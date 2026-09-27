@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>لوحة إدارة سوق الرهد</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--text:#0f172a;--muted:#64748b;--line:#e7ebf1;--soft:#f1f4f9;--amber:#f59e0b;--amber2:#fbbf24;--amberd:#d97706;--amberbg:#fff7e8;--green:#16a34a;--red:#e11d48}
+@media (prefers-color-scheme:dark){:root{--bg:#0b1220;--card:#131c2e;--text:#f1f5f9;--muted:#94a3b8;--line:#243049;--soft:#1b2740;--amberbg:#2a2110}}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Tahoma,Arial;background:var(--bg);color:var(--text);padding-bottom:40px}
+header{background:linear-gradient(120deg,var(--amber2),var(--amberd));color:#111;padding:16px 14px;font-weight:900;font-size:16px;position:sticky;top:0;z-index:5;display:flex;justify-content:space-between;align-items:center;gap:8px}
+main{max-width:640px;margin:0 auto;padding:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+h2{font-size:14px;margin:0 0 10px}
+.muted{color:var(--muted);font-size:12.5px}
+input,select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:var(--soft);color:var(--text);font-size:13.5px;margin-bottom:8px}
+label{font-size:12px;font-weight:700;color:var(--muted);display:block;margin-bottom:3px}
+button{border:0;border-radius:9px;padding:9px 14px;font-weight:800;font-size:12.5px;cursor:pointer}
+.btn{background:var(--amber);color:#111}
+.btn-line{background:transparent;border:1px solid var(--line);color:var(--text)}
+.btn-red{background:#fef2f2;color:var(--red)}
+.btn-green{background:#ecfdf3;color:var(--green)}
+.btn-sm{padding:6px 10px;font-size:11.5px}
+.grp{display:flex;gap:6px;flex-wrap:wrap}
+.item{border-top:1px solid var(--line);padding:10px 0}
+.item:first-child{border-top:0}
+.iname{font-weight:800;font-size:13.5px}
+.imeta{color:var(--muted);font-size:12px;margin-top:2px}
+.off{color:var(--red);font-weight:800}
+.empty{color:var(--muted);text-align:center;padding:24px 0;font-size:13px}
+.err{background:#fef2f2;color:var(--red);padding:10px 12px;border-radius:10px;font-size:13px;margin-bottom:10px}
+.ok{background:#ecfdf3;color:var(--green);padding:10px 12px;border-radius:10px;font-size:13px;margin-bottom:10px}
+.linkbox{display:flex;gap:6px;align-items:center;background:var(--amberbg);border:1px dashed var(--amber);border-radius:9px;padding:8px 10px;font-size:11.5px;overflow:hidden;margin-top:6px}
+.linkbox span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.gform{display:none}
+.gform.open{display:block}
+</style>
+</head>
+<body>
+<header><span id="hTitle">لوحة الإدارة</span><span id="hSub" class="muted" style="color:#3a2a06"></span></header>
+<main id="app"><div class="empty">⏳ جاري التحميل...</div></main>
+
+<script>
+var SCRIPT_URL="https://script.google.com/macros/s/AKfycbwJFFCgJmXwuKqyHMTO4agUN2YtXXSB44RQeV1iZyEEIm45as_HgNWKvq9UvuGZmuO7/exec";
+var $=function(id){return document.getElementById(id)};
+var qs=new URLSearchParams(location.search);
+var KEY=qs.get("key")||"";
+var STORE=qs.get("store")||"";
+var MASTER_MODE=!STORE;
+var data={},keysMap={},msg="";
+
+function post(action,payload){
+  var body=Object.assign({action:action,key:KEY,store:STORE},payload||{});
+  return fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify(body)}).then(function(r){return r.json()});
+}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(m){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]})}
+function copy(text,btn){
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(function(){btn.textContent="✓ تم النسخ";setTimeout(function(){btn.textContent="📋 نسخ الرابط"},1400)})}
+}
+
+function load(){
+  fetch(SCRIPT_URL).then(function(r){return r.json()}).then(function(d){
+    data=d;
+    if(!KEY){renderError("الرابط ناقص المفتاح — تأكد إنك فتحت الرابط كامل كما أُرسل لك.");return}
+    if(MASTER_MODE){
+      $("hTitle").textContent="لوحة الإدارة الرئيسية";
+      post("listKeys").then(function(r){
+        if(!r.ok){renderError("المفتاح غير صحيح — تأكد من الرابط.");return}
+        keysMap=r.stores||{};renderMaster();
+      });
+    }else{
+      $("hTitle").textContent="إدارة: "+STORE;
+      if(!data[STORE]){renderError("المحل \""+STORE+"\" غير موجود.");return}
+      renderStore();
+    }
+  }).catch(function(){renderError("تعذّر الاتصال بالخادم. تحقق من اتصالك بالإنترنت.")});
+}
+
+function renderError(m){
+  $("app").innerHTML='<div class="err">⚠️ '+esc(m)+'</div>';
+}
+function flash(m,ok){msg='<div class="'+(ok?"ok":"err")+'">'+esc(m)+'</div>';}
+
+// ================= وضع الإدارة الرئيسية =================
+function renderMaster(){
+  var names=Object.keys(data);
+  var origin=location.origin+location.pathname.replace(/admin\.html$/,"");
+  var html=msg;msg="";
+  html+='<div class="card"><h2>➕ إضافة محل جديد</h2>'+
+    '<label>اسم المحل (كما سيظهر للزبائن)</label><input id="nsName" placeholder="مثال: بقالة الأمل">'+
+    '<label>رقم واتساب المحل (بدون +)</label><input id="nsWa" placeholder="2491xxxxxxxx">'+
+    '<label>رقم الحساب البنكي (اختياري)</label><input id="nsBank">'+
+    '<button class="btn" onclick="addStore()">إنشاء المحل</button></div>';
+
+  html+='<div class="card"><h2>المحلات ('+names.length+')</h2>';
+  if(!names.length)html+='<div class="empty">ما فيه محلات بعد.</div>';
+  names.forEach(function(n){
+    var storeKey=keysMap[n]||"";
+    var link=origin+"admin.html?store="+encodeURIComponent(n)+"&key="+encodeURIComponent(storeKey);
+    html+='<div class="item"><div class="row"><div><div class="iname">'+esc(n)+'</div><div class="imeta">'+((data[n].products||[]).length)+' صنف</div></div>'+
+      '<div class="grp"><button class="btn-line btn-sm" onclick="goStore(\''+esc(n).replace(/'/g,"\\'")+'\')">✏️ فتح</button>'+
+      '<button class="btn-red btn-sm" onclick="regen(\''+esc(n).replace(/'/g,"\\'")+'\')">🔄 رابط جديد</button></div></div>'+
+      (storeKey?'<div class="linkbox"><span>'+esc(link)+'</span><button class="btn-sm btn-green" onclick=\'copy(this.previousElementSibling.textContent,this)\'>📋 نسخ الرابط</button></div>':'<div class="muted" style="margin-top:6px">لا يوجد مفتاح مسجّل لهذا المحل بعد.</div>')+
+      '</div>';
+  });
+  html+='</div>';
+  $("app").innerHTML=html;
+}
+function goStore(n){location.href="admin.html?store="+encodeURIComponent(n)+"&key="+encodeURIComponent(KEY)}
+function addStore(){
+  var name=$("nsName").value.trim(),wa=$("nsWa").value.trim(),bank=$("nsBank").value.trim();
+  if(!name){alert("اكتب اسم المحل");return}
+  post("addStore",{name:name,whatsapp:wa,bankAccount:bank}).then(function(r){
+    if(!r.ok){flash(r.error||"فشل الإنشاء",false);renderMaster();return}
+    flash("تم إنشاء \""+name+"\" بنجاح ✓",true);
+    load();
+  });
+}
+function regen(n){
+  if(!confirm('توليد رابط جديد لـ"'+n+'"؟ الرابط القديم يتوقف عن العمل فورًا.'))return;
+  post("regenKey",{store:n}).then(function(r){
+    if(!r.ok){flash(r.error||"فشل التوليد",false);renderMaster();return}
+    keysMap[n]=r.key;flash("تم توليد رابط جديد لـ\""+n+"\" — انسخه وابعثه له",true);renderMaster();
+  });
+}
+
+// ================= وضع إدارة محل واحد =================
+var editingId=null;
+function renderStore(){
+  var st=data[STORE],products=st.products||[];
+  var html=msg;msg="";
+  html+='<div class="card"><h2>بيانات التواصل</h2>'+
+    '<label>رقم واتساب</label><input id="mWa" value="'+esc(st.whatsapp||"")+'">'+
+    '<label>رقم الحساب البنكي</label><input id="mBank" value="'+esc(st.bankAccount||"")+'">'+
+    '<button class="btn btn-sm" onclick="saveMeta()">حفظ</button></div>';
+
+  html+='<div class="card"><h2>➕ إضافة صنف جديد</h2>'+productForm("n")+
+    '<button class="btn" onclick="addProduct()">إضافة الصنف</button></div>';
+
+  html+='<div class="card"><h2>الأصناف ('+products.length+')</h2>';
+  if(!products.length)html+='<div class="empty">ما فيه أصناف بعد.</div>';
+  products.forEach(function(p){
+    if(editingId===String(p.id)){
+      html+='<div class="item">'+productForm("e",p)+
+        '<div class="grp"><button class="btn btn-sm" onclick="saveEdit(\''+esc(p.id)+'\')">حفظ</button>'+
+        '<button class="btn-line btn-sm" onclick="editingId=null;renderStore()">إلغاء</button></div></div>';
+    }else{
+      html+='<div class="item"><div class="row"><div><div class="iname">'+esc(p.name)+'</div>'+
+        '<div class="imeta">'+esc(p.category||"")+' • '+esc(p.unit||"")+' • '+ (p.price_full||0).toLocaleString()+' ج.س'+
+        (/نفد|غير متوفر/.test(String(p.status))?' • <span class="off">نفد</span>':'')+'</div></div>'+
+        '<div class="grp"><button class="btn-line btn-sm" onclick="editingId=\''+esc(p.id)+'\';renderStore()">✏️</button>'+
+        '<button class="btn-red btn-sm" onclick="delProduct(\''+esc(p.id)+'\')">🗑️</button></div></div></div>';
+    }
+  });
+  html+='</div>';
+  $("app").innerHTML=html;
+}
+function productForm(pfx,p){
+  p=p||{};
+  return '<label>الاسم</label><input id="'+pfx+'Name" value="'+esc(p.name)+'">'+
+  '<label>التصنيف</label><input id="'+pfx+'Cat" value="'+esc(p.category)+'">'+
+  '<label>الوحدة</label><input id="'+pfx+'Unit" value="'+esc(p.unit)+'">'+
+  '<label>السعر (كامل)</label><input id="'+pfx+'PF" type="number" value="'+esc(p.price_full)+'">'+
+  '<label>السعر (نصف) — اختياري</label><input id="'+pfx+'PH" type="number" value="'+esc(p.price_half)+'">'+
+  '<label>السعر (ربع) — اختياري</label><input id="'+pfx+'PQ" type="number" value="'+esc(p.price_quarter)+'">'+
+  '<label>الحالة</label><select id="'+pfx+'St"><option value="موجود"'+(p.status!=="نفد"?" selected":"")+'>موجود</option><option value="نفد"'+(p.status==="نفد"?" selected":"")+'>نفد</option></select>'+
+  '<label>رابط صورة — اختياري</label><input id="'+pfx+'Img" value="'+esc(p.image)+'">';
+}
+function readForm(pfx){
+  return{
+    name:$(pfx+"Name").value.trim(),category:$(pfx+"Cat").value.trim(),unit:$(pfx+"Unit").value.trim(),
+    price_full:Number($(pfx+"PF").value)||0,price_half:$(pfx+"PH").value?Number($(pfx+"PH").value):"",
+    price_quarter:$(pfx+"PQ").value?Number($(pfx+"PQ").value):"",status:$(pfx+"St").value,image:$(pfx+"Img").value.trim()
+  };
+}
+function saveMeta(){
+  post("updateMeta",{whatsapp:$("mWa").value.trim(),bankAccount:$("mBank").value.trim()}).then(function(r){
+    flash(r.ok?"تم الحفظ ✓":(r.error||"فشل الحفظ"),!!r.ok);load();
+  });
+}
+function addProduct(){
+  var p=readForm("n");
+  if(!p.name){alert("اكتب اسم الصنف");return}
+  post("addProduct",{product:p}).then(function(r){flash(r.ok?"تمت الإضافة ✓":(r.error||"فشل"),!!r.ok);load()});
+}
+function saveEdit(id){
+  var p=readForm("e");
+  post("updateProduct",{id:id,product:p}).then(function(r){editingId=null;flash(r.ok?"تم الحفظ ✓":(r.error||"فشل"),!!r.ok);load()});
+}
+function delProduct(id){
+  if(!confirm("حذف هذا الصنف نهائياً؟"))return;
+  post("deleteProduct",{id:id}).then(function(r){flash(r.ok?"تم الحذف ✓":(r.error||"فشل"),!!r.ok);load()});
+}
+
+load();
+</script>
+</body>
+</html>
