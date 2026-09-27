@@ -238,15 +238,12 @@ footer .fbottom p b{color:#94a3b8}
 </div></footer>
 <script>
 var PLATFORM="249115819197";
-var SCRIPT_URL="https://script.google.com/macros/s/AKfycbzXuDV6EXrtKxXGMte66aDQCnD-IF1BjL0fGtpEJTYtwNGf70ivpQCOHmYSaWkkFeJ6/exec";
+var SCRIPT_URL="https://script.google.com/macros/s/AKfycbwLta_Ydyn14aK4iYHbEsVLlxxb-uUK1PnQ2fttwlNVL0hBcN71MQIDjbKTeM1NmZAe/exec";
 // ===== شريط العروض/الكوبونات =====
-// المصدر: ورقة "العروض" في قوقل شيت (منشورة كـ CSV). الصق رابط النشر هنا بمجرد ما يصير جاهز عندك.
-// الطريقة: أي صف فيه نص (بأي عمود) = عرض واحد يظهر كما هو، بلا أعمدة أو صف عناوين مطلوب. الصفوف الفاضية تُتجاهل.
 var OFFERS_CSV_URL="";
-// عروض يدوية اختيارية من داخل الكود مباشرة (تُضاف فوق عروض الشيت) — نفس الشكل: text/code/store/until، اتركها [] لو مو محتاجها.
 var PROMOS=[];
 var DEMO={
- "بقالة النور":{whatsapp:"249115819197",bankAccount:"1234567",minOrder:3000,deliveryNote:"التوصيل مجاني فوق 5000 جنيه",products:[
+ "بقالة النور":{whatsapp:"249115819197",bankAccount:"1234567",minOrder:3000,deliveryNote:"التوصيل مجاني فوق 5000 ج.س",products:[
   {id:1,name:"سكر",category:"تموين",unit:"كيلو",price_full:1800,price_half:900,price_quarter:450,status:"موجود"},
   {id:2,name:"دقيق أبيض",category:"تموين",unit:"كيلو",price_full:1200,price_half:600,status:"موجود"},
   {id:3,name:"صابون غسيل",category:"منظفات",unit:"قطعة",price_full:700,status:"نفد"}]},
@@ -257,7 +254,7 @@ var DEMO={
   {id:1,name:"سكر (كرتونة)",category:"اجمالي",unit:"كرتونة",price_full:36000,status:"موجود"},
   {id:2,name:"زيت (كرتونة)",category:"اجمالي",unit:"كرتونة",price_full:54000,status:"موجود"}]},
  "فواكه أحمد":{whatsapp:"249115819197",bankAccount:"",products:[
-  {id:1,name:"موز",category:"فواكه",unit:"كيلو",price_full:1500,status:"موجود",image:"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAoHBwgHBgoICAgLCgoLDhgQDg0NDh0VFhEYIx8lJCIfIiEmKzcvJik0KSEiMEExNDk7Pj4+JS5ESUM8SDc9Pjv/2wBDAQoLCw4NDhwQEBw7KCIoOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozv/wAARCACgAKADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDt6KKK/MD3gooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKa8iRj5j+FQNdE/dXHuaLDLNFUTLITkufw4ppOTk07BY0KKzqeJZAc7z+JosOxeoqqt04+8A36VOkqSdDz6GlYVh9FFFAgooooAKKKKACiiigAooooAKgmuNp2pye59KW4l2Dapwx/lVSmkNIUkk5JyfekooqigooooAKKKKAClBwcikooAsw3HIV/wA6sVnVZtpc/u2P0qWhNFiiiikSFFFFABRRRQAUE4GTRTJjiFiPTFAym7F3LHvTaKKsoKKKKACiiigAooooAKKKKAClBIII6ikooA0EbegYdxS1FbHMWPQ4qWoJCiiigQUUUUAFMnBMLYp9BAIIPQ0DM6ilZSrFT1FJVlBRRRQAUUUUAFFFFABRRRQAUUUoGTgUAWrYERfU1NTUXYgX0FOqCQooooEFFFFABRRRQBBcxZG8dR1qrWjVaa3Od0Y47immUmV6KKKoYUUUUAFFFFABRRRQAVPbRZO89B096SGAuQzDC/zq2BgYFJsTYUUUVJIUUUUAFFFFABRRRQAUUUUARyQpJyeD6ioGtpF6fMPardFO47meVKnBBH1pK0aaY0JyUX8qLjuUKUAk4Ayfar3lp/cX8qdRcLlNbeRu2PrU8duiHJ+Y+tS0UXFcKKKKQgooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA//9k="},
+  {id:1,name:"موز",category:"فواكه",unit:"كيلو",price_full:1500,status:"موجود",image:"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAoHBwgHBgoICAgLCgoLDhgQDg0NDh0VFhEYIx8lJCIfIiEmKzcvJik0KSEiMEExNDk7Pj4+JS5ESUM8SDc9Pjv/2wBDAQoLCw4NDhwQEBw7KCIoOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozv/wAARCACgAKADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDt6KKK/MD3gooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKa8iRj5j+FQNdE/dXHuaLDLNFUTLITkufw4ppOTk07BY0KKzqeJZAc7z+JosOxeoqqt04+8A36VOkqSdDz6GlYVh9FFFAgooooAKKKKACiiigAooooAKgmuNp2pye59KW4l2Dapwx/lVSmkNIUkk5JyfekooqigooooAKKKKAClBwcikooAsw3HIV/wA6sVnVZtpc/u2P0qWhNFiiiikSFFFFABRRRQAUE4GTRTJjiFiPTFAym7F3LHvTaKKsoKKKKACiiigAooooAKKKKAClBIII6ikooA0EbegYdxS1FbHMWPQ4qWoJCiiigQUUUUAFMnBMLYp9BAIIPQ0DM6ilZSrFT1FJVlBRRRQAUUUUAFFFFABRRRQAUUUoGTgUAWrYERfU1NTUXYgX0FOqCQooooEFFFFABRRRQBBcxZG8dR1qrWjVaa3Od0Y47immUmV6KKKoYUUUUAFFFFABRRRQAVPbRZO89B096SGAuQzDC/zq2BgYFJsTYUUUVJIUUUUAFFFFABRRRQAUUUIgcpJyfoagNriTlzn2q7RTuBmluQcc0lXnjSQYYZqvLaY5jOfY0wK1KCQcEYoooAtx3H8L/AJ1YqjT453TgnIqShuKKWiiQUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAH//9k="},
   {id:2,name:"تفاح",category:"فواكه",unit:"كيلو",price_full:2200,status:"موجود"}]},
  "خضار الحاج":{whatsapp:"249115819197",bankAccount:"",products:[
   {id:1,name:"طماطم",category:"خضار",unit:"كيلو",price_full:900,status:"موجود"}]},
@@ -303,7 +300,7 @@ function icon(c){
   if(/محل|محلات/.test(c))return"🏬";
   return"📦";
 }
-var typeLabels={};// key(normalized first word) -> display label (raw first word as written), filled in build()
+var typeLabels={};
 function normAr(s){return String(s||"").replace(/[\u064B-\u065F]/g,"").replace(/[إأآ]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").trim()}
 function firstWord(name){var w=String(name||"").trim().split(/\s+/)[0];return w||name}
 function classifyStore(name){return normAr(firstWord(name))}
@@ -325,7 +322,7 @@ function parseCSV(text){
     }else{
       if(c==='"')inQ=true;
       else if(c===','){row.push(field);field=""}
-      else if(c==='\n'||c==='\r'){
+      else if(c===('\n')||c==='\r'){
         if(c==='\r'&&text[i+1]==='\n')i++;
         row.push(field);rows.push(row);row=[];field="";
       }else field+=c;
@@ -335,7 +332,7 @@ function parseCSV(text){
   return rows.filter(function(r){return r.length&&r.some(function(x){return x.trim()!==""})});
 }
 function offersFromCSV(text){
-  var rows=parseCSV(text);// كل صف فيه نص = عرض واحد؛ الصفوف الفاضية تُتجاهل أصلاً هنا
+  var rows=parseCSV(text);
   var out=[];
   rows.forEach(function(r,i){
     var cells=r.map(function(x){return(x||"").trim()}).filter(function(x){return x!==""});
@@ -350,7 +347,7 @@ function fetchOffers(){
   fetch(OFFERS_CSV_URL).then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(txt){
     try{localStorage.setItem("sr_offers_cache",txt)}catch(e){}
     OFFERS=offersFromCSV(txt);renderPromos();
-  },function(){/* تجاهل الفشل بصمت، تبقى آخر عروض محفوظة أو الفارغة معروضة */});
+  },function(){});
 }
 function renderPromos(){
   var today=new Date().toISOString().slice(0,10);
@@ -474,7 +471,7 @@ function render(){
   var curStore=stores.filter(function(s){return s.name===selStore})[0];
   if(curStore){
     var noteBits=[];
-    if(curStore.minOrder>0)noteBits.push("الحد الأدنى للطلب: "+curStore.minOrder.toLocaleString()+" جنيه");
+    if(curStore.minOrder>0)noteBits.push("الحد الأدنى للطلب: "+curStore.minOrder.toLocaleString()+" ج.س");
     if(curStore.note)noteBits.push(curStore.note);
     $("storeBanner").hidden=false;
     $("storeBanner").innerHTML='<div class="sbinfo"><span class="sbname">🏪 '+esc(curStore.name)+'</span>'+
@@ -526,7 +523,7 @@ function drawCart(){
   var n=cart.reduce(function(s,c){return s+c.qty},0),total=cart.reduce(function(s,c){return s+c.price*c.qty},0);
   $("cnt").hidden=!n;$("cnt").textContent=n;
   $("cartBar").hidden=!n;document.body.classList.toggle("has-cartbar",!!n);
-  $("cbTotal").textContent=total.toLocaleString()+" جنيه";
+  $("cbTotal").textContent=total.toLocaleString()+" ج.س";
   var b=$("cartBody");
   if(!cart.length){b.innerHTML='<div class="empty">🛒<br>السلة فارغة حالياً</div>';saveState();return}
   var g={};cart.forEach(function(c){(g[c.store]=g[c.store]||[]).push(c)});
@@ -538,12 +535,12 @@ function drawCart(){
   names.forEach(function(s){
     var st=stores.filter(function(x){return x.name===s})[0]||{},sub=g[s].reduce(function(a,c){return a+c.price*c.qty},0),bank=!!st.bank,blocked=pay==="bankak"&&!bank;
     h+='<div class="grp"><b>🏪 '+esc(s)+'</b>'+g[s].map(function(c){
-      return '<div class="it"><div><b>'+esc(c.name)+'</b> <small>('+esc(c.unit)+')</small><br><small>'+c.qty+' × '+c.price.toLocaleString()+' = '+(c.price*c.qty).toLocaleString()+' جنيه</small></div><button data-rm="'+esc(c.id)+'">حذف</button></div>';
-    }).join("")+'<div class="sub"><span>إجمالي البقالة:</span><span>'+sub.toLocaleString()+' جنيه</span></div>'+
+      return '<div class="it"><div><b>'+esc(c.name)+'</b> <small>('+esc(c.unit)+')</small><br><small>'+c.qty+' × '+c.price.toLocaleString()+' = '+(c.price*c.qty).toLocaleString()+' ج.س</small></div><button data-rm="'+esc(c.id)+'">حذف</button></div>';
+    }).join("")+'<div class="sub"><span>إجمالي البقالة:</span><span>'+sub.toLocaleString()+' ج.س</span></div>'+
     (pay==="bankak"?(bank?'<div class="info"><b>حساب بنك الخرطوم:</b> <span style="user-select:all;font-family:monospace">'+esc(st.bank)+'</span><br>المستفيد: '+esc(s)+'<br>حوّل المبلغ ثم أرسل الإيصال عبر الواتساب.</div>':'<div class="info warn">هذه البقالة لم تضف رقم حساب بنكك. اختر الدفع عند الاستلام / واتساب.</div>'):'')+
     '<button class="send" data-send="'+esc(s)+'"'+(blocked?' disabled':'')+'>إرسال طلب '+esc(s)+' إلى واتساب</button></div>';
   });
-  h+='<div class="total"><span>الإجمالي الكلي:</span><span>'+total.toLocaleString()+' جنيه</span></div>';
+  h+='<div class="total"><span>الإجمالي الكلي:</span><span>'+total.toLocaleString()+' ج.س</span></div>';
   b.innerHTML=h;
   saveState();
 }
@@ -566,8 +563,8 @@ function send(s){
   if(!cust.n||!cust.p||!cust.a){alert("الرجاء إكمال بيانات التوصيل (الاسم، الهاتف، العنوان).");return}
   var items=cart.filter(function(c){return c.store===s}),sub=items.reduce(function(a,c){return a+c.price*c.qty},0);
   var m="🛒 *طلب جديد عبر سوق الرهد الإلكتروني*\n🏪 *البقالة:* "+s+"\n👤 *الاسم:* "+cust.n+"\n📞 *الهاتف:* "+cust.p+"\n📍 *العنوان:* "+cust.a+"\n💳 *طريقة الدفع:* "+(pay==="bankak"?"تحويل بنكك":"دفع عند الاستلام / واتساب")+"\n\n📦 *المنتجات المطلوبة:*\n";
-  items.forEach(function(c,i){m+=(i+1)+". "+c.name+" ("+c.unit+") × "+c.qty+" - "+(c.price*c.qty).toLocaleString()+" جنيه\n"});
-  m+="\n💰 *إجمالي هذه البقالة:* "+sub.toLocaleString()+" جنيه";
+  items.forEach(function(c,i){m+=(i+1)+". "+c.name+" ("+c.unit+") × "+c.qty+" - "+(c.price*c.qty).toLocaleString()+" ج.س\n"});
+  m+="\n💰 *إجمالي هذه البقالة:* "+sub.toLocaleString()+" ج.س";
   if(pay==="bankak")m+="\n\n📎 *ملاحظة:* تم التحويل عبر بنكك ومرفق إيصال الدفع.";
   logOrder(s,items);
   window.open("https://wa.me/"+items[0].phone+"?text="+encodeURIComponent(m),"_blank");
@@ -652,8 +649,6 @@ window.addEventListener("beforeinstallprompt",function(e){
 });
 window.addEventListener("appinstalled",function(){$("install").hidden=true});
 
-// الرسالة الظاهرة على الشريط تبقى ثابتة وتسويقية دائماً؛ خطوات التثبيت التفصيلية
-// تظهر فقط داخل نافذة تنبيه عند الضغط، وليس على الشريط نفسه.
 if(isIOS()){
   showInstallBar();
 }else{
