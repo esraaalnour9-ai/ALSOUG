@@ -3,7 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>لوحة إدارة سوق الرهد</title>
+<title>إدارة المتجر - سوق الرهد</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#f59e0b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
 <style>
 :root{--bg:#f6f7fb;--card:#fff;--text:#0f172a;--muted:#64748b;--line:#e7ebf1;--soft:#f1f4f9;--amber:#f59e0b;--amber2:#fbbf24;--amberd:#d97706;--amberbg:#fff7e8;--green:#16a34a;--red:#e11d48}
 @media (prefers-color-scheme:dark){:root{--bg:#0b1220;--card:#131c2e;--text:#f1f5f9;--muted:#94a3b8;--line:#243049;--soft:#1b2740;--amberbg:#2a2110}}
@@ -23,6 +28,8 @@ button{border:0;border-radius:9px;padding:9px 14px;font-weight:800;font-size:12.
 .btn-red{background:#fef2f2;color:var(--red)}
 .btn-green{background:#ecfdf3;color:var(--green)}
 .btn-sm{padding:6px 10px;font-size:11.5px}
+.install-banner{background:var(--amberbg);border:1px solid var(--amber);border-radius:12px;padding:12px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.install-banner p{margin:0;font-size:13px;font-weight:700;color:var(--text)}
 .grp{display:flex;gap:6px;flex-wrap:wrap}
 .item{border-top:1px solid var(--line);padding:10px 0}
 .item:first-child{border-top:0}
@@ -37,7 +44,7 @@ button{border:0;border-radius:9px;padding:9px 14px;font-weight:800;font-size:12.
 </style>
 </head>
 <body>
-<header><span id="hTitle">لوحة الإدارة</span><span id="hSub" class="muted" style="color:#3a2a06"></span></header>
+<header><span id="hTitle">إدارة المتجر</span><span id="hSub" class="muted" style="color:#3a2a06"></span></header>
 <main id="app"><div class="empty">⏳ جاري التحميل...</div></main>
 
 <script>
@@ -48,6 +55,32 @@ var KEY=qs.get("key")||"";
 var STORE=qs.get("store")||"";
 var MASTER_MODE=!STORE;
 var data={},keysMap={},msg="",searchQuery="";
+var deferredPrompt=null;
+
+// التقاط حدث التثبيت التلقائي لأندرويد
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  deferredPrompt = e;
+  showInstallBanner();
+});
+
+function showInstallBanner(){
+  var banner = $('installCard');
+  if(banner) banner.style.display = 'flex';
+}
+
+function installApp(){
+  if(deferredPrompt){
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function(choiceResult){
+      if(choiceResult.outcome === 'accepted'){
+        var banner = $('installCard');
+        if(banner) banner.style.display = 'none';
+      }
+      deferredPrompt = null;
+    });
+  }
+}
 
 function post(action,payload){
   var body=Object.assign({action:action,key:KEY,store:STORE},payload||{});
@@ -81,11 +114,34 @@ function renderError(m){
 }
 function flash(m,ok){msg='<div class="'+(ok?"ok":"err")+'">'+esc(m)+'</div>';}
 
+// توليد بنر التثبيت الذكي في أعلى الصفحة
+function getInstallBannerHtml(){
+  // فحص ما إذا كان الجهاز يعمل بنظام آيفون (iOS)
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+  
+  if(isStandalone) return ""; // إذا كان مثبت مسبقاً، لا تعرض البنر
+
+  if(isIOS){
+    return '<div class="install-banner" id="installCard">'+
+      '<p>📱 لتثبيت التطبيق على آيفون: اضغط على زر المشاركة <b style="font-size:16px">⎙</b> ثم اختر <b>"إضافة إلى الصفحة الرئيسية"</b></p>'+
+    '</div>';
+  } else {
+    return '<div class="install-banner" id="installCard" style="display:'+(deferredPrompt?'flex':'none')+'">'+
+      '<p>📲 تثبيت تطبيق إدارة المتجر للوصول السريع بنقرة واحدة</p>'+
+      '<button class="btn btn-sm" onclick="installApp()">تثبيت الآن</button>'+
+    '</div>';
+  }
+}
+
 // ================= وضع الإدارة الرئيسية =================
 function renderMaster(){
   var names=Object.keys(data);
   var origin=location.origin+location.pathname.replace(/admin\.html$/,"");
   var html=msg;msg="";
+  
+  html += getInstallBannerHtml();
+
   html+='<div class="card"><h2>➕ إضافة محل جديد</h2>'+
     '<label>اسم المحل (كما سيظهر للزبائن)</label><input id="nsName" placeholder="مثال: بقالة الأمل">'+
     '<label>رقم واتساب المحل (بدون +)</label><input id="nsWa" placeholder="2491xxxxxxxx">'+
@@ -129,6 +185,9 @@ var editingId=null;
 function renderStore(){
   var st=data[STORE],products=st.products||[];
   var html=msg;msg="";
+  
+  html += getInstallBannerHtml();
+
   html+='<div class="card"><h2>بيانات التواصل</h2>'+
     '<label>رقم واتساب</label><input id="mWa" value="'+esc(st.whatsapp||"")+'">'+
     '<label>رقم الحساب البنكي</label><input id="mBank" value="'+esc(st.bankAccount||"")+'">'+
@@ -137,7 +196,6 @@ function renderStore(){
   html+='<div class="card"><h2>➕ إضافة صنف جديد</h2>'+productForm("n")+
     '<button class="btn" onclick="addProduct()">إضافة الصنف</button></div>';
 
-  // تصفية الأصناف بناءً على ما يكتبه المستخدم في مربع البحث
   var filteredProducts = products.filter(function(p){
     if(!searchQuery) return true;
     var q = searchQuery.toLowerCase();
@@ -173,9 +231,7 @@ function renderStore(){
 
 function handleSearch(val){
   searchQuery = val;
-  // إعادة رسم جزء الأصناف فقط أو تحديث المتغير دون فقدان التركيز على خانة البحث
   var container = $("searchBox");
-  // نحتفظ بموقع المؤشر لكي لا يخرج المستخدم أثناء الكتابة
   var cursorStart = container ? container.selectionStart : 0;
   renderStore();
   var newBox = $("searchBox");
