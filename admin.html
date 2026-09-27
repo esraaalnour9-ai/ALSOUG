@@ -57,17 +57,11 @@ var MASTER_MODE=!STORE;
 var data={},keysMap={},msg="",searchQuery="";
 var deferredPrompt=null;
 
-// التقاط حدث التثبيت التلقائي لأندرويد
+// التقاط حدث التثبيت إن وجد
 window.addEventListener('beforeinstallprompt', function(e) {
   e.preventDefault();
   deferredPrompt = e;
-  showInstallBanner();
 });
-
-function showInstallBanner(){
-  var banner = $('installCard');
-  if(banner) banner.style.display = 'flex';
-}
 
 function installApp(){
   if(deferredPrompt){
@@ -79,6 +73,9 @@ function installApp(){
       }
       deferredPrompt = null;
     });
+  } else {
+    // حل بديل ذكي ومباشر إذا حجب المتصفح الحدث التلقائي بسبب الـ index
+    alert("لتثبيت لوحة الإدارة كبرنامج مستقل:\n1. اضغط على قائمة المتصفح (النقاط الثلاث ⁝ أعلى اليمين).\n2. اختر 'إضافة إلى الشاشة الرئيسية' أو 'تثبيت التطبيق'.");
   }
 }
 
@@ -114,24 +111,15 @@ function renderError(m){
 }
 function flash(m,ok){msg='<div class="'+(ok?"ok":"err")+'">'+esc(m)+'</div>';}
 
-// توليد بنر التثبيت الذكي في أعلى الصفحة
+// بنر تثبيت دائم يظهر دائماً في صفحة الإدارة بغض النظر عن حالة الـ Index
 function getInstallBannerHtml(){
-  // فحص ما إذا كان الجهاز يعمل بنظام آيفون (iOS)
-  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-  
-  if(isStandalone) return ""; // إذا كان مثبت مسبقاً، لا تعرض البنر
+  if(isStandalone) return ""; 
 
-  if(isIOS){
-    return '<div class="install-banner" id="installCard">'+
-      '<p>📱 لتثبيت التطبيق على آيفون: اضغط على زر المشاركة <b style="font-size:16px">⎙</b> ثم اختر <b>"إضافة إلى الصفحة الرئيسية"</b></p>'+
-    '</div>';
-  } else {
-    return '<div class="install-banner" id="installCard" style="display:'+(deferredPrompt?'flex':'none')+'">'+
-      '<p>📲 تثبيت تطبيق إدارة المتجر للوصول السريع بنقرة واحدة</p>'+
-      '<button class="btn btn-sm" onclick="installApp()">تثبيت الآن</button>'+
-    '</div>';
-  }
+  return '<div class="install-banner" id="installCard">'+
+    '<p>📲 ثبت تطبيق إدارة المتجر للوصول السريع بنقرة واحدة</p>'+
+    '<button class="btn btn-sm" onclick="installApp()">تثبيت الآن</button>'+
+  '</div>';
 }
 
 // ================= وضع الإدارة الرئيسية =================
@@ -173,10 +161,10 @@ function addStore(){
   });
 }
 function regen(n){
-  if(!confirm('توليد رابط جديد لـ"'+n+'"؟ الرابط القديم يتوقف عن العمل فورًا.'))return;
+  if(!confirm('توليد رابط جديد ل"'+n+'"؟ الرابط القديم يتوقف عن العمل فورًا.'))return;
   post("regenKey",{store:n}).then(function(r){
     if(!r.ok){flash(r.error||"فشل التوليد",false);renderMaster();return}
-    keysMap[n]=r.key;flash("تم توليد رابط جديد لـ\""+n+"\" — انسخه وابعثه له",true);renderMaster();
+    keysMap[n]=r.key;flash("تم توليد رابط جديد ل\""+n+"\" — انسخه وابعثه له",true);renderMaster();
   });
 }
 
