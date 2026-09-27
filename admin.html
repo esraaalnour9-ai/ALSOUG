@@ -57,7 +57,7 @@ var MASTER_MODE=!STORE;
 var data={},keysMap={},msg="",searchQuery="";
 var deferredPrompt=null;
 
-// التقاط حدث التثبيت إن وجد
+// التقاط حدث المتصفح التلقائي إن وُجد
 window.addEventListener('beforeinstallprompt', function(e) {
   e.preventDefault();
   deferredPrompt = e;
@@ -67,15 +67,11 @@ function installApp(){
   if(deferredPrompt){
     deferredPrompt.prompt();
     deferredPrompt.userChoice.then(function(choiceResult){
-      if(choiceResult.outcome === 'accepted'){
-        var banner = $('installCard');
-        if(banner) banner.style.display = 'none';
-      }
       deferredPrompt = null;
     });
   } else {
-    // حل بديل ذكي ومباشر إذا حجب المتصفح الحدث التلقائي بسبب الـ index
-    alert("لتثبيت لوحة الإدارة كبرنامج مستقل:\n1. اضغط على قائمة المتصفح (النقاط الثلاث ⁝ أعلى اليمين).\n2. اختر 'إضافة إلى الشاشة الرئيسية' أو 'تثبيت التطبيق'.");
+    // رسالة إرشادية واضحة جداً تضمن تثبيت لوحة الإدارة يدوياً في ثوانٍ دون تعارض مع الـ Index
+    alert("💡 لتثبيت تطبيق إدارة المتجر على شاشتك الرئيسية:\n\n1. اضغط على قائمة المتصفح (النقاط الثلاث ⁝ أعلى اليمين).\n2. اختر خيار: (إضافة إلى الشاشة الرئيسية) أو (تثبيت التطبيق).\n\nملاحظة: سيتم تثبيت لوحة الإدارة خصيصاً كبرنامج مستقل وسهل الوصول إليه.");
   }
 }
 
@@ -111,13 +107,13 @@ function renderError(m){
 }
 function flash(m,ok){msg='<div class="'+(ok?"ok":"err")+'">'+esc(m)+'</div>';}
 
-// بنر تثبيت دائم يظهر دائماً في صفحة الإدارة بغض النظر عن حالة الـ Index
+// بنر تثبيت دائم يظهر في أعلى صفحة الإدارة بشكل مستقل تماماً عن الـ Index
 function getInstallBannerHtml(){
   var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
   if(isStandalone) return ""; 
 
   return '<div class="install-banner" id="installCard">'+
-    '<p>📲 ثبت تطبيق إدارة المتجر للوصول السريع بنقرة واحدة</p>'+
+    '<p>📲 ثبت تطبيق إدارة متجرك للوصول السريع</p>'+
     '<button class="btn btn-sm" onclick="installApp()">تثبيت الآن</button>'+
   '</div>';
 }
