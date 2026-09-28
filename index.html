@@ -10,6 +10,15 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="سوق الرهد">
 <meta name="google-site-verification" content="7tRSgt6m0xkuMJP6mzbMMhB-5RctV3W7QDETb1LHpeQ" />
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-63SK91X3E1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-63SK91X3E1');
+</script>
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -385,7 +394,6 @@ function build(d){
       if(Number(p.price_full)>0)v.push({unit:p.unit||"كامل",price:Number(p.price_full)});
       if(Number(p.price_half)>0)v.push({unit:"نصف "+u,price:Number(p.price_half)});
       if(Number(p.price_quarter)>0)v.push({unit:"ربع "+u,price:Number(p.price_quarter)});
-      // مرونة كاملة في جلب رابط الصورة من مختلف الحقول المحتملة
       var imgUrl = p.image || p.img || p.photo || p.imageUrl || "";
       products.push({id:s+"-"+(p.id||i),name:p.name||"منتج بدون اسم",cat:p.category||"عام",store:s,storeType:classifyStore(s),phone:phone(st.whatsapp),status:p.status||"موجود",image:imgUrl,v:v});
     });
@@ -478,7 +486,6 @@ function card(p){
     '<button class="addbtn" data-add="'+esc(p.id)+'" data-i="'+i+'"'+(ok?'':' disabled')+' title="إضافة">+</button></div></div>';
   }).join("");
   
-  // معالجة مرنة للصورة: إذا وُجد رابط صورة يتم عرضه، وإذا فشل التحميل أو كان فارغاً يُعرض الرمز التعبيري للقسم تلقائياً
   var imgHtml = p.image ? '<img src="'+esc(p.image)+'" alt="" loading="lazy" onerror="this.outerHTML=\''+icon(p.cat)+'\'">' : icon(p.cat);
 
   return '<div class="card'+(ok?'':' off')+'">'+
