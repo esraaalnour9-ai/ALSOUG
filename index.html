@@ -9,6 +9,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="سوق الرهد">
+<meta name="google-site-verification" content="7tRSgt6m0xkuMJP6mzbMMhB-5RctV3W7QDETb1LHpeQ" />
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -156,6 +157,11 @@ footer .fbottom p b{color:#94a3b8}
 #cartBar .cbtot b{font-size:14.5px;font-weight:900}
 #cartBar button{background:#0f172a;color:#fff;padding:9px 16px;border-radius:11px;font-weight:800;font-size:12.5px;white-space:nowrap;flex-shrink:0}
 .has-cartbar main{padding-bottom:88px}
+.promo-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;background:linear-gradient(120deg,#e11d48,#f59e0b);color:#fff;padding:10px 16px;font-weight:800;font-size:13px;position:relative}
+.promo-bar[hidden]{display:none}
+.promo-bar .pmsg{flex:1;min-width:0}
+.promo-bar .pcode{background:rgba(255,255,255,.22);border:1px dashed rgba(255,255,255,.75);border-radius:8px;padding:2px 9px;margin-inline-start:6px;cursor:pointer;letter-spacing:.5px;white-space:nowrap;font:inherit;color:inherit;font-weight:900}
+.promo-bar .pclose{background:rgba(255,255,255,.22);color:#fff;width:24px;height:24px;border-radius:50%;flex-shrink:0;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;border:0}
 </style>
 </head>
 <body>
@@ -175,6 +181,7 @@ footer .fbottom p b{color:#94a3b8}
     <button class="cartbtn" id="openCart">🛒 السلة<b id="cnt" hidden>0</b></button>
   </div>
 </header>
+<div id="promoBar" class="promo-bar" hidden></div>
 <section class="hero"><div class="in">
   <span class="badge">🛍️ سوق إلكتروني محلي</span>
   <h2>أهلاً بك في سوق الرهد التجاري</h2>
@@ -232,32 +239,14 @@ footer .fbottom p b{color:#94a3b8}
 </div></footer>
 <script>
 var PLATFORM="249115819197";
-var SCRIPT_URL="https://script.google.com/macros/s/AKfycbwJFFCgJmXwuKqyHMTO4agUN2YtXXSB44RQeV1iZyEEIm45as_HgNWKvq9UvuGZmuO7/exec";
+var SCRIPT_URL="https://script.google.com/macros/s/AKfycbwLta_Ydyn14aK4iYHbEsVLlxxb-uUK1PnQ2fttwlNVL0hBcN71MQIDjbKTeM1NmZAe/exec";
+var OFFERS_CSV_URL="";
+var PROMOS=[];
 var DEMO={
- "بقالة النور":{whatsapp:"249115819197",bankAccount:"1234567",minOrder:3000,deliveryNote:"التوصيل مجاني فوق 5000 جنيه",products:[
+ "بقالة النور":{whatsapp:"249115819197",bankAccount:"1234567",minOrder:3000,deliveryNote:"التوصيل مجاني فوق 5000 ج.س",products:[
   {id:1,name:"سكر",category:"تموين",unit:"كيلو",price_full:1800,price_half:900,price_quarter:450,status:"موجود"},
   {id:2,name:"دقيق أبيض",category:"تموين",unit:"كيلو",price_full:1200,price_half:600,status:"موجود"},
-  {id:3,name:"صابون غسيل",category:"منظفات",unit:"قطعة",price_full:700,status:"نفد"}]},
- "بقالة الأمل":{whatsapp:"249115819197",bankAccount:"",products:[
-  {id:1,name:"شاي",category:"مشروبات",unit:"علبة",price_full:2500,status:"موجود"},
-  {id:2,name:"بسكويت",category:"حلويات",unit:"كرتونة",price_full:9000,price_half:4500,status:"موجود"}]},
- "اجمالي الوحدة":{whatsapp:"249115819197",bankAccount:"",products:[
-  {id:1,name:"سكر (كرتونة)",category:"اجمالي",unit:"كرتونة",price_full:36000,status:"موجود"},
-  {id:2,name:"زيت (كرتونة)",category:"اجمالي",unit:"كرتونة",price_full:54000,status:"موجود"}]},
- "فواكه أحمد":{whatsapp:"249115819197",bankAccount:"",products:[
-  {id:1,name:"موز",category:"فواكه",unit:"كيلو",price_full:1500,status:"موجود",image:"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAoHBwgHBgoICAgLCgoLDhgQDg0NDh0VFhEYIx8lJCIfIiEmKzcvJik0KSEiMEExNDk7Pj4+JS5ESUM8SDc9Pjv/2wBDAQoLCw4NDhwQEBw7KCIoOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozv/wAARCACgAKADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDt6KKK/MD3gooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKa8iRj5j+FQNdE/dXHuaLDLNFUTLITkufw4ppOTk07BY0KKzqeJZAc7z+JosOxeoqqt04+8A36VOkqSdDz6GlYVh9FFFAgooooAKKKKACiiigAooooAKgmuNp2pye59KW4l2Dapwx/lVSmkNIUkk5JyfekooqigooooAKKKKAClBwcikooAsw3HIV/wA6sVnVZtpc/u2P0qWhNFiiiikSFFFFABRRRQAUE4GTRTJjiFiPTFAym7F3LHvTaKKsoKKKKACiiigAooooAKKKKAClBIII6ikooA0EbegYdxS1FbHMWPQ4qWoJCiiigQUUUUAFMnBMLYp9BAIIPQ0DM6ilZSrFT1FJVlBRRRQAUUUUAFFFFABRRRQAUUUoGTgUAWrYERfU1NTUXYgX0FOqCQooooEFFFFABRRRQBBcxZG8dR1qrWjVaa3Od0Y47immUmV6KKKoYUUUUAFFFFABRRRQAVPbRZO89B096SGAuQzDC/zq2BgYFJsTYUUUVJIUUUUAFFFFABRRRQAUUUUARyQpJyeD6ioGtpF6fMPardFO47meVKnBBH1pK0aaY0JyUX8qLjuUKUAk4Ayfar3lp/cX8qdRcLlNbeRu2PrU8duiHJ+Y+tS0UXFcKKKKQgooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA//9k="},
-  {id:2,name:"تفاح",category:"فواكه",unit:"كيلو",price_full:2200,status:"موجود"}]},
- "خضار الحاج":{whatsapp:"249115819197",bankAccount:"",products:[
-  {id:1,name:"طماطم",category:"خضار",unit:"كيلو",price_full:900,status:"موجود"}]},
- "لحوم علي":{whatsapp:"249115819197",bankAccount:"",products:[
-  {id:1,name:"لحم بقري",category:"لحوم",unit:"كيلو",price_full:6500,status:"موجود"}]},
- "اسماك النيل":{whatsapp:"249115819197",bankAccount:"",products:[
-  {id:1,name:"سمك بلطي",category:"أسماك",unit:"كيلو",price_full:3500,status:"موجود"}]},
- "كافتيريا الشرق":{whatsapp:"249115819197",bankAccount:"",products:[
-  {id:1,name:"عصير مانجو",category:"كافتيريا",unit:"كوب",price_full:1200,status:"موجود"},
-  {id:2,name:"ساندويش جبنة",category:"كافتيريا",unit:"سندويشة",price_full:1800,status:"موجود"}]},
- "محل السلام":{whatsapp:"249115819197",bankAccount:"",products:[
-  {id:1,name:"أدوات منزلية متنوعة",category:"محل",unit:"قطعة",price_full:1800,status:"موجود"}]}
+  {id:3,name:"صابون غسيل",category:"منظفات",unit:"قطعة",price_full:700,status:"نفد"}]}
 };
 var stores=[],products=[],cart=[],qty={},selStore="all",selType="all",selCat="all",term="",pay="whatsapp",cust={n:"",p:"",a:""},loading=true,liveData=true,pop={};
 function popMap(){try{return JSON.parse(localStorage.getItem("sr_pop")||"{}")}catch(e){return{}}}
@@ -269,22 +258,29 @@ function avail(s){return !/غير\s*متوفر|نفد|منتهي|نافد/.test(
 function icon(c){
   c=String(c||"");
   if(/منظف/.test(c))return"✨";
-  if(/حلوي|حلويات/.test(c))return"🎁";
+  if(/غاز/.test(c))return"🍺";
+  if(/حلوي|حلويات/.test(c))return"🍬";
+  if(/عصائر|عصير/.test(c))return"🥤";
   if(/مشروب/.test(c))return"☕";
-  if(/تموين|بقال/.test(c))return"🌾";
+  if(/تموين|بقال/.test(c))return"🍱";
   if(/لحوم|لحم/.test(c))return"🥩";
   if(/سمك|اسماك|أسماك/.test(c))return"🐟";
-  if(/فواكه|فاكهة/.test(c))return"🍎";
-  if(/خضار|خضروات/.test(c))return"🥬";
+  if(/فواكه|فاكهة/.test(c))return"🍉";
+  if(/خضار|خضروات/.test(c))return"🥦";
   if(/دجاج|فراخ/.test(c))return"🍗";
   if(/مخبز|خبز/.test(c))return"🍞";
   if(/ألبان|البان|جبن|حليب/.test(c))return"🧀";
   if(/بهارات|توابل/.test(c))return"🧂";
-  if(/كافتيريا|كافيتريا|كافيه/.test(c))return"☕";
+  if(/مطاعم|مطعم/.test(c))return"🍽";
+  if(/مغالق/.test(c))return"🛠";
+  if(/كافتيريا|كافيتريا|كافتريا|كفترياء|كافيه|كافي/.test(c))return"🍕";
+  if(/أواني|اواني/.test(c))return"🍴";
+  if(/كهربائية|كهرباء/.test(c))return"🖥";
+  if(/مكتبة/.test(c))return"📚";
   if(/محل|محلات/.test(c))return"🏬";
   return"📦";
 }
-var typeLabels={};// key(normalized first word) -> display label (raw first word as written), filled in build()
+var typeLabels={};
 function normAr(s){return String(s||"").replace(/[\u064B-\u065F]/g,"").replace(/[إأآ]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").trim()}
 function firstWord(name){var w=String(name||"").trim().split(/\s+/)[0];return w||name}
 function classifyStore(name){return normAr(firstWord(name))}
@@ -294,6 +290,54 @@ function showToast(msg){
   var t=$("toast");t.innerHTML=msg;t.classList.add("show");
   clearTimeout(toastTimer);
   toastTimer=setTimeout(function(){t.classList.remove("show")},1500);
+}
+
+function parseCSV(text){
+  var rows=[],row=[],field="",inQ=false;
+  for(var i=0;i<text.length;i++){
+    var c=text[i];
+    if(inQ){
+      if(c==='"'){if(text[i+1]==='"'){field+='"';i++}else inQ=false}
+      else field+=c;
+    }else{
+      if(c==='"')inQ=true;
+      else if(c===','){row.push(field);field=""}
+      else if(c===('\n')||c==='\r'){
+        if(c==='\r'&&text[i+1]==='\n')i++;
+        row.push(field);rows.push(row);row=[];field="";
+      }else field+=c;
+    }
+  }
+  if(field.length||row.length){row.push(field);rows.push(row)}
+  return rows.filter(function(r){return r.length&&r.some(function(x){return x.trim()!==""})});
+}
+function offersFromCSV(text){
+  var rows=parseCSV(text);
+  var out=[];
+  rows.forEach(function(r,i){
+    var cells=r.map(function(x){return(x||"").trim()}).filter(function(x){return x!==""});
+    if(!cells.length)return;
+    out.push({id:"sheet"+i,text:cells.join(" "),code:"",store:"all",until:""});
+  });
+  return out;
+}
+function fetchOffers(){
+  if(!OFFERS_CSV_URL)return;
+  try{var raw=localStorage.getItem("sr_offers_cache");if(raw){OFFERS=offersFromCSV(raw);renderPromos()}}catch(e){}
+  fetch(OFFERS_CSV_URL).then(function(r){if(!r.ok)throw 0;return r.text()}).then(function(txt){
+    try{localStorage.setItem("sr_offers_cache",txt)}catch(e){}
+    OFFERS=offersFromCSV(txt);renderPromos();
+  },function(){});
+}
+function renderPromos(){
+  var today=new Date().toISOString().slice(0,10);
+  var active=PROMOS.concat(OFFERS).filter(function(p){
+    return (!p.until||p.until>=today)&&(p.store==="all"||p.store==="الكل"||p.store===selStore)&&sessionStorage.getItem("promo_x_"+p.id)!=="1";
+  });
+  var box=$("promoBar");
+  if(!active.length){box.hidden=true;box.innerHTML="";return}
+  box.hidden=false;
+  box.innerHTML='<span class="pmsg">'+esc(active[0].text)+'</span>';
 }
 function readCache(){
   try{var raw=localStorage.getItem("sr_data_cache");if(raw)return JSON.parse(raw)}catch(e){}
@@ -308,6 +352,7 @@ function load(){
   $("ctaWa").href="https://wa.me/"+PLATFORM+"?text="+encodeURIComponent(wa);
   var inviteMsg="🛍️ جرّب سوق الرهد الإلكتروني! تسوّق من محلات منطقتك بسهولة عبر واتساب:\n"+location.origin+location.pathname;
   $("inviteFriend").href="https://wa.me/?text="+encodeURIComponent(inviteMsg);
+  fetchOffers();
   var cached=readCache();
   if(cached&&cached.data){
     loading=false;liveData=true;$("dataError").hidden=true;build(cached.data);
@@ -340,7 +385,9 @@ function build(d){
       if(Number(p.price_full)>0)v.push({unit:p.unit||"كامل",price:Number(p.price_full)});
       if(Number(p.price_half)>0)v.push({unit:"نصف "+u,price:Number(p.price_half)});
       if(Number(p.price_quarter)>0)v.push({unit:"ربع "+u,price:Number(p.price_quarter)});
-      products.push({id:s+"-"+(p.id||i),name:p.name||"منتج بدون اسم",cat:p.category||"عام",store:s,storeType:classifyStore(s),phone:phone(st.whatsapp),status:p.status||"موجود",image:p.image||p.img||p.photo||"",v:v});
+      // مرونة كاملة في جلب رابط الصورة من مختلف الحقول المحتملة
+      var imgUrl = p.image || p.img || p.photo || p.imageUrl || "";
+      products.push({id:s+"-"+(p.id||i),name:p.name||"منتج بدون اسم",cat:p.category||"عام",store:s,storeType:classifyStore(s),phone:phone(st.whatsapp),status:p.status||"موجود",image:imgUrl,v:v});
     });
   });
   if(!build.urlApplied){
@@ -375,7 +422,7 @@ function chips(el,list,cur,key,cls){
   el.innerHTML=list.map(function(x){return '<button class="chip '+cls+(cur===x[0]?' on':'')+'" data-'+key+'="'+esc(x[0])+'">'+esc(x[1])+'</button>'}).join("");
 }
 function render(){
-  if(typeof updateSuggest==="function")updateSuggest();
+  renderPromos();
   if(loading){
     $("n").textContent="";
     $("grid").innerHTML='<div class="empty" style="grid-column:1/-1">⏳ جاري تحميل الأصناف...</div>';
@@ -395,7 +442,7 @@ function render(){
   var curStore=stores.filter(function(s){return s.name===selStore})[0];
   if(curStore){
     var noteBits=[];
-    if(curStore.minOrder>0)noteBits.push("الحد الأدنى للطلب: "+curStore.minOrder.toLocaleString()+" جنيه");
+    if(curStore.minOrder>0)noteBits.push("الحد الأدنى للطلب: "+curStore.minOrder.toLocaleString()+" ج.س");
     if(curStore.note)noteBits.push(curStore.note);
     $("storeBanner").hidden=false;
     $("storeBanner").innerHTML='<div class="sbinfo"><span class="sbname">🏪 '+esc(curStore.name)+'</span>'+
@@ -430,8 +477,12 @@ function card(p){
     '<div class="vctl"><div class="qty"><button data-q="'+esc(k)+'" data-d="-1"'+(ok?'':' disabled')+'>−</button><span>'+q+'</span><button data-q="'+esc(k)+'" data-d="1"'+(ok?'':' disabled')+'>+</button></div>'+
     '<button class="addbtn" data-add="'+esc(p.id)+'" data-i="'+i+'"'+(ok?'':' disabled')+' title="إضافة">+</button></div></div>';
   }).join("");
+  
+  // معالجة مرنة للصورة: إذا وُجد رابط صورة يتم عرضه، وإذا فشل التحميل أو كان فارغاً يُعرض الرمز التعبيري للقسم تلقائياً
+  var imgHtml = p.image ? '<img src="'+esc(p.image)+'" alt="" loading="lazy" onerror="this.outerHTML=\''+icon(p.cat)+'\'">' : icon(p.cat);
+
   return '<div class="card'+(ok?'':' off')+'">'+
-  '<div class="chead"><div class="cinfo"><div class="cico">'+(p.image?'<img src="'+esc(p.image)+'" alt="" loading="lazy" onerror="this.parentElement.innerHTML=\''+icon(p.cat)+'\'">':icon(p.cat))+'</div><div class="cname">'+esc(p.name)+'</div></div><span class="tag">'+esc(p.store)+'</span></div>'+
+  '<div class="chead"><div class="cinfo"><div class="cico">'+imgHtml+'</div><div class="cname">'+esc(p.name)+'</div></div><span class="tag">'+esc(p.store)+'</span></div>'+
   (ok?'':'<span class="badge-off">غير متوفر حالياً</span> <button class="notifybtn" data-notify="'+esc(p.id)+'">🔔 أعلمني عند التوفر</button>')+
   ((pop[p.id]>0)?'<span class="badge-off" style="color:var(--amberd);background:var(--amberbg)">🔁 طلبته من قبل</span>':'')+
   '<div class="vlist">'+vs+'</div>'+
@@ -447,7 +498,7 @@ function drawCart(){
   var n=cart.reduce(function(s,c){return s+c.qty},0),total=cart.reduce(function(s,c){return s+c.price*c.qty},0);
   $("cnt").hidden=!n;$("cnt").textContent=n;
   $("cartBar").hidden=!n;document.body.classList.toggle("has-cartbar",!!n);
-  $("cbTotal").textContent=total.toLocaleString()+" جنيه";
+  $("cbTotal").textContent=total.toLocaleString()+" ج.س";
   var b=$("cartBody");
   if(!cart.length){b.innerHTML='<div class="empty">🛒<br>السلة فارغة حالياً</div>';saveState();return}
   var g={};cart.forEach(function(c){(g[c.store]=g[c.store]||[]).push(c)});
@@ -459,12 +510,12 @@ function drawCart(){
   names.forEach(function(s){
     var st=stores.filter(function(x){return x.name===s})[0]||{},sub=g[s].reduce(function(a,c){return a+c.price*c.qty},0),bank=!!st.bank,blocked=pay==="bankak"&&!bank;
     h+='<div class="grp"><b>🏪 '+esc(s)+'</b>'+g[s].map(function(c){
-      return '<div class="it"><div><b>'+esc(c.name)+'</b> <small>('+esc(c.unit)+')</small><br><small>'+c.qty+' × '+c.price.toLocaleString()+' = '+(c.price*c.qty).toLocaleString()+' جنيه</small></div><button data-rm="'+esc(c.id)+'">حذف</button></div>';
-    }).join("")+'<div class="sub"><span>إجمالي البقالة:</span><span>'+sub.toLocaleString()+' جنيه</span></div>'+
+      return '<div class="it"><div><b>'+esc(c.name)+'</b> <small>('+esc(c.unit)+')</small><br><small>'+c.qty+' × '+c.price.toLocaleString()+' = '+(c.price*c.qty).toLocaleString()+' ج.س</small></div><button data-rm="'+esc(c.id)+'">حذف</button></div>';
+    }).join("")+'<div class="sub"><span>إجمالي البقالة:</span><span>'+sub.toLocaleString()+' ج.س</span></div>'+
     (pay==="bankak"?(bank?'<div class="info"><b>حساب بنك الخرطوم:</b> <span style="user-select:all;font-family:monospace">'+esc(st.bank)+'</span><br>المستفيد: '+esc(s)+'<br>حوّل المبلغ ثم أرسل الإيصال عبر الواتساب.</div>':'<div class="info warn">هذه البقالة لم تضف رقم حساب بنكك. اختر الدفع عند الاستلام / واتساب.</div>'):'')+
     '<button class="send" data-send="'+esc(s)+'"'+(blocked?' disabled':'')+'>إرسال طلب '+esc(s)+' إلى واتساب</button></div>';
   });
-  h+='<div class="total"><span>الإجمالي الكلي:</span><span>'+total.toLocaleString()+' جنيه</span></div>';
+  h+='<div class="total"><span>الإجمالي الكلي:</span><span>'+total.toLocaleString()+' ج.س</span></div>';
   b.innerHTML=h;
   saveState();
 }
@@ -487,8 +538,8 @@ function send(s){
   if(!cust.n||!cust.p||!cust.a){alert("الرجاء إكمال بيانات التوصيل (الاسم، الهاتف، العنوان).");return}
   var items=cart.filter(function(c){return c.store===s}),sub=items.reduce(function(a,c){return a+c.price*c.qty},0);
   var m="🛒 *طلب جديد عبر سوق الرهد الإلكتروني*\n🏪 *البقالة:* "+s+"\n👤 *الاسم:* "+cust.n+"\n📞 *الهاتف:* "+cust.p+"\n📍 *العنوان:* "+cust.a+"\n💳 *طريقة الدفع:* "+(pay==="bankak"?"تحويل بنكك":"دفع عند الاستلام / واتساب")+"\n\n📦 *المنتجات المطلوبة:*\n";
-  items.forEach(function(c,i){m+=(i+1)+". "+c.name+" ("+c.unit+") × "+c.qty+" - "+(c.price*c.qty).toLocaleString()+" جنيه\n"});
-  m+="\n💰 *إجمالي هذه البقالة:* "+sub.toLocaleString()+" جنيه";
+  items.forEach(function(c,i){m+=(i+1)+". "+c.name+" ("+c.unit+") × "+c.qty+" - "+(c.price*c.qty).toLocaleString()+" ج.س\n"});
+  m+="\n💰 *إجمالي هذه البقالة:* "+sub.toLocaleString()+" ج.س";
   if(pay==="bankak")m+="\n\n📎 *ملاحظة:* تم التحويل عبر بنكك ومرفق إيصال الدفع.";
   logOrder(s,items);
   window.open("https://wa.me/"+items[0].phone+"?text="+encodeURIComponent(m),"_blank");
@@ -496,7 +547,7 @@ function send(s){
 document.addEventListener("click",function(e){
   var t=e.target.closest("button");if(!t)return;var d=t.dataset;
   if(d.t!==undefined){selType=d.t;selStore="all";render()}
-  else if(d.gostore!==undefined){clearTimeout(qTimer);selStore=d.gostore;term="";$("q").value="";$("qx").classList.remove("show");$("storeSuggest").classList.remove("show");render()}
+  else if(d.gostore!==undefined){selStore=d.gostore;term="";$("q").value="";$("qx").classList.remove("show");$("storeSuggest").classList.remove("show");render()}
   else if(d.share!==undefined){shareStore(d.share)}
   else if(d.notify!==undefined){
     var pn=find(d.notify);
@@ -545,47 +596,10 @@ $("q").addEventListener("input",function(){
   clearTimeout(qTimer);
   qTimer=setTimeout(function(){updateSuggest();render()},220);
 });
-$("qx").addEventListener("click",function(){clearTimeout(qTimer);term="";$("q").value="";$("qx").classList.remove("show");$("storeSuggest").classList.remove("show");$("q").focus();render()});
+$("qx").addEventListener("click",function(){term="";$("q").value="";$("qx").classList.remove("show");$("storeSuggest").classList.remove("show");$("q").focus();render()});
 document.addEventListener("click",function(e){if(!e.target.closest(".swrap"))$("storeSuggest").classList.remove("show")});
 $("refresh").addEventListener("click",load);
 $("retryLoad").addEventListener("click",load);
-
-var deferred=null;
-function standalone(){return window.matchMedia("(display-mode: standalone)").matches||navigator.standalone===true}
-function isIOS(){return /iphone|ipad|ipod/i.test(navigator.userAgent)}
-function dismissed(){try{return sessionStorage.getItem("noInstall")==="1"}catch(e){return false}}
-function hideInstall(){$("install").hidden=true;try{sessionStorage.setItem("noInstall","1")}catch(e){}}
-function showInstallBar(){if(!standalone()&&!dismissed())$("install").hidden=false}
-
-window.addEventListener("beforeinstallprompt",function(e){
-  e.preventDefault();deferred=e;
-  showInstallBar();
-});
-window.addEventListener("appinstalled",function(){$("install").hidden=true});
-
-// الرسالة الظاهرة على الشريط تبقى ثابتة وتسويقية دائماً؛ خطوات التثبيت التفصيلية
-// تظهر فقط داخل نافذة تنبيه عند الضغط، وليس على الشريط نفسه.
-if(isIOS()){
-  showInstallBar();
-}else{
-  setTimeout(function(){
-    if(!deferred && !standalone() && !dismissed())showInstallBar();
-  },2500);
-}
-
-$("installBtn").addEventListener("click",function(){
-  if(deferred){
-    deferred.prompt();
-    deferred.userChoice.then(function(){deferred=null;$("install").hidden=true});
-  }else if(isIOS()){
-    alert("لتثبيت التطبيق:\nاضغط زر المشاركة ⬆️ أسفل الشاشة، ثم اختر «إضافة إلى الشاشة الرئيسية».");
-  }else{
-    alert("لتثبيت التطبيق:\n1) افتح قائمة المتصفح (⋮) أعلى الشاشة.\n2) اختر «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية».");
-  }
-});
-$("installX").addEventListener("click",hideInstall);
-
-if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(){});}
 
 loadState();
 load();
