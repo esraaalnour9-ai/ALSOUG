@@ -1,5 +1,10 @@
-var CACHE = "souq-v2"; // كل ما تعدّل index.html/admin.html غيّر هذا الرقم (v3, v4...) عشان يجبر المتصفح ياخذ آخر نسخة فورًا
+var CACHE = "souq-v3"; // كل ما تعدّل index.html/admin.html غيّر هذا الرقم (v4, v5...) عشان يجبر المتصفح ياخذ آخر نسخة فورًا
 var ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
+
+// يسمح للصفحة بإجبار نسخة SW الجديدة على التفعّل فوراً بدل انتظار إغلاق كل التبويبات
+self.addEventListener("message", function (e) {
+  if (e.data && e.data.type === "SKIP_WAITING") self.skipWaiting();
+});
 
 self.addEventListener("install", function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(ASSETS); }).then(function () { return self.skipWaiting(); }));
