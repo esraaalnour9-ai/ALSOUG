@@ -747,7 +747,28 @@ $("installBtn").addEventListener("click",function(){
 });
 $("installX").addEventListener("click",hideInstall);
 
-if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(function(){});}
+// ===== تسجيل الـ Service Worker مع إجبار فحص التحديثات =====
+// المشكلة الأصلية: تطبيق PWA مثبّت يُستأنف من الخلفية غالباً بدل تصفّح جديد فعلي،
+// فلا يتحقق المتصفح تلقائياً من وجود نسخة sw.js أحدث، فيبقى عالقاً على نسخة قديمة
+// من الصفحة نفسها حتى لو كانت بيانات الشيت نفسها محدّثة. الحل: فحص فعّال عند كل فتح/عودة.
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(function(reg){
+    // افحصي فوراً عند التسجيل، ثم كل مرة يعود فيها التطبيق للواجهة (فتحه من الشاشة الرئيسية مثلاً)
+    reg.update().catch(function(){});
+    document.addEventListener("visibilitychange",function(){
+      if(!document.hidden)reg.update().catch(function(){});
+    });
+    window.addEventListener("focus",function(){reg.update().catch(function(){})});
+  }).catch(function(){});
+
+  // إذا تسلّمت نسخة SW جديدة التحكم، أعيدي تحميل الصفحة مرة واحدة فقط
+  // حتى يعمل أحدث كود فعلياً بدل بقاء الكود القديم في الذاكرة رغم تحديث الملفات
+  var swReloaded=false;
+  navigator.serviceWorker.addEventListener("controllerchange",function(){
+    if(swReloaded)return;swReloaded=true;
+    location.reload();
+  });
+}
 
 loadState();
 load();
