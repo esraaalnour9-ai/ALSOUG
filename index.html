@@ -295,8 +295,10 @@ function loadSupabase(){
     sbGet("products?select=id,store_id,name,category,unit,price_full,price_half,price_quarter,status,image_url,min_amount&order=created_at&limit=5000"),
     sbGet("store_payment_accounts?select=id,store_id,provider,account_number,account_name&order=sort_order&limit=2000"),
     sbGet("offers?select=id,store_id,text,code,until&order=created_at.desc&limit=500"),
-    sbGet("store_sections?select=name&order=sort_order,name&limit=200").catch(function(){return []})
+    sbGet("store_sections?select=name&order=sort_order,name&limit=200").catch(function(){return []}),
+    sbGet("delivery_zones?select=name,fee&order=sort_order,name&limit=100").catch(function(){return []})
   ]).then(function(r){
+    ZONES=Array.isArray(r[5])?r[5].map(function(z){return{name:z.name,fee:Number(z.fee)||0}}):[];
     var byId={},d={};
     SECLIST=Array.isArray(r[4])?r[4].map(function(x){return x.name}):[];
     if(!Array.isArray(r[0])||!r[0].length)throw new Error("no stores");
@@ -350,7 +352,7 @@ var DEMO={
  "محل السلام":{whatsapp:"249115819197",bankAccount:"",products:[
   {id:1,name:"أدوات منزلية متنوعة",category:"محل",unit:"قطعة",price_full:1800,status:"موجود"}]}
 };
-var stores=[],products=[],cart=[],qty={},selStore="all",selType="all",selCat="all",term="",pay="whatsapp",cust={n:"",p:"",a:""},recvBy={},loading=true,liveData=true,pop={};
+var stores=[],products=[],cart=[],qty={},selStore="all",selType="all",selCat="all",term="",pay="whatsapp",cust={n:"",p:"",a:""},recvBy={},zoneSel="",ZONES=[],loading=true,liveData=true,pop={};
 function popMap(){try{return JSON.parse(localStorage.getItem("sr_pop")||"{}")}catch(e){return{}}}
 function bumpPop(id){try{var m=popMap();m[id]=(m[id]||0)+1;localStorage.setItem("sr_pop",JSON.stringify(m))}catch(e){}}
 var $=function(i){return document.getElementById(i)};
@@ -569,7 +571,7 @@ function build(d){
   render();
 }
 function saveState(){
-  try{localStorage.setItem("sr_state",JSON.stringify({cart:cart,cust:cust,pay:pay,recvBy:recvBy}))}catch(e){}
+  try{localStorage.setItem("sr_state",JSON.stringify({cart:cart,cust:cust,pay:pay,recvBy:recvBy,zoneSel:zoneSel}))}catch(e){}
 }
 function loadState(){
   try{
@@ -580,6 +582,7 @@ function loadState(){
     if(s.cust)cust={n:s.cust.n||"",p:s.cust.p||"",a:s.cust.a||""};
     if(s.pay)pay=s.pay;
     if(s.recvBy&&typeof s.recvBy==="object")recvBy=s.recvBy;
+    if(typeof s.zoneSel==="string")zoneSel=s.zoneSel;
   }catch(e){}
 }
 function shareStore(name){
@@ -685,11 +688,20 @@ var RL={delivery:"🚚 توصيل الإسراء والمعراج",own:"🛵 ت�
 function recvOpts(st){var m=(st&&st.dm)||"both";return m==="company"?["delivery","pickup"]:m==="own"?["own","pickup"]:["delivery","own","pickup"]}
 function storeOf(s){return stores.filter(function(x){return x.name===s})[0]||{}}
 function recvOf(s){var o=recvOpts(storeOf(s)),v=recvBy[s];return o.indexOf(v)>-1?v:o[0]}
+function zoneFee(n){var z=ZONES.filter(function(x){return x.name===n})[0];return z?z.fee:null}
+function zoneBlock(){
+  if(!ZONES.length)return '<div class="info">🚚 رسم التوصيل تحدده شركة الإسراء والمعراج حسب الحي والوزن، ولا يدخل في إجمالي الطلب.</div>';
+  if(zoneFee(zoneSel)===null)zoneSel="";
+  var f=zoneFee(zoneSel);
+  return '<div class="paybox"><label>اختر حيّك</label><select data-zone="1"><option value="">— اختر الحي —</option>'+
+    ZONES.map(function(z){return '<option value="'+esc(z.name)+'"'+(z.name===zoneSel?' selected':'')+'>'+esc(z.name)+'</option>'}).join("")+'</select>'+
+    '<div class="info">'+(f!==null?'🚚 رسم التوصيل لحيّك: <b>'+f.toLocaleString()+' جنيه</b>، يُدفع للسائق عند التسليم ولا يدخل في إجمالي الطلب. قد يزيد إن كان الوزن كبيرًا (فوق 10 كجم).':'🚚 اختر حيّك ليظهر رسم التوصيل.')+'</div></div>';
+}
 function recvBlock(s,st){
   var cur=recvOf(s),o=recvOpts(st);
   return '<div class="recvbox"><label>طريقة الاستلام</label><div class="recv">'+o.map(function(m){
     return '<button type="button" data-recvs="'+esc(s)+'" data-recvm="'+m+'" class="'+(m===cur?'on':'')+'">'+RL[m]+'</button>'}).join("")+'</div>'+
-    (cur==="delivery"?'<div class="info">🚚 رسم التوصيل تحدده شركة الإسراء والمعراج حسب المسافة والوزن، ولا يدخل في إجمالي الطلب.</div>':
+    (cur==="delivery"?zoneBlock():
      cur==="own"?'<div class="info">🛵 المتجر يوصّل طلبك بنفسه، ويتفق معك على الرسم.</div>':'')+'</div>';
 }
 function payBlock(s,st,ac){
@@ -772,7 +784,7 @@ function placeOrder(s,items,pl){
   if(!st||!UUID_RE.test(st.sid||"")){dbgWhy("المتجر بلا معرّف Supabase — البيانات من النظام القديم أو النسخة قديمة");return Promise.resolve(null);}
   var okItems=items.every(function(c){return UUID_RE.test(c.pid||"")&&/^(full|half|quarter|amount)$/.test(c.tier||"")});
   if(!okItems){dbgWhy("الصنف في السلة قديم (بلا معرّف). فرّغ السلة وأضفه من جديد");return Promise.resolve(null);}
-  var payload={store_id:st.sid,name:cust.n,phone:cust.p,address:(recvOf(s)!=='pickup'?cust.a:(cust.a||'استلام من المتجر')),delivery:recvOf(s),pay:pl,
+  var payload={store_id:st.sid,name:cust.n,phone:cust.p,address:(recvOf(s)!=='pickup'?cust.a:(cust.a||'استلام من المتجر')),delivery:recvOf(s),zone:(recvOf(s)==='delivery'?zoneSel:''),pay:pl,
     items:items.map(function(c){return c.tier==="amount"?{product_id:c.pid,tier:"amount",qty:1,amount:c.amt,note:c.note||""}:{product_id:c.pid,tier:c.tier,qty:c.qty}})};
   var ctrl=(typeof AbortController!=="undefined")?new AbortController():null;
   var timer=ctrl?setTimeout(function(){ctrl.abort()},10000):null;
@@ -782,6 +794,7 @@ function placeOrder(s,items,pl){
       if(j.error==="rate_limited")return{fatal:"أرسلتَ طلبات كثيرة خلال وقت قصير. حاول بعد قليل."};
       if(j.error==="unavailable")return{fatal:"أحد الأصناف لم يعد متوفرًا أو تغيّر. حدّث الصفحة وراجع السلة."};
       if(j.error==="delivery_mode")return{fatal:"طريقة الاستلام المختارة غير متاحة لهذا المتجر. حدّث الصفحة واختر طريقة أخرى."};
+      if(j.error==="zone")return{fatal:"الحي المختار غير متاح الآن. حدّث الصفحة واختر الحي من جديد."};
       if(j.error==="amount")return{fatal:"المبلغ المدخل أقل من الحد الأدنى لأحد الأصناف."};
       if(j.error==="invalid"||j.error==="items")return{fatal:"تعذّر قبول الطلب. تأكد من الاسم ورقم الهاتف وحدّث الصفحة."};
       dbgWhy("رد الدالة "+r.status+" — "+(j.error||"؟"));return null;
@@ -797,6 +810,7 @@ function send(s){
   cust.n=$("cn").value.trim();cust.p=$("cp").value.trim();cust.a=$("ca").value.trim();
   var rv=recvOf(s);
   if(!cust.n||!cust.p||(rv!=="pickup"&&!cust.a)){alert(rv!=="pickup"?"الرجاء إكمال بيانات التوصيل (الاسم، الهاتف، العنوان).":"الرجاء كتابة الاسم ورقم الهاتف.");return}
+  if(rv==="delivery"&&ZONES.length&&!zoneSel){alert("الرجاء اختيار الحي لمعرفة رسم التوصيل.");return}
   if(rv!=="pickup"&&cust.a.length<4){alert("الرجاء كتابة عنوان التوصيل بوضوح (الحي / الشارع).");return}
   if(cust.n.length<2){alert("الرجاء كتابة الاسم كاملًا (حرفان على الأقل).");return}
   if(cust.p.replace(/\D/g,"").length<9){alert("الرجاء كتابة رقم هاتف صحيح (9 أرقام على الأقل).");return}
@@ -813,7 +827,7 @@ function send(s){
     var code=o.code;sub=o.total;
     var m="🛒 *طلب جديد عبر سوق الرهد الإلكتروني*\n"+
       (code?"🔒 *رقم الطلب المرجعي:* #"+code+"\n":"")+
-      "🏪 *البقالة:* "+s+"\n👤 *الاسم:* "+cust.n+"\n📞 *الهاتف:* "+cust.p+"\n"+(rv==="delivery"?"🚚 *الاستلام:* توصيل (الإسراء والمعراج للتوصيل)\n📍 *العنوان:* "+cust.a:rv==="own"?"🛵 *الاستلام:* توصيل من المتجر\n📍 *العنوان:* "+cust.a:"🏪 *الاستلام:* من المتجر"+(cust.a?"\n📝 *ملاحظة:* "+cust.a:""))+"\n💳 *طريقة الدفع:* "+(acS?("تحويل — "+acS.provider+" ("+acS.number+")"):"دفع عند الاستلام")+"\n\n📦 *المنتجات المطلوبة:*\n";
+      "🏪 *البقالة:* "+s+"\n👤 *الاسم:* "+cust.n+"\n📞 *الهاتف:* "+cust.p+"\n"+(rv==="delivery"?"🚚 *الاستلام:* توصيل (الإسراء والمعراج للتوصيل)\n"+(zoneSel?"🗺️ *الحي:* "+zoneSel+" — رسم التوصيل: "+(zoneFee(zoneSel)||0).toLocaleString()+" جنيه (يُدفع للسائق)\n":"")+"📍 *العنوان:* "+cust.a:rv==="own"?"🛵 *الاستلام:* توصيل من المتجر\n📍 *العنوان:* "+cust.a:"🏪 *الاستلام:* من المتجر"+(cust.a?"\n📝 *ملاحظة:* "+cust.a:""))+"\n💳 *طريقة الدفع:* "+(acS?("تحويل — "+acS.provider+" ("+acS.number+")"):"دفع عند الاستلام")+"\n\n📦 *المنتجات المطلوبة:*\n";
     items.forEach(function(c,i){m+=(i+1)+". "+c.name+" ("+c.unit+") × "+c.qty+" - "+(c.price*c.qty).toLocaleString()+" جنيه\n"});
     m+="\n💰 *إجمالي هذه البقالة:* "+sub.toLocaleString()+" جنيه";
     if(acS)m+="\n\n📎 *ملاحظة:* تم التحويل عبر "+acS.provider+" وسيُرفق إيصال الدفع.";
@@ -960,6 +974,10 @@ if("serviceWorker" in navigator){
 var sbOffers=false,SO=[],SOALL=[],soIdx=0,soTimer=null,soKey="",soList=[];
 document.addEventListener("change",function(e){
   var t=e.target;
+  if(t&&t.dataset&&t.dataset.zone!==undefined){
+    cust.n=$("cn").value;cust.p=$("cp").value;cust.a=$("ca").value;
+    zoneSel=t.value;saveState();drawCart();return;
+  }
   if(t&&t.dataset&&t.dataset.payacct!==undefined){
     cust.n=$("cn").value;cust.p=$("cp").value;cust.a=$("ca").value;
     payPick[t.dataset.payacct]=t.value;drawCart();

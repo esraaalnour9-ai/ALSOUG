@@ -194,10 +194,13 @@ function adminFn(payload){
 }
 
 // ===== الحالة =====
-var ME={master:false,role:"",uid:""},STAFF=[],STORES=[],ORDERS=[];
+var ME={master:false,role:"",uid:""},STAFF=[],STORES=[],ORDERS=[],ZONES=[],TIERS=[];
 var TAB="orders",FILT="new",pollTimer=null,lastSig="",seenNew=-1,muted=false,audioCtx=null;
 try{muted=localStorage.getItem("sr_dv_mute")==="1"}catch(e){}
 function isDisp(){return ME.master||ME.role==="supervisor"}
+function zoneByName(n){return ZONES.filter(function(z){return z.name===n})[0]}
+function extraFor(kg){var e=0,b=-1;TIERS.forEach(function(t){if(+t.over_kg<kg&&+t.over_kg>b){b=+t.over_kg;e=+t.extra}});return e}
+function fmtKg(kg){kg=+kg;return kg<1?Math.round(kg*1000)+" جرام":(Math.round(kg*100)/100)+" كجم"}
 function storeName(id){var s=STORES.filter(function(x){return x.id===id})[0];return s?s.name:""}
 function storePhone(id){var s=STORES.filter(function(x){return x.id===id})[0];return s?s.whatsapp:""}
 function staffName(id){var s=STAFF.filter(function(x){return x.user_id===id})[0];return s?s.name:""}
@@ -253,7 +256,8 @@ function logout(){
 var ORD_SEL="orders?select=id,code,store_id,customer_name,customer_phone,customer_address,pay_method,total,status,created_at,delivery_type,delivery_status,delivery_fee,delivery_distance_km,delivery_weight_kg,delivery_note,driver_id,delivered_at,order_items(name,unit,qty,price)";
 function boot(){
   $("app").innerHTML='<div class="empty">⏳ جاري التحميل...</div>';
-  Promise.all([api("GET","admins?select=user_id"),api("GET","delivery_staff?select=*&order=created_at"),api("GET","stores?select=id,name,whatsapp&order=name&limit=1000")]).then(function(r){
+  Promise.all([api("GET","admins?select=user_id"),api("GET","delivery_staff?select=*&order=created_at"),api("GET","stores?select=id,name,whatsapp&order=name&limit=1000"),api("GET","delivery_zones?select=*&order=sort_order,name&limit=200").catch(function(){return[]}),api("GET","delivery_weight_tiers?select=*&order=over_kg").catch(function(){return[]})]).then(function(r){
+    ZONES=r[3]||[];TIERS=r[4]||[];
     ME.master=!!(r[0]&&r[0].length);
     STAFF=r[1]||[];STORES=r[2]||[];
     var mine=STAFF.filter(function(s){return s.user_id===SESS.uid})[0];
@@ -298,21 +302,22 @@ function orderBase(o,extra){
   var ph=waNum(o.customer_phone),sp=waNum(storePhone(o.store_id));
   return '<div class="item"><div class="row"><div class="iname">#'+esc(o.code)+' — '+esc(storeName(o.store_id))+'</div><span class="badge '+(ST_CLS[o.delivery_status]||"")+'">'+esc((!isDisp()&&o.delivery_status==="assigned")?"جاهز: استلمه من المتجر":(ST_LBL[o.delivery_status]||o.delivery_status))+'</span></div>'+
     '<div class="imeta">👤 '+esc(o.customer_name)+' · 📞 <a class="lnk ltr" href="tel:'+esc(ph)+'">'+esc(o.customer_phone)+'</a> · <a class="lnk" target="_blank" rel="noopener" href="https://wa.me/'+esc(ph)+'">واتساب</a></div>'+
-    '<div class="imeta">📍 '+esc(o.customer_address)+'</div>'+
+    '<div class="imeta">'+(o.delivery_zone?'🗺️ الحي: <b>'+esc(o.delivery_zone)+'</b> · ':'')+'📍 '+esc(o.customer_address)+'</div>'+
     '<div class="imeta">🏪 المتجر: '+(sp?'<a class="lnk" target="_blank" rel="noopener" href="https://wa.me/'+esc(sp)+'">واتساب المتجر</a>':'-')+' · 💳 '+esc(o.pay_method||"-")+' · 🕒 '+esc(dt(o.created_at))+'</div>'+
     (o.driver_id?'<div class="imeta">🛵 السائق: <b>'+esc(staffName(o.driver_id)||"—")+'</b></div>':'')+
     (o.delivery_note?'<div class="imeta">📝 '+esc(o.delivery_note)+'</div>':'')+
     (o.order_items||[]).map(function(i){return '<div class="oitem">• '+esc(i.name)+' ('+esc(i.unit)+') × '+i.qty+'</div>'}).join("")+
     '<div class="row" style="margin-top:6px"><b>إجمالي الطلب: '+fmt(o.total)+' جنيه</b><span class="muted">رسم التوصيل: '+(+o.delivery_fee>0?fmt(o.delivery_fee)+' جنيه':'لم يُحدَّد')+
-    (o.delivery_distance_km!=null?' · '+o.delivery_distance_km+' كم':'')+(o.delivery_weight_kg!=null?' · '+o.delivery_weight_kg+' كجم':'')+'</span></div>'+
+    (o.delivery_weight_kg!=null?' · '+fmtKg(o.delivery_weight_kg):'')+'</span></div>'+
     (extra||'')+'</div>';
 }
 function dispHtml(){
   var cnt={new:0,active:0,done:0};
   ORDERS.forEach(function(o){var s=o.delivery_status;if(s==="requested")cnt.new++;else if(s==="assigned"||s==="picked")cnt.active++;else cnt.done++});
   var h='<div class="tabs2">'+
-    [["orders","🧾 الطلبات"],["staff","👥 الفريق"],["report","📊 التقارير"]].map(function(t){return '<button class="chip '+(TAB===t[0]?'on':'')+'" data-tab="'+t[0]+'">'+t[1]+'</button>'}).join("")+'</div>';
+    [["orders","🧾 الطلبات"],["staff","👥 الفريق"],["prices","💲 الأسعار"],["report","📊 التقارير"]].filter(function(t){return t[0]!=="prices"||isDisp()}).map(function(t){return '<button class="chip '+(TAB===t[0]?'on':'')+'" data-tab="'+t[0]+'">'+t[1]+'</button>'}).join("")+'</div>';
   if(TAB==="staff")return h+staffHtml();
+  if(TAB==="prices"&&isDisp())return h+pricesHtml();
   if(TAB==="report")return h+reportHtml();
   h+='<div class="tabs2">'+
     [["new","جديدة ("+cnt.new+")"],["active","قيد التنفيذ ("+cnt.active+")"],["done","منتهية ("+cnt.done+")"],["all","الكل"]].map(function(t){return '<button class="chip '+(FILT===t[0]?'on':'')+'" data-filt="'+t[0]+'">'+t[1]+'</button>'}).join("")+'</div>';
@@ -331,9 +336,10 @@ function dispActions(o){
   var ds=drivers();
   var form='<div class="dform"><label>السائق</label><select id="dr-'+id+'"><option value="">— اختر سائقًا —</option>'+
     ds.map(function(d){return '<option value="'+esc(d.user_id)+'"'+(o.driver_id===d.user_id?' selected':'')+'>'+esc(d.name)+'</option>'}).join("")+'</select>'+
-    '<div class="grid3"><div><label>المسافة (كم)</label><input id="km-'+id+'" type="number" inputmode="decimal" value="'+(o.delivery_distance_km!=null?o.delivery_distance_km:"")+'"></div>'+
-    '<div><label>الوزن (كجم)</label><input id="kg-'+id+'" type="number" inputmode="decimal" value="'+(o.delivery_weight_kg!=null?o.delivery_weight_kg:"")+'"></div>'+
-    '<div><label>الرسم (جنيه)</label><input id="fee-'+id+'" type="number" inputmode="decimal" value="'+(+o.delivery_fee>0?o.delivery_fee:"")+'"></div></div>'+
+    '<div class="grid3"><div><label>الوزن</label><input id="kg-'+id+'" class="numonly" data-wt="'+id+'" type="text" inputmode="decimal" placeholder="مثال: 6" value="'+(o.delivery_weight_kg!=null?(+o.delivery_weight_kg<1?Math.round(o.delivery_weight_kg*1000):o.delivery_weight_kg):"")+'"></div>'+
+    '<div><label>الوحدة</label><select id="un-'+id+'" data-wt="'+id+'"><option value="kg"'+(o.delivery_weight_kg!=null&&+o.delivery_weight_kg<1?'':' selected')+'>كجم</option><option value="g"'+(o.delivery_weight_kg!=null&&+o.delivery_weight_kg<1?' selected':'')+'>جرام</option></select></div>'+
+    '<div><label>الرسم (جنيه)</label><input id="fee-'+id+'" class="numonly" type="text" inputmode="decimal" value="'+(+o.delivery_fee>0?o.delivery_fee:"")+'"></div></div>'+
+    '<div class="hint" id="fh-'+id+'">'+(o.delivery_zone&&zoneByName(o.delivery_zone)?'رسم حي '+esc(o.delivery_zone)+': '+fmt(zoneByName(o.delivery_zone).fee)+' جنيه. اكتبي الوزن ليُحسب الرسم تلقائيًا، ولك تعديله.':'اكتبي الرسم يدويًا.')+'</div>'+
     '<input id="nt-'+id+'" maxlength="300" placeholder="ملاحظة (اختياري)" value="'+esc(o.delivery_note||"")+'"></div>';
   var b='<div class="acts"><button class="btn btn-sm" data-act="assign" data-id="'+id+'">'+(s==="requested"?'✓ تعيين السائق وتأكيد':'حفظ التعديل')+'</button>';
   if(s==="assigned")b+='<button class="btn btn-sm btn-line" data-act="setst" data-id="'+id+'" data-v="picked">السائق استلم الطلب</button>';
@@ -377,6 +383,32 @@ function staffHtml(){
   }
   return h;
 }
+function pricesHtml(){
+  var h='<div class="card"><h2>🗺️ أحياء التوصيل ورسومها ('+ZONES.length+')</h2>';
+  if(!ZONES.length)h+='<div class="empty">لا توجد أحياء بعد. أضيفي من الأسفل.</div>';
+  ZONES.forEach(function(z){
+    var id=esc(z.id);
+    h+='<div class="item"><div class="grid3" style="grid-template-columns:2fr 1fr"><div><label>الحي</label><input id="zn-'+id+'" maxlength="60" value="'+esc(z.name)+'"></div>'+
+      '<div><label>الرسم (جنيه)</label><input id="zf-'+id+'" class="numonly" type="text" inputmode="decimal" value="'+esc(z.fee)+'"></div></div>'+
+      '<div class="acts"><button class="btn btn-sm" data-act="zoneSave" data-id="'+id+'">حفظ</button>'+
+      '<button class="btn btn-sm btn-line" data-act="zoneToggle" data-id="'+id+'">'+(z.active?'إيقاف (يختفي من المتجر)':'تفعيل')+'</button>'+
+      '<button class="btn btn-sm btn-red" data-act="zoneDel" data-id="'+id+'">حذف</button></div>'+(z.active?'':'<div class="hint">موقوف: لا يظهر للزبائن.</div>')+'</div>';
+  });
+  h+='<div class="dform"><label>➕ حيّ جديد</label><input id="znNew" maxlength="60" placeholder="اسم الحي"><input id="zfNew" class="numonly" type="text" inputmode="decimal" placeholder="الرسم بالجنيه"><button class="btn" data-act="zoneAdd">إضافة</button></div></div>';
+  h+='<div class="card"><h2>⚖️ زيادة الوزن</h2><div class="hint" style="margin-bottom:8px">إن زاد الوزن عن الحد يُضاف المبلغ إلى رسم الحي. يُطبَّق أعلى حدّ تجاوزه الطلب.</div>';
+  TIERS.forEach(function(t){
+    var id=esc(t.id);
+    h+='<div class="item"><div class="grid3" style="grid-template-columns:1fr 1fr"><div><label>إن زاد الوزن عن (كجم)</label><input id="tk-'+id+'" class="numonly" type="text" inputmode="decimal" value="'+esc(t.over_kg)+'"></div>'+
+      '<div><label>يُضاف (جنيه)</label><input id="te-'+id+'" class="numonly" type="text" inputmode="decimal" value="'+esc(t.extra)+'"></div></div>'+
+      '<div class="acts"><button class="btn btn-sm" data-act="tierSave" data-id="'+id+'">حفظ</button><button class="btn btn-sm btn-red" data-act="tierDel" data-id="'+id+'">حذف</button></div></div>';
+  });
+  h+='<div class="dform"><label>➕ حدّ جديد</label><input id="tkNew" class="numonly" type="text" inputmode="decimal" placeholder="الوزن بالكجم"><input id="teNew" class="numonly" type="text" inputmode="decimal" placeholder="المبلغ المضاف بالجنيه"><button class="btn" data-act="tierAdd">إضافة</button></div></div>';
+  return h;
+}
+function reloadPrices(){
+  return Promise.all([api("GET","delivery_zones?select=*&order=sort_order,name&limit=200"),api("GET","delivery_weight_tiers?select=*&order=over_kg")]).then(function(r){ZONES=r[0]||[];TIERS=r[1]||[];render()});
+}
+function pErr(e){toast(/duplicate|unique|23505/.test(String((e&&e.message)||"")+(e&&e.code))?"هذا الاسم/الحدّ موجود من قبل.":niceErr(e),true)}
 function reportHtml(){
   var del=ORDERS.filter(function(o){return o.delivery_status==="delivered"&&o.delivered_at});
   var now=new Date(),d0=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime(),
@@ -419,11 +451,11 @@ var ACT={
   reload:function(){location.reload()},
   mute:function(){muted=!muted;try{localStorage.setItem("sr_dv_mute",muted?"1":"0")}catch(e){}$("muteBtn").textContent=muted?"🔕":"🔔";if(!muted)beep()},
   assign:function(d){
-    var id=d.id,drv=$("dr-"+id).value,km=$("km-"+id).value,kg=$("kg-"+id).value,fee=numv($("fee-"+id).value),note=$("nt-"+id).value.trim();
+    var id=d.id,drv=$("dr-"+id).value,kg=$("kg-"+id).value,un=$("un-"+id).value,fee=numv($("fee-"+id).value),note=$("nt-"+id).value.trim();
     var o=rowOf(id);
     if(!drv){toast("اختاري سائقًا أولًا",true);return}
     if(!(fee>0)){toast("حدّدي رسم التوصيل (أكبر من صفر)",true);return}
-    var body={driver_id:drv,delivery_fee:fee,delivery_note:note,delivery_distance_km:km===""?null:numv(km),delivery_weight_kg:kg===""?null:numv(kg)};
+    var body={driver_id:drv,delivery_fee:fee,delivery_note:note,delivery_weight_kg:kg===""?null:Math.round(numv(kg)*(un==="g"?1:1000))/1000};
     patch(id,body,o&&o.delivery_status==="requested"?"عُيّن السائق ✓":"تم الحفظ ✓");
   },
   setst:function(d){
@@ -431,6 +463,39 @@ var ACT={
     if(v==="cancelled"&&!confirm("إلغاء التوصيل لهذا الطلب؟"))return;
     if(v==="delivered"&&!confirm("تأكيد أن الطلب وصل للزبون؟"))return;
     patch(d.id,{delivery_status:v},v==="delivered"?"تم تسجيل التسليم ✓":v==="picked"?"تم تسجيل الاستلام ✓":"أُلغي التوصيل");
+  },
+  zoneAdd:function(){
+    var n=$("znNew").value.trim(),f=numv($("zfNew").value);
+    if(n.length<1){toast("اكتبي اسم الحي",true);return}
+    if(!(f>0)){toast("اكتبي الرسم (أكبر من صفر)",true);return}
+    api("POST","delivery_zones",{name:n,fee:f,sort_order:(ZONES.length?Math.max.apply(null,ZONES.map(function(z){return +z.sort_order||0}))+1:1)},"return=minimal").then(function(){toast("أُضيف الحي ✓");return reloadPrices()}).catch(pErr);
+  },
+  zoneSave:function(d){
+    var n=$("zn-"+d.id).value.trim(),f=numv($("zf-"+d.id).value);
+    if(!n||!(f>0)){toast("الاسم والرسم مطلوبان",true);return}
+    api("PATCH","delivery_zones?id=eq."+d.id,{name:n,fee:f},"return=minimal").then(function(){toast("تم الحفظ ✓");return reloadPrices()}).catch(pErr);
+  },
+  zoneToggle:function(d){
+    var z=ZONES.filter(function(x){return x.id===d.id})[0];if(!z)return;
+    api("PATCH","delivery_zones?id=eq."+d.id,{active:!z.active},"return=minimal").then(function(){return reloadPrices()}).catch(pErr);
+  },
+  zoneDel:function(d){
+    if(!confirm("حذف هذا الحي نهائيًا؟ (الطلبات السابقة تحتفظ باسمه)"))return;
+    api("DELETE","delivery_zones?id=eq."+d.id).then(function(){toast("حُذف ✓");return reloadPrices()}).catch(pErr);
+  },
+  tierAdd:function(){
+    var k=numv($("tkNew").value),e=numv($("teNew").value);
+    if(!(k>0)||!(e>0)){toast("اكتبي الوزن والمبلغ (أكبر من صفر)",true);return}
+    api("POST","delivery_weight_tiers",{over_kg:k,extra:e},"return=minimal").then(function(){toast("أُضيف ✓");return reloadPrices()}).catch(pErr);
+  },
+  tierSave:function(d){
+    var k=numv($("tk-"+d.id).value),e=numv($("te-"+d.id).value);
+    if(!(k>0)||!(e>0)){toast("اكتبي الوزن والمبلغ",true);return}
+    api("PATCH","delivery_weight_tiers?id=eq."+d.id,{over_kg:k,extra:e},"return=minimal").then(function(){toast("تم الحفظ ✓");return reloadPrices()}).catch(pErr);
+  },
+  tierDel:function(d){
+    if(!confirm("حذف هذا الحدّ؟"))return;
+    api("DELETE","delivery_weight_tiers?id=eq."+d.id).then(function(){toast("حُذف ✓");return reloadPrices()}).catch(pErr);
   },
   addStaff:function(){
     var name=$("stName").value.trim(),ph=$("stPhone").value.trim(),pw=$("stPw").value,role=$("stRole").value;
@@ -459,6 +524,19 @@ document.addEventListener("click",function(e){
   if(d.filt){FILT=d.filt;render();return}
   if(d.act&&ACT[d.act])ACT[d.act](d);
 });
+function wtRecalc(id){
+  var o=rowOf(id),kgEl=$("kg-"+id),unEl=$("un-"+id),feeEl=$("fee-"+id);if(!o||!kgEl||!feeEl)return;
+  var z=zoneByName(o.delivery_zone),raw=numv(kgEl.value);if(!z||kgEl.value==="")return;
+  var kg=unEl&&unEl.value==="g"?raw/1000:raw,ex=extraFor(kg);
+  feeEl.value=(+z.fee)+ex;
+  var h=$("fh-"+id);if(h)h.textContent="رسم "+o.delivery_zone+" "+fmt(z.fee)+(ex?" + زيادة وزن "+fmt(ex):"")+" = "+fmt((+z.fee)+ex)+" جنيه (يمكنك تعديله)";
+}
+document.addEventListener("input",function(e){
+  var t=e.target;
+  if(t.classList&&t.classList.contains("numonly")){var v=t.value.replace(/[^\d.]/g,"").replace(/(\..*)\./g,"$1");if(v!==t.value)t.value=v}
+  if(t.dataset&&t.dataset.wt)wtRecalc(t.dataset.wt);
+});
+document.addEventListener("change",function(e){var t=e.target;if(t.dataset&&t.dataset.wt&&t.tagName==="SELECT")wtRecalc(t.dataset.wt)});
 document.addEventListener("keydown",function(e){if(e.key==="Enter"&&e.target.id==="lgPass")doLogin()});
 
 // ===== التشغيل =====
