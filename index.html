@@ -105,6 +105,31 @@ main{max-width:1150px;margin:0 auto;padding:22px 14px 16px}
 .card:hover{box-shadow:0 6px 18px rgba(15,23,42,.09);transform:translateY(-1px)}
 .card.off{opacity:.55}
 .cico img,.vimg img{cursor:zoom-in}
+.fbbtn{align-self:flex-start;background:var(--soft);color:var(--text);border:1px solid var(--line);border-radius:99px;padding:3px 10px;font-size:12px;font-weight:700;display:inline-flex;gap:6px;align-items:center}
+.fbbtn b{color:var(--amberd)}
+#fbm{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center}
+#fbm.show{display:flex}
+#fbm .sheet{background:var(--card);width:100%;max-width:560px;max-height:90vh;overflow:auto;border-radius:20px 20px 0 0;padding:14px 14px 22px}
+#fbm .sh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+#fbm .sh b{font-size:15px}
+#fbm .x{width:36px;height:36px;border-radius:50%;background:var(--soft);font-size:22px;line-height:1}
+.fbi{border-top:1px solid var(--line);padding:9px 0;font-size:13.5px}
+.fbi .m{color:var(--muted);font-size:11.5px;margin-top:3px}
+.fbi .st{color:var(--amberd);letter-spacing:1px}
+.fbi .rp{background:var(--soft);border-radius:10px;padding:7px 9px;margin-top:6px;font-size:13px}
+.fbi .vb{background:#e7f8ee;color:#15803d;border-radius:99px;padding:1px 8px;font-size:11px;font-weight:700;margin-inline-start:6px}
+#fbm .kinds{display:flex;gap:6px;margin:10px 0 6px}
+#fbm .kinds button{flex:1;padding:8px;border-radius:12px;background:var(--soft);border:1px solid var(--line);font-weight:800;font-size:13px}
+#fbm .kinds button.on{background:var(--amberbg);border-color:var(--amber);color:var(--amberd)}
+#fbm .stars button{font-size:28px;color:#cbd5e1;background:none;padding:0 3px}
+#fbm .stars button.on{color:var(--amber)}
+#fbm input,#fbm textarea{width:100%;margin-top:6px;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--text);font:inherit}
+#fbm textarea{min-height:72px;resize:vertical}
+#fbm .send{width:100%;margin-top:10px;padding:12px;border-radius:12px;background:linear-gradient(135deg,var(--amber2),var(--amberd));color:#fff;font-weight:900}
+#fbm .send:disabled{opacity:.6}
+#fbm .note{font-size:12px;color:var(--muted);margin-top:6px}
+#fbm .okmsg{background:#e7f8ee;color:#15803d;border-radius:12px;padding:10px;font-weight:700;margin-top:10px}
+#fbm .hp{position:absolute;left:-9999px;opacity:0;height:0;width:0}
 #lb{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.88);display:none;align-items:center;justify-content:center;padding:14px}
 #lb.show{display:flex}
 #lb img{max-width:100%;max-height:88vh;border-radius:12px;object-fit:contain;touch-action:pinch-zoom}
@@ -245,6 +270,7 @@ footer .fbottom p b{color:#94a3b8}
   <div class="grid" id="grid"></div>
 </main>
 <div id="toast"></div>
+<div id="fbm" role="dialog" aria-label="آراء واستفسارات"><div class="sheet" id="fbSheet"></div></div>
 <div id="lb" role="dialog" aria-label="عرض الصورة"><button type="button" aria-label="إغلاق">&times;</button><img alt=""></div>
 <div id="cartBar" hidden><div class="cbtot"><small>الإجمالي</small><b id="cbTotal">0</b></div><button id="cbOpen">🛒 إتمام الطلب</button></div>
 <div id="drawer"><div class="panel">
@@ -297,8 +323,10 @@ function loadSupabase(){
     sbGet("offers?select=id,store_id,text,code,until&order=created_at.desc&limit=500"),
     sbGet("store_sections?select=name&order=sort_order,name&limit=200").catch(function(){return []}),
     sbGet("delivery_zones?select=name,fee&order=sort_order,name&limit=100").catch(function(){return []}),
-    sbGet("app_settings?select=key,value&limit=20").catch(function(){return []})
+    sbGet("app_settings?select=key,value&limit=20").catch(function(){return []}),
+    sbGet("product_feedback?select=product_id,kind,rating&limit=5000").catch(function(){return []})
   ]).then(function(r){
+    FB={};(Array.isArray(r[7])?r[7]:[]).forEach(function(x){var f=FB[x.product_id]||(FB[x.product_id]={rn:0,rs:0,q:0});if(x.kind==="review"){f.rn++;f.rs+=Number(x.rating)||0}else f.q++});
     DPAUSE=false;DPMSG="";(Array.isArray(r[6])?r[6]:[]).forEach(function(x){if(x.key==="delivery_paused")DPAUSE=x.value==="1";if(x.key==="delivery_paused_msg")DPMSG=x.value});
     ZONES=Array.isArray(r[5])?r[5].map(function(z){return{name:z.name,fee:Number(z.fee)||0}}):[];
     var byId={},d={};
@@ -354,7 +382,7 @@ var DEMO={
  "محل السلام":{whatsapp:"249115819197",bankAccount:"",products:[
   {id:1,name:"أدوات منزلية متنوعة",category:"محل",unit:"قطعة",price_full:1800,status:"موجود"}]}
 };
-var stores=[],products=[],cart=[],qty={},selStore="all",selType="all",selCat="all",term="",pay="whatsapp",cust={n:"",p:"",a:""},recvBy={},zoneSel="",ZONES=[],DPAUSE=false,DPMSG="",loading=true,liveData=true,pop={};
+var stores=[],products=[],cart=[],qty={},selStore="all",selType="all",selCat="all",term="",pay="whatsapp",cust={n:"",p:"",a:""},recvBy={},zoneSel="",ZONES=[],DPAUSE=false,DPMSG="",FB={},FBP=null,FBL=[],FBK="review",FBR=0,FBDONE="",loading=true,liveData=true,pop={};
 function popMap(){try{return JSON.parse(localStorage.getItem("sr_pop")||"{}")}catch(e){return{}}}
 function bumpPop(id){try{var m=popMap();m[id]=(m[id]||0)+1;localStorage.setItem("sr_pop",JSON.stringify(m))}catch(e){}}
 var $=function(i){return document.getElementById(i)};
@@ -649,6 +677,13 @@ function render(){
   $("grid").innerHTML=list.length?list.map(card).join(""):'<div class="empty" style="grid-column:1/-1">لا توجد أصناف مطابقة حالياً.</div>';
   drawCart();
 }
+function fbLine(p){
+  if(!UUID_RE.test(p.uid||""))return "";
+  var f=FB[p.uid];
+  var t=f&&f.rn?'<b>★ '+(f.rs/f.rn).toFixed(1)+'</b> ('+f.rn+')':'★ قيّم';
+  if(f&&f.q)t+=' · 💬 '+f.q;else if(!f||!f.rn)t+=' · 💬 اسأل';
+  return '<button type="button" class="fbbtn" data-fb="'+esc(p.uid)+'">'+t+'</button>';
+}
 function card(p){
   var ok=avail(p.status);
   var vs=(p.visual?p.v.slice(0,1):p.v).map(function(v,i){
@@ -662,12 +697,13 @@ function card(p){
     '<div class="vimg">'+(p.image?'<img src="'+esc(p.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.innerHTML=\''+icon(p.cat)+'\'">':icon(p.cat))+'</div>'+
     '<div class="vbody"><div class="cname">'+esc(p.name)+'</div><span class="tag" style="align-self:flex-start">'+esc(p.store)+'</span>'+
     (ok?'':'<span class="badge-off">غير متوفر حالياً</span>')+
-    '<div class="vlist">'+vs+'</div></div></div>';
+    fbLine(p)+'<div class="vlist">'+vs+'</div></div></div>';
   }
   return '<div class="card'+(ok?'':' off')+'">'+
   '<div class="chead"><div class="cinfo"><div class="cico">'+(p.image?'<img src="'+esc(p.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.innerHTML=\''+icon(p.cat)+'\'">':icon(p.cat))+'</div><div class="cname">'+esc(p.name)+'</div></div><span class="tag">'+esc(p.store)+'</span></div>'+
   (ok?'':'<span class="badge-off">غير متوفر حالياً</span> <button class="notifybtn" data-notify="'+esc(p.id)+'">🔔 أعلمني عند التوفر</button>')+
   ((pop[p.id]>0)?'<span class="badge-off" style="color:var(--amberd);background:var(--amberbg)">🔁 طلبته من قبل</span>':'')+
+  fbLine(p)+
   '<div class="vlist">'+vs+'</div>'+
   '<div class="custom"><input class="amt" type="number" placeholder="'+(p.minAmt>0?'أقل '+p.minAmt:'مبلغ')+'" data-a="'+esc(p.id)+'"'+(ok?'':' disabled')+'><input class="note" placeholder="وصف الطلب" data-n="'+esc(p.id)+'"'+(ok?'':' disabled')+'>'+
   '<button data-custom="'+esc(p.id)+'"'+(ok?'':' disabled')+' title="أضف إلى السلة">🛒</button></div></div>';
@@ -777,6 +813,57 @@ function reserveOrderCode(storeName,items,sub,pl){
     return (r&&r.ok&&r.code)?r.code:null;
   }).catch(function(){if(timer)clearTimeout(timer);return null});
 }
+var FB_URL=SB_URL+"/functions/v1/feedback";
+function stars(n){var s="";for(var i=1;i<=5;i++)s+=i<=n?"★":"☆";return s}
+function openFb(uid){
+  var p=products.filter(function(x){return x.uid===uid})[0];if(!p)return;
+  FBP=p;FBL=[];FBK="review";FBR=0;FBDONE="";fbDraw(true);$("fbm").classList.add("show");
+  sbGet("product_feedback?select=kind,rating,body,author_name,verified,reply,created_at&product_id=eq."+uid+"&status=eq.approved&order=created_at.desc&limit=100")
+    .then(function(r){FBL=Array.isArray(r)?r:[];fbDraw(false)}).catch(function(){FBL=[];fbDraw(false)});
+}
+function fbDraw(loadingNow){
+  if(!FBP)return;
+  var keep=function(id){var e=$(id);return e?e.value:""};
+  var nm=keep("fbName")||cust.n||"",tx=keep("fbBody"),oc=keep("fbOrd"),ph=keep("fbPh");
+  var f=FB[FBP.uid],avg=f&&f.rn?(f.rs/f.rn).toFixed(1):"";
+  var list=FBL.map(function(x){
+    return '<div class="fbi"><div>'+(x.kind==="review"?'<span class="st">'+stars(x.rating)+'</span> ':'<b>❓ سؤال: </b>')+esc(x.body)+'</div>'+
+      '<div class="m">'+esc(x.author_name)+(x.verified?'<span class="vb">✓ اشترى من هذا المتجر</span>':'')+' · '+esc(new Date(x.created_at).toLocaleDateString("ar-EG"))+'</div>'+
+      (x.reply?'<div class="rp">💬 رد المتجر: '+esc(x.reply)+'</div>':'')+'</div>';
+  }).join("");
+  var h='<div class="sh"><b>'+esc(FBP.name)+' — '+esc(FBP.store)+'</b><button type="button" class="x" data-fbclose="1" aria-label="إغلاق">×</button></div>'+
+    (avg?'<div><span class="st" style="color:var(--amberd)">'+stars(Math.round(avg))+'</span> <b>'+avg+'</b> <span class="muted">('+f.rn+' تقييم)</span></div>':'')+
+    '<div>'+(loadingNow?'<div class="note">جارٍ التحميل...</div>':(list||'<div class="note" style="padding:10px 0">لا توجد آراء أو أسئلة منشورة بعد. كن أول من يكتب.</div>'))+'</div>';
+  if(FBDONE){h+='<div class="okmsg">'+esc(FBDONE)+'</div>'}
+  else{
+    h+='<div class="kinds"><button type="button" data-fbkind="review" class="'+(FBK==="review"?'on':'')+'">⭐ رأيي في المنتج</button><button type="button" data-fbkind="question" class="'+(FBK==="question"?'on':'')+'">❓ أريد أن أسأل</button></div>';
+    if(FBK==="review")h+='<div class="stars">'+[1,2,3,4,5].map(function(i){return '<button type="button" data-fbstar="'+i+'" class="'+(i<=FBR?'on':'')+'" aria-label="'+i+' نجوم">★</button>'}).join("")+'</div>';
+    h+='<input id="fbName" maxlength="40" placeholder="اسمك" value="'+esc(nm)+'">'+
+      '<textarea id="fbBody" maxlength="600" placeholder="'+(FBK==="review"?'اكتب رأيك بصدق وباختصار':'اكتب سؤالك عن المنتج')+'">'+esc(tx)+'</textarea>'+
+      '<details style="margin-top:6px"><summary class="note" style="cursor:pointer">اشتريتَ من هذا المتجر؟ أضف رقم طلبك لتظهر علامة «✓ اشترى» (اختياري)</summary>'+
+      '<input id="fbOrd" class="ltr" dir="ltr" maxlength="20" placeholder="رقم الطلب مثل RH-000010" value="'+esc(oc)+'"><input id="fbPh" dir="ltr" inputmode="tel" maxlength="20" placeholder="رقم هاتفك الذي طلبت به" value="'+esc(ph)+'"></details>'+
+      '<input class="hp" id="fbWeb" tabindex="-1" autocomplete="off" aria-hidden="true">'+
+      '<button type="button" class="send" id="fbSend" data-fbsend="1">إرسال</button>'+
+      '<div class="note">لا يُنشر شيء قبل مراجعة المتجر. لا تكتب روابط أو أرقام هواتف في النص.</div>';
+  }
+  $("fbSheet").innerHTML=h;
+}
+function fbSend(){
+  var name=($("fbName").value||"").trim(),body=($("fbBody").value||"").trim();
+  if(name.length<2){alert("اكتب اسمك (حرفان على الأقل).");return}
+  if(FBK==="review"&&!(FBR>=1)){alert("اختر عدد النجوم.");return}
+  if(body.length<3){alert(FBK==="review"?"اكتب رأيك (3 أحرف على الأقل).":"اكتب سؤالك.");return}
+  var btn=$("fbSend");btn.disabled=true;btn.textContent="⏳ جارٍ الإرسال...";
+  cust.n=cust.n||name;
+  fetch(FB_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({product_id:FBP.uid,kind:FBK,rating:FBK==="review"?FBR:null,body:body,name:name,order_code:($("fbOrd").value||"").trim(),phone:($("fbPh").value||"").trim(),website:$("fbWeb").value})})
+    .then(function(r){return r.json().catch(function(){return{}}).then(function(j){return{r:r,j:j}})})
+    .then(function(x){
+      if(x.r.ok&&x.j.ok){FBDONE=FBK==="review"?"شكرًا لرأيك ✓ سيظهر بعد مراجعة المتجر.":"وصل سؤالك ✓ سيظهر مع ردّ المتجر بعد المراجعة.";fbDraw(false);return}
+      btn.disabled=false;btn.textContent="إرسال";
+      var e=x.j&&x.j.error;
+      alert(e==="rate_limited"?"أرسلتَ رسائل كثيرة. حاول بعد قليل.":e==="links"?"لا تضع روابط أو أرقام هواتف في النص.":e==="invalid"?"تعذّر الإرسال. تأكد من الاسم والنص وحدّث الصفحة.":"تعذّر الإرسال الآن، حاول مرة أخرى.");
+    }).catch(function(){btn.disabled=false;btn.textContent="إرسال";alert("تعذّر الاتصال. تأكد من الإنترنت وحاول مرة أخرى.")});
+}
 var PLACE_URL=SB_URL+"/functions/v1/super-handler";
 var DEBUG_ORDERS=false; // مؤقت: يعرض سبب تعذّر الحفظ في النظام الجديد. اجعله false بعد نجاح الاختبار
 function dbgWhy(w){if(DEBUG_ORDERS){try{alert("تشخيص (مؤقت): "+w)}catch(e){}}}
@@ -845,7 +932,13 @@ document.addEventListener("click",function(e){
   var im=e.target.closest&&e.target.closest(".cico img,.vimg img");
   if(im){var u=im.src.replace(/sz=w\d+/,"sz=w1200");$("lb").querySelector("img").src=u;$("lb").classList.add("show");return}
   if(e.target.closest&&e.target.closest("#lb")){$("lb").classList.remove("show");$("lb").querySelector("img").removeAttribute("src");return}
+  if(e.target.id==="fbm"){$("fbm").classList.remove("show");FBP=null;return}
   var t=e.target.closest("button");if(!t)return;var d=t.dataset;
+  if(d.fb!==undefined){openFb(d.fb);return}
+  if(d.fbclose){$("fbm").classList.remove("show");FBP=null;return}
+  if(d.fbkind){FBK=d.fbkind;FBR=0;fbDraw(false);return}
+  if(d.fbstar){FBR=+d.fbstar;fbDraw(false);return}
+  if(d.fbsend){fbSend();return}
   if(d.recvs!==undefined){recvBy[d.recvs]=d.recvm;saveState();drawCart();return}
   if(d.t!==undefined){selType=d.t;selStore="all";render()}
   else if(d.gostore!==undefined){clearTimeout(qTimer);selStore=d.gostore;term="";$("q").value="";$("qx").classList.remove("show");$("storeSuggest").classList.remove("show");render()}
