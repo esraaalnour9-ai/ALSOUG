@@ -195,7 +195,7 @@ function adminFn(payload){
   });
 }
 // ===== الحالة =====
-var STATS=[],ALLV=false,ME={master:false},STORES=[],CUR=null,PROVIDERS=[],PRODUCTS=[],OFFERS=[],ACCTS=[],ORDERS=[],FBS=[],FBF='pending';
+var STATS=[],ALLV=false,ME={master:false},STORES=[],CUR=null,PROVIDERS=[],PRODUCTS=[],OFFERS=[],ACCTS=[],ORDERS=[],FBS=[],FBF='approved';
 var TAB="home",editingId=null,searchQ="",ordersLimit=20;
 var notif={lastSeen:0,muted:false},lastMax=0,audioCtx=null,pollTimer=null;
 try{var _n=localStorage.getItem("sr_adm_notif");if(_n)notif=Object.assign(notif,JSON.parse(_n))}catch(e){}
@@ -320,15 +320,15 @@ function loadStoreData(){
   return Promise.all(jobs).then(render).catch(fail);
 }
 function loadFeedback(){
-  var q="product_feedback?select=*,products(name)&order=created_at.desc&limit=300";
+  var q="product_feedback?select=id,product_id,store_id,kind,rating,body,author_name,verified,status,reply,replied_at,created_at,products(name)&order=created_at.desc&limit=300";
   if(!ME.master){var ids=STORES.map(function(x){return x.id});if(!ids.length){FBS=[];return Promise.resolve()}q+="&store_id=in.("+ids.join(",")+")"}
-  return api("GET",q).then(function(x){FBS=x||[];var b=$("navBadge_fb"),n=FBS.filter(function(f){return f.status==="pending"}).length;if(b){b.hidden=!n;b.textContent=n>99?"99+":n}}).catch(function(){});
+  return api("GET",q).then(function(x){FBS=x||[];var b=$("navBadge_fb"),n=FBS.filter(function(f){return f.status!=="hidden"&&!f.reply&&(f.kind==="question"||f.status==="pending")}).length;if(b){b.hidden=!n;b.textContent=n>99?"99+":n}}).catch(function(){});
 }
 function fbHtml(){
-  var cnt={pending:0,approved:0,hidden:0};FBS.forEach(function(f){cnt[f.status]=(cnt[f.status]||0)+1});
+  var cnt={pending:0,approved:0,hidden:0,noreply:0};FBS.forEach(function(f){cnt[f.status]=(cnt[f.status]||0)+1;if(f.status!=="hidden"&&!f.reply&&f.kind==="question")cnt.noreply++});
   var h='<div class="card"><h2>💬 آراء واستفسارات الزبائن</h2><div class="acts" style="margin:0">'+
-   [["pending","بانتظار المراجعة"],["approved","منشورة"],["hidden","مخفية"]].map(function(t){return '<button class="btn btn-sm '+(FBF===t[0]?'':'btn-line')+'" data-act="fbFilter" data-f="'+t[0]+'">'+t[1]+' ('+(cnt[t[0]]||0)+')</button>'}).join("")+'</div></div>';
-  var L=FBS.filter(function(f){return f.status===FBF});
+   [["approved","منشورة"],["noreply","أسئلة بلا رد"],["hidden","مخفية"]].concat(cnt.pending?[["pending","قديمة بانتظار النشر"]]:[]).map(function(t){return '<button class="btn btn-sm '+(FBF===t[0]?'':'btn-line')+'" data-act="fbFilter" data-f="'+t[0]+'">'+t[1]+' ('+(cnt[t[0]]||0)+')</button>'}).join("")+'</div></div>';
+  var L=FBS.filter(function(f){return FBF==="noreply"?(f.status!=="hidden"&&!f.reply&&f.kind==="question"):f.status===FBF});
   if(!L.length)return h+'<div class="card"><div class="empty">لا توجد عناصر هنا.</div></div>';
   L.forEach(function(f){
     var st=storeById(f.store_id),pn=f.products&&f.products.name?f.products.name:"";
@@ -337,7 +337,7 @@ function fbHtml(){
       '<div class="iname">'+(f.kind==="review"?'<span style="color:#d98a00">'+star(f.rating)+'</span> ':'❓ سؤال: ')+esc(f.body)+'</div>'+
       '<div class="imeta">'+esc(f.author_name)+(f.verified?' · ✓ اشترى':'')+' · '+esc(new Date(f.created_at).toLocaleString("ar-EG"))+'</div>'+
       '<label>ردّ المتجر (يظهر للجميع)</label><textarea id="fbr_'+esc(f.id)+'" maxlength="600">'+esc(f.reply||"")+'</textarea>'+
-      '<div class="acts">'+(f.status!=="approved"?'<button class="btn btn-green btn-sm" data-act="fbSet" data-id="'+esc(f.id)+'" data-s="approved">نشر ✓</button>':'')+
+      '<div class="acts">'+(f.status!=="approved"?'<button class="btn btn-green btn-sm" data-act="fbSet" data-id="'+esc(f.id)+'" data-s="approved">إعادة نشر ✓</button>':'')+
       (f.status!=="hidden"?'<button class="btn btn-line btn-sm" data-act="fbSet" data-id="'+esc(f.id)+'" data-s="hidden">إخفاء</button>':'')+
       '<button class="btn btn-line btn-sm" data-act="fbReply" data-id="'+esc(f.id)+'">حفظ الرد'+(f.status==="pending"?' ونشر':'')+'</button>'+
       '<button class="btn btn-red btn-sm" data-act="fbDel" data-id="'+esc(f.id)+'">حذف</button></div></div>';
@@ -501,7 +501,7 @@ function ordersHtml(){
       '<div class="row" style="margin-top:6px"><b>الإجمالي: '+fmt(o.total)+' جنيه</b>'+
       (!done&&o.delivery_status==='none'&&o.delivery_type!=='own'&&(st&&st.delivery_mode)!=='own'?'<button class="btn btn-sm btn-line" data-act="orderDeliv" data-id="'+esc(o.id)+'" data-v="requested">🚚 اطلب توصيلًا</button>':'')+
       (o.delivery_status==='requested'?'<button class="btn btn-sm btn-line" data-act="orderDeliv" data-id="'+esc(o.id)+'" data-v="none">↩ إلغاء طلب التوصيل</button>':'')+
-      '<button class="btn btn-sm '+(done?'btn-line':'')+'" data-act="orderDone" data-id="'+esc(o.id)+'" data-v="'+(done?"pending":"done")+'">'+(done?'إرجاع للجديد':'✓ تم التسليم')+'</button></div></div>';
+      '<button class="btn btn-sm btn-red" data-act="orderDel" data-id="'+esc(o.id)+'">🗑 حذف</button>'+'<button class="btn btn-sm '+(done?'btn-line':'')+'" data-act="orderDone" data-id="'+esc(o.id)+'" data-v="'+(done?"pending":"done")+'">'+(done?'إرجاع للجديد':'✓ تم التسليم')+'</button></div></div>';
   });
   if(ORDERS.length>=ordersLimit)h+='<button class="btn btn-line" style="width:100%;margin-top:10px" data-act="moreOrders">تحميل المزيد</button>';
   return h+'</div>';
@@ -655,6 +655,7 @@ function adminHtml(){
 
 // ===== الأحداث =====
 var ACT={
+  orderDel:function(d){if(!confirm('حذف هذا الطلب نهائيًا؟ لا يمكن التراجع، وسيختفي من تقارير المبيعات ومن لوحة التوصيل.'))return;api('DELETE','orders?id=eq.'+d.id,null,'return=minimal').then(function(){ORDERS=ORDERS.filter(function(o){return o.id!==d.id});STATS=STATS.filter(function(o){return o.id!==d.id});toast('تم حذف الطلب');render()}).catch(fail)},
   fbFilter:function(d){FBF=d.f;render()},
   fbSet:function(d){api("PATCH","product_feedback?id=eq."+d.id,{status:d.s},"return=minimal").then(function(){return loadFeedback()}).then(function(){toast(d.s==="approved"?"تم النشر ✓":"تم الإخفاء");render()}).catch(fail)},
   fbReply:function(d){var el=$("fbr_"+d.id),v=el?el.value.trim():"";var f=FBS.filter(function(x){return x.id===d.id})[0];
