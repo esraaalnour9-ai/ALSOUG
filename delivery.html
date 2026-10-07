@@ -194,7 +194,7 @@ function adminFn(payload){
 }
 
 // ===== الحالة =====
-var ME={master:false,role:"",uid:""},STAFF=[],STORES=[],ORDERS=[],ZONES=[],TIERS=[];
+var ME={master:false,role:"",uid:""},STAFF=[],STORES=[],ORDERS=[],ZONES=[],TIERS=[],DPAUSE=false,DPMSG="";
 var TAB="orders",FILT="new",pollTimer=null,lastSig="",seenNew=-1,muted=false,audioCtx=null;
 try{muted=localStorage.getItem("sr_dv_mute")==="1"}catch(e){}
 function isDisp(){return ME.master||ME.role==="supervisor"}
@@ -256,8 +256,8 @@ function logout(){
 var ORD_SEL="orders?select=id,code,store_id,customer_name,customer_phone,customer_address,pay_method,total,status,created_at,delivery_type,delivery_status,delivery_fee,delivery_distance_km,delivery_weight_kg,delivery_note,driver_id,delivered_at,order_items(name,unit,qty,price)";
 function boot(){
   $("app").innerHTML='<div class="empty">⏳ جاري التحميل...</div>';
-  Promise.all([api("GET","admins?select=user_id"),api("GET","delivery_staff?select=*&order=created_at"),api("GET","stores?select=id,name,whatsapp&order=name&limit=1000"),api("GET","delivery_zones?select=*&order=sort_order,name&limit=200").catch(function(){return[]}),api("GET","delivery_weight_tiers?select=*&order=over_kg").catch(function(){return[]})]).then(function(r){
-    ZONES=r[3]||[];TIERS=r[4]||[];
+  Promise.all([api("GET","admins?select=user_id"),api("GET","delivery_staff?select=*&order=created_at"),api("GET","stores?select=id,name,whatsapp&order=name&limit=1000"),api("GET","delivery_zones?select=*&order=sort_order,name&limit=200").catch(function(){return[]}),api("GET","delivery_weight_tiers?select=*&order=over_kg").catch(function(){return[]}),api("GET","app_settings?select=key,value").catch(function(){return[]})]).then(function(r){
+    ZONES=r[3]||[];TIERS=r[4]||[];(r[5]||[]).forEach(function(x){if(x.key==="delivery_paused")DPAUSE=x.value==="1";if(x.key==="delivery_paused_msg")DPMSG=x.value});
     ME.master=!!(r[0]&&r[0].length);
     STAFF=r[1]||[];STORES=r[2]||[];
     var mine=STAFF.filter(function(s){return s.user_id===SESS.uid})[0];
@@ -384,7 +384,13 @@ function staffHtml(){
   return h;
 }
 function pricesHtml(){
-  var h='<div class="card"><h2>🗺️ أحياء التوصيل ورسومها ('+ZONES.length+')</h2>';
+  var h='';
+  if(ME.master)h+='<div class="card"><h2>'+(DPAUSE?'⏸️ التوصيل موقوف مؤقتًا':'✅ التوصيل يعمل')+'</h2>'+
+    '<div class="hint" style="margin-bottom:8px">'+(DPAUSE?'عندما يختار الزبون «توصيل الإسراء والمعراج» تظهر له الرسالة أدناه ولا يُرسَل الطلب.':'الزبائن يطلبون توصيل الشركة الآن.')+'</div>'+
+    '<label>رسالة الإيقاف</label><input id="dpMsg" maxlength="300" value="'+esc(DPMSG)+'">'+
+    '<div class="acts"><button class="btn btn-sm" data-act="dpSaveMsg">حفظ الرسالة</button>'+
+    '<button class="btn btn-sm '+(DPAUSE?'btn-green':'btn-red')+'" data-act="dpToggle">'+(DPAUSE?'▶️ تشغيل التوصيل الآن':'⏸️ إيقاف التوصيل مؤقتًا')+'</button></div></div>';
+  h+='<div class="card"><h2>🗺️ أحياء التوصيل ورسومها ('+ZONES.length+')</h2>';
   if(!ZONES.length)h+='<div class="empty">لا توجد أحياء بعد. أضيفي من الأسفل.</div>';
   ZONES.forEach(function(z){
     var id=esc(z.id);
@@ -463,6 +469,21 @@ var ACT={
     if(v==="cancelled"&&!confirm("إلغاء التوصيل لهذا الطلب؟"))return;
     if(v==="delivered"&&!confirm("تأكيد أن الطلب وصل للزبون؟"))return;
     patch(d.id,{delivery_status:v},v==="delivered"?"تم تسجيل التسليم ✓":v==="picked"?"تم تسجيل الاستلام ✓":"أُلغي التوصيل");
+  },
+  dpToggle:function(){
+    var to=!DPAUSE;
+    if(!confirm(to?"إيقاف توصيل الإسراء والمعراج؟ لن يستطيع الزبائن اختياره.":"تشغيل التوصيل الآن؟ سيستطيع الزبائن اختياره."))return;
+    api("PATCH","app_settings?key=eq.delivery_paused",{value:to?"1":"0"},"return=representation").then(function(r){
+      if(!r||!r.length){toast("لم يتم الحفظ",true);return}
+      DPAUSE=to;toast(to?"تم الإيقاف المؤقت ✓":"تم تشغيل التوصيل ✓");render();
+    }).catch(pErr);
+  },
+  dpSaveMsg:function(){
+    var m=$("dpMsg").value.trim();if(m.length<3){toast("اكتبي رسالة واضحة",true);return}
+    api("PATCH","app_settings?key=eq.delivery_paused_msg",{value:m},"return=representation").then(function(r){
+      if(!r||!r.length){toast("لم يتم الحفظ",true);return}
+      DPMSG=m;toast("تم حفظ الرسالة ✓");render();
+    }).catch(pErr);
   },
   zoneAdd:function(){
     var n=$("znNew").value.trim(),f=numv($("zfNew").value);
