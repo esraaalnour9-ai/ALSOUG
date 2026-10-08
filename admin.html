@@ -195,7 +195,7 @@ function adminFn(payload){
   });
 }
 // ===== الحالة =====
-var STATS=[],ALLV=false,ME={master:false},STORES=[],CUR=null,PROVIDERS=[],PRODUCTS=[],OFFERS=[],ACCTS=[],ORDERS=[],FBS=[],FBF='approved';
+var STATS=[],ALLV=false,ME={master:false},STORES=[],CUR=null,PROVIDERS=[],PRODUCTS=[],OFFERS=[],ACCTS=[],ORDERS=[],FBS=[],FBF='approved',BKL=[],BSV=[],BKF='pending';
 var TAB="home",editingId=null,searchQ="",ordersLimit=20;
 var notif={lastSeen:0,muted:false},lastMax=0,audioCtx=null,pollTimer=null;
 try{var _n=localStorage.getItem("sr_adm_notif");if(_n)notif=Object.assign(notif,JSON.parse(_n))}catch(e){}
@@ -311,7 +311,7 @@ function boot(){
 }
 function loadStoreData(){
   var sid=CUR&&CUR.id;
-  var jobs=[loadOrders(),loadStats(),loadFeedback()];
+  var jobs=[loadOrders(),loadStats(),loadFeedback(),loadBookings(),loadBsv()];
   if(sid){
     jobs.push(api("GET","products?select=*&store_id=eq."+sid+"&order=created_at.desc&limit=2000").then(function(x){PRODUCTS=x||[]}));
     jobs.push(api("GET","offers?select=*&or=(store_id.eq."+sid+(ME.master?",store_id.is.null":"")+")&order=created_at.desc&limit=200").then(function(x){OFFERS=x||[]}));
@@ -344,6 +344,55 @@ function fbHtml(){
   });
   return h;
 }
+function lat(v){return String(v||'').replace(/[٠-٩]/g,function(c){return c.charCodeAt(0)-1632})}
+function hasBk(){return STORES.some(function(s){return s.booking_enabled})}
+function loadBookings(){
+  if(!hasBk()){BKL=[];return Promise.resolve()}
+  return api("GET","bookings?select=id,code,store_id,service_name,patient_name,phone,age,gender,reason,booking_date,queue_no,status,created_at&order=booking_date.asc,queue_no.asc&limit=500").then(function(x){BKL=x||[];var b=$("navBadge_bk"),n=BKL.filter(function(f){return f.status==="pending"}).length;if(b){b.hidden=!n;b.textContent=n>99?"99+":n}}).catch(function(){});
+}
+function loadBsv(){
+  if(!CUR||!CUR.booking_enabled){BSV=[];return Promise.resolve()}
+  return api("GET","booking_services?select=*&store_id=eq."+CUR.id+"&order=sort_order,created_at").then(function(x){BSV=x||[]}).catch(function(){BSV=[]});
+}
+var WD=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+function wdBoxes(pre,sel){return '<div class="acts" style="margin:4px 0;flex-wrap:wrap">'+WD.map(function(n,i){return '<label style="display:inline-flex;gap:4px;align-items:center;margin:0 6px 4px 0;font-size:13px"><input type="checkbox" id="'+pre+i+'"'+(sel&&sel.indexOf(i)>-1?' checked':'')+' style="width:auto;margin:0">'+n+'</label>'}).join('')+'</div>'}
+function wdRead(pre){var a=[];for(var i=0;i<7;i++){if($(pre+i)&&$(pre+i).checked)a.push(i)}return(a.length&&a.length<7)?a:null}
+var BK_LBL={pending:"جديدة",confirmed:"مؤكدة",done:"تمّت",cancelled:"ملغاة"};
+function bkHtml(){
+  var cnt={pending:0,confirmed:0,done:0,cancelled:0};BKL.forEach(function(b){cnt[b.status]=(cnt[b.status]||0)+1});
+  var h='<div class="card"><h2>🩺 الحجوزات</h2><div class="acts" style="margin:0">'+
+    ["pending","confirmed","done","cancelled"].map(function(k){return '<button class="btn btn-sm '+(BKF===k?'':'btn-line')+'" data-act="bkFilter" data-f="'+k+'">'+BK_LBL[k]+' ('+(cnt[k]||0)+')</button>'}).join("")+'</div></div>';
+  var L=BKL.filter(function(b){return b.status===BKF});
+  if(!L.length)h+='<div class="card"><div class="empty">لا توجد حجوزات هنا.</div></div>';
+  L.forEach(function(b){
+    var st=storeById(b.store_id),ph=waNum(b.phone);
+    var wmsg=encodeURIComponent("السلام عليكم "+b.patient_name+"، بخصوص حجزك رقم "+b.code+" ("+b.service_name+") بتاريخ "+b.booking_date+" ورقمك في الدور "+b.queue_no+".");
+    h+='<div class="item"><div class="row"><div class="iname">#'+esc(b.code)+(ME.master&&st?' — '+esc(st.name):'')+'</div><span class="badge '+(b.status==="pending"?'red':(b.status==="cancelled"?'':'green'))+'">'+esc(BK_LBL[b.status]||b.status)+'</span></div>'+
+      '<div class="imeta">📅 '+esc(b.booking_date)+' · رقم الدور: <b>'+b.queue_no+'</b> · '+esc(b.service_name)+'</div>'+
+      '<div class="imeta">👤 '+esc(b.patient_name)+' · العمر '+b.age+(b.gender==="male"?' · ذكر':(b.gender==="female"?' · أنثى':''))+'</div>'+
+      '<div class="imeta">📞 <a class="lnk ltr" href="tel:'+esc(ph)+'">'+esc(b.phone)+'</a> · <a class="lnk" target="_blank" rel="noopener" href="https://wa.me/'+esc(ph)+'?text='+wmsg+'">واتساب</a></div>'+
+      (b.reason?'<div class="imeta">📝 '+esc(b.reason)+'</div>':'')+
+      '<div class="acts">'+(b.status==="pending"?'<button class="btn btn-green btn-sm" data-act="bkSet" data-id="'+esc(b.id)+'" data-s="confirmed">✓ تأكيد</button>':'')+
+      (b.status==="confirmed"||b.status==="pending"?'<button class="btn btn-sm" data-act="bkSet" data-id="'+esc(b.id)+'" data-s="done">تمّت الزيارة</button><button class="btn btn-line btn-sm" data-act="bkSet" data-id="'+esc(b.id)+'" data-s="cancelled">إلغاء</button>':'')+
+      (b.status==="cancelled"||b.status==="done"?'<button class="btn btn-line btn-sm" data-act="bkSet" data-id="'+esc(b.id)+'" data-s="pending">إرجاع للجديدة</button>':'')+
+      '<button class="btn btn-red btn-sm" data-act="bkDel" data-id="'+esc(b.id)+'">حذف</button></div></div>';
+  });
+  // خدمات الحجز للمتجر المحدد
+  h+=storeSwitch();
+  if(ALLV)h+='<div class="card"><div class="hint" style="margin:0">اختاري متجرًا من القائمة أعلاه لإدارة خدمات حجزه.</div></div>';
+  else if(CUR&&!CUR.booking_enabled)h+='<div class="card"><div class="hint" style="margin:0">الحجز غير مفعّل لهذا المتجر.</div></div>';
+  else if(CUR){
+    h+='<div class="card"><h2>⚙️ خدمات الحجز — '+esc(CUR.name)+'</h2><div class="hint" style="margin:0 0 8px">«العدد في اليوم» اتركه فارغًا إذا لا تريد حدًّا، وإذا كتبت رقمًا يتوقف الحجز عند اكتمال العدد ليوم واحد.</div>';
+    BSV.forEach(function(v){
+      h+='<div class="item"><div class="iname"'+(v.paused?' style="opacity:.5"':'')+'>'+esc(v.name)+(v.grp?' · '+esc(v.grp):'')+(v.paused?' (متوقفة مؤقتًا)':'')+'</div><div class="imeta">'+(v.weekdays&&v.weekdays.length?v.weekdays.map(function(i){return WD[i]}).join('، '):'كل الأيام')+'</div>'+
+        '<div class="grid3"><div><label>الاسم (قسم أو طبيب)</label><input id="bsn_'+esc(v.id)+'" maxlength="80" value="'+esc(v.name)+'"></div><div><label>المجموعة (مثل: الباطنية)</label><input id="bsg_'+esc(v.id)+'" maxlength="60" value="'+esc(v.grp||"")+'"></div>'+
+        '<div><label>العدد في اليوم</label><input id="bsc_'+esc(v.id)+'" inputmode="numeric" placeholder="بلا حد" value="'+(v.capacity_per_day==null?'':v.capacity_per_day)+'"></div></div><label>أيام العمل (بدون تحديد = كل الأيام)</label>'+wdBoxes('bsw_'+v.id+'_',v.weekdays)+
+        '<div class="acts"><button class="btn btn-sm" data-act="bsvSave" data-id="'+esc(v.id)+'">حفظ</button><button class="btn btn-line btn-sm" data-act="bsvToggle" data-id="'+esc(v.id)+'">'+(v.paused?'استئناف الخدمة':'إيقاف مؤقت')+'</button><button class="btn btn-red btn-sm" data-act="bsvDel" data-id="'+esc(v.id)+'">حذف</button></div></div>';
+    });
+    h+='<label>خدمة جديدة (مثل: كشف أسنان)</label><input id="bsNew" maxlength="80"><label>المجموعة — اختياري (مثل: الباطنية، الجراحة، الأطفال)</label><input id="bsNewGrp" maxlength="60"><label>العدد في اليوم — اختياري</label><input id="bsNewCap" inputmode="numeric" placeholder="بلا حد"><label>أيام العمل (بدون تحديد = كل الأيام)</label>'+wdBoxes('bswn_',null)+'<button class="btn" data-act="bsvAdd">إضافة الخدمة</button></div>';
+  }
+  return h;
+}
 function loadStats(){
   var since=new Date(Date.now()-35*864e5).toISOString();
   return api("GET","orders?select=id,store_id,total,status,created_at,order_items(product_id,name,qty,price)&created_at=gte."+since+"&order=created_at.desc&limit=3000").then(function(x){STATS=x||[]});
@@ -360,7 +409,7 @@ function loadOrders(){
   });
 }
 var pollN=0;
-function startPolling(){clearInterval(pollTimer);pollTimer=setInterval(function(){if(document.hidden)return;pollN++;var p=(pollN%3===0?loadFeedback():Promise.resolve()).then(function(){return(pollN%6===0)?Promise.all([loadOrders(),loadStats()]):loadOrders()});p.then(function(){if(TAB==="home"||TAB==="orders"||TAB==="fb")render()}).catch(function(){})},20000)}
+function startPolling(){clearInterval(pollTimer);pollTimer=setInterval(function(){if(document.hidden)return;pollN++;var p=(pollN%3===0?Promise.all([loadFeedback(),loadBookings()]):Promise.resolve()).then(function(){return(pollN%6===0)?Promise.all([loadOrders(),loadStats()]):loadOrders()});p.then(function(){if(TAB==="home"||TAB==="orders"||TAB==="fb"||TAB==="bk")render()}).catch(function(){})},20000)}
 function unseen(){return ORDERS.filter(function(o){return +new Date(o.created_at)>notif.lastSeen}).length}
 function badge(){
   var n=unseen(),b=$("navBadge_orders");
@@ -385,9 +434,10 @@ document.addEventListener("click",function(){try{audioCtx=audioCtx||new (window.
 // ===== التبويبات =====
 function buildNav(){
   var tabs=[["home","🏠","الرئيسية"],["orders","🧾","الطلبات"],["products","🛍️","الأصناف"],["offers","🏷️","العروض"],["fb","💬","الآراء"],["settings","⚙️","الإعدادات"]];
+  if(hasBk()){tabs.splice(5,0,["bk","🩺","الحجوزات"])}
   if(ME.master)tabs.push(["admin","🏬","الإدارة"]);
   $("bottomNav").innerHTML=tabs.map(function(t){
-    return '<button class="navbtn" data-tab="'+t[0]+'"><span class="navicon"><span style="font-size:19px">'+t[1]+'</span>'+(t[0]==="orders"?'<span class="navbadge" id="navBadge_orders" hidden>0</span>':'')+(t[0]==="fb"?'<span class="navbadge" id="navBadge_fb" hidden>0</span>':'')+'</span><span>'+t[2]+'</span></button>';
+    return '<button class="navbtn" data-tab="'+t[0]+'"><span class="navicon"><span style="font-size:19px">'+t[1]+'</span>'+(t[0]==="orders"?'<span class="navbadge" id="navBadge_orders" hidden>0</span>':'')+(t[0]==="fb"?'<span class="navbadge" id="navBadge_fb" hidden>0</span>':'')+(t[0]==="bk"?'<span class="navbadge" id="navBadge_bk" hidden>0</span>':'')+'</span><span>'+t[2]+'</span></button>';
   }).join("");
 }
 function setTab(t){
@@ -415,6 +465,7 @@ function render(){
   else if(TAB==="offers")h+=storeSwitch()+offersHtml();
   else if(TAB==="settings")h+=storeSwitch()+settingsHtml();
   else if(TAB==="fb")h+=fbHtml();
+  else if(TAB==="bk")h+=bkHtml();
   else if(TAB==="admin")h=adminHtml();
   var keep=document.activeElement&&document.activeElement.id==="searchBox";
   $("app").innerHTML=h;
@@ -575,7 +626,7 @@ function offersHtml(){
 // ===== الإعدادات + حسابات الدفع =====
 function settingsHtml(){
   if(!CUR)return '<div class="card"><div class="empty">لا يوجد متجر.</div></div>';
-  var h='<div class="card"><h2>بيانات المتجر</h2>'+
+  var h=(ME.master?'<div class="card"><h2>🩺 الحجز بموعد</h2><div class="hint" style="margin:0 0 8px">للعيادات والخدمات التي تعمل بحجز مواعيد بدل السلة.</div><button class="btn '+(CUR.booking_enabled?'btn-red':'btn-green')+'" data-act="bkEnable">'+(CUR.booking_enabled?'إيقاف الحجز لهذا المتجر':'تفعيل الحجز لهذا المتجر')+'</button></div>':'')+'<div class="card"><h2>بيانات المتجر</h2>'+
     '<label>اسم صاحب المتجر</label><input id="sOwner" value="'+esc(CUR.owner_name||"")+'">'+
     '<label>نوع المحل (القسم)</label>'+secSelect("sSec",CUR.section||"")+
     '<label>رقم واتساب (بالصيغة الدولية، مثل 249912345678)</label><input id="sWa" class="ltr" inputmode="numeric" value="'+esc(CUR.whatsapp||"")+'">'+
@@ -616,7 +667,8 @@ function settingsHtml(){
 
 // ===== الإدارة العامة (المدير فقط) =====
 function adminHtml(){
-  var h='<div class="card"><h2>➕ إضافة متجر جديد</h2>'+
+  var h='<div class="card"><h2>💾 نسخة احتياطية</h2><div class="hint" style="margin:0 0 8px">تنزيل ملف فيه كل بيانات السوق (المتاجر والأصناف والطلبات والآراء ومناطق التوصيل). احتفظي به في مكان آمن، ويُفضَّل مرة كل أسبوع.</div><button class="btn" id="bkBtn" data-act="backup">⬇️ تنزيل نسخة احتياطية الآن</button><div class="muted" id="bkMsg" style="margin-top:6px"></div></div>'+
+    '<div class="card"><h2>➕ إضافة متجر جديد</h2>'+
     '<label>اسم المتجر</label><input id="nsName" maxlength="80">'+
     '<label>نوع المحل (القسم)</label>'+secSelect("nsSec","")+
     '<label>اسم صاحب المتجر</label><input id="nsOwner">'+
@@ -655,6 +707,35 @@ function adminHtml(){
 
 // ===== الأحداث =====
 var ACT={
+  bkFilter:function(d){BKF=d.f;render()},
+  bkSet:function(d){api("PATCH","bookings?id=eq."+d.id,{status:d.s},"return=minimal").then(function(){return loadBookings()}).then(function(){toast("تم التحديث ✓");render()}).catch(fail)},
+  bkDel:function(d){if(!confirm("حذف هذا الحجز نهائيًا؟"))return;api("DELETE","bookings?id=eq."+d.id,null,"return=minimal").then(function(){return loadBookings()}).then(function(){toast("تم الحذف");render()}).catch(fail)},
+  bkEnable:function(){var v=!CUR.booking_enabled;api("PATCH","stores?id=eq."+CUR.id,{booking_enabled:v},"return=minimal").then(function(){CUR.booking_enabled=v;buildNav();return Promise.all([loadBookings(),loadBsv()])}).then(function(){toast(v?"تم تفعيل الحجز ✓ أضيفي الخدمات من تبويب الحجوزات":"تم إيقاف الحجز");render()}).catch(fail)},
+  bsvAdd:function(){var n=($("bsNew").value||"").trim(),c=parseInt(lat($("bsNewCap").value),10);if(!n){toast("اكتب اسم الخدمة",true);return}
+    api("POST","booking_services",{store_id:CUR.id,name:n,capacity_per_day:c>0?c:null,grp:($("bsNewGrp").value||"").trim(),weekdays:wdRead("bswn_")},"return=minimal").then(function(){return loadBsv()}).then(function(){toast("تمت الإضافة ✓");render()}).catch(fail)},
+  bsvSave:function(d){var n=($("bsn_"+d.id).value||"").trim(),c=parseInt(lat($("bsc_"+d.id).value),10);if(!n){toast("اكتب اسم الخدمة",true);return}
+    api("PATCH","booking_services?id=eq."+d.id,{name:n,capacity_per_day:c>0?c:null,grp:($("bsg_"+d.id).value||"").trim(),weekdays:wdRead("bsw_"+d.id+"_")},"return=minimal").then(function(){return loadBsv()}).then(function(){toast("تم الحفظ ✓");render()}).catch(fail)},
+  bsvToggle:function(d){var v=BSV.filter(function(x){return x.id===d.id})[0];api("PATCH","booking_services?id=eq."+d.id,{paused:!v.paused},"return=minimal").then(function(){return loadBsv()}).then(function(){render()}).catch(fail)},
+  bsvDel:function(d){if(!confirm("حذف الخدمة؟ الحجوزات السابقة تبقى محفوظة."))return;api("DELETE","booking_services?id=eq."+d.id,null,"return=minimal").then(function(){return loadBsv()}).then(function(){toast("تم الحذف");render()}).catch(fail)},
+  backup:function(){
+    var T=["stores","products","offers","orders","order_items","store_payment_accounts","store_members","store_sections","payment_providers","admins","delivery_staff","delivery_zones","delivery_weight_tiers","app_settings","product_feedback"];
+    var COLS={product_feedback:"id,product_id,store_id,kind,rating,body,author_name,verified,status,reply,replied_at,created_at"};
+    var out={app:"ALSOUG",taken_at:new Date().toISOString(),tables:{},errors:{}},msg=$("bkMsg"),btn=$("bkBtn");
+    btn.disabled=true;
+    function page(t,from,acc){
+      var q=t+"?select="+(COLS[t]||"*")+"&limit=1000&offset="+from;
+      return api("GET",q).then(function(x){x=x||[];acc=acc.concat(x);return x.length===1000?page(t,from+1000,acc):acc});
+    }
+    var p=Promise.resolve();
+    T.forEach(function(t){p=p.then(function(){msg.textContent="⏳ "+t+" ...";return page(t,0,[]).then(function(r){out.tables[t]=r}).catch(function(e){out.errors[t]=String(e&&e.message||e)})})});
+    p.then(function(){
+      var blob=new Blob([JSON.stringify(out,null,1)],{type:"application/json"});
+      var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="alsoug-backup-"+new Date().toISOString().slice(0,10)+".json";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},4000);
+      var n=Object.keys(out.tables).map(function(k){return k+": "+out.tables[k].length}).join(" · "),er=Object.keys(out.errors);
+      msg.textContent="✓ تم التنزيل. "+n+(er.length?" — تعذّر: "+er.join(", "):"");
+      btn.disabled=false;
+    });
+  },
   orderDel:function(d){if(!confirm('حذف هذا الطلب نهائيًا؟ لا يمكن التراجع، وسيختفي من تقارير المبيعات ومن لوحة التوصيل.'))return;api('DELETE','orders?id=eq.'+d.id,null,'return=minimal').then(function(){ORDERS=ORDERS.filter(function(o){return o.id!==d.id});STATS=STATS.filter(function(o){return o.id!==d.id});toast('تم حذف الطلب');render()}).catch(fail)},
   fbFilter:function(d){FBF=d.f;render()},
   fbSet:function(d){api("PATCH","product_feedback?id=eq."+d.id,{status:d.s},"return=minimal").then(function(){return loadFeedback()}).then(function(){toast(d.s==="approved"?"تم النشر ✓":"تم الإخفاء");render()}).catch(fail)},
