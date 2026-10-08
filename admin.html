@@ -212,6 +212,7 @@ function imgUrl(u){
   return m?"https://drive.google.com/thumbnail?id="+m[1]+"&sz=w200":u;
 }
 function thumb(u,cls,ph){var s=imgUrl(u);return '<div class="'+(cls||"thumb")+'">'+(s?'<img src="'+esc(s)+'" alt="" referrerpolicy="no-referrer" onerror="this.parentElement.textContent=\''+(ph||"📦")+'\'">':(ph||"📦"))+'</div>'}
+function prc(x){var n=parseInt(lat(x),10);return n>0?n:null}
 var DEPTS=["الأسنان","الباطنية","الجراحة","الأطفال","النساء والولادة","أطباء عموميون","المختبر","الأشعة"];
 function deptSelect(id,cur){
   var l=DEPTS.slice();BSV.forEach(function(v){if(v.grp&&l.indexOf(v.grp)<0)l.push(v.grp)});
@@ -395,11 +396,11 @@ function bkHtml(){
     h+='<div class="card"><h2>⚙️ خدمات الحجز — '+esc(CUR.name)+'</h2><div class="hint" style="margin:0 0 8px">«العدد في اليوم» اتركه فارغًا إذا لا تريد حدًّا، وإذا كتبت رقمًا يتوقف الحجز عند اكتمال العدد ليوم واحد.</div>';
     BSV.forEach(function(v){
       h+='<div class="item"><div class="iname"'+(v.paused?' style="opacity:.5"':'')+'>'+esc(v.name)+(v.grp?' · '+esc(v.grp):'')+(v.paused?' (متوقفة مؤقتًا)':'')+'</div><div class="imeta">'+(v.weekdays&&v.weekdays.length?v.weekdays.map(function(i){return WD[i]}).join('، '):'كل الأيام')+'</div>'+
-        '<div class="grid3"><div><label>الاسم (قسم أو طبيب)</label><input id="bsn_'+esc(v.id)+'" maxlength="80" value="'+esc(v.name)+'"></div><div><label>القسم</label>'+deptSelect('bsg_'+v.id,v.grp||"")+'</div>'+
-        '<div><label>العدد في اليوم</label><input id="bsc_'+esc(v.id)+'" inputmode="numeric" placeholder="بلا حد" value="'+(v.capacity_per_day==null?'':v.capacity_per_day)+'"></div></div><label>أيام العمل (بدون تحديد = كل الأيام)</label>'+wdBoxes('bsw_'+v.id+'_',v.weekdays)+
+        '<div class="grid3" style="grid-template-columns:1fr 1fr"><div><label>الاسم (قسم أو طبيب)</label><input id="bsn_'+esc(v.id)+'" maxlength="80" value="'+esc(v.name)+'"></div><div><label>القسم</label>'+deptSelect('bsg_'+v.id,v.grp||"")+'</div>'+
+        '<div><label>العدد في اليوم</label><input id="bsc_'+esc(v.id)+'" inputmode="numeric" placeholder="بلا حد" value="'+(v.capacity_per_day==null?'':v.capacity_per_day)+'"></div><div><label>قيمة الحجز (اختياري)</label><input id="bsp_'+esc(v.id)+'" inputmode="numeric" placeholder="بلا قيمة" value="'+(v.price==null?'':v.price)+'"></div></div><label>أيام العمل (بدون تحديد = كل الأيام)</label>'+wdBoxes('bsw_'+v.id+'_',v.weekdays)+
         '<div class="acts"><button class="btn btn-sm" data-act="bsvSave" data-id="'+esc(v.id)+'">حفظ</button><button class="btn btn-line btn-sm" data-act="bsvToggle" data-id="'+esc(v.id)+'">'+(v.paused?'استئناف الخدمة':'إيقاف مؤقت')+'</button><button class="btn btn-red btn-sm" data-act="bsvDel" data-id="'+esc(v.id)+'">حذف</button></div></div>';
     });
-    h+='<label>الاسم (الخدمة أو الطبيب)</label><input id="bsNew" maxlength="80"><label>القسم</label>'+deptSelect('bsNewGrp',"")+'<label>العدد في اليوم — اختياري</label><input id="bsNewCap" inputmode="numeric" placeholder="بلا حد"><label>أيام العمل (بدون تحديد = كل الأيام)</label>'+wdBoxes('bswn_',null)+'<button class="btn" data-act="bsvAdd">إضافة الخدمة</button></div>';
+    h+='<label>الاسم (الخدمة أو الطبيب)</label><input id="bsNew" maxlength="80"><label>القسم</label>'+deptSelect('bsNewGrp',"")+'<label>قيمة الحجز — اختياري</label><input id="bsNewPrice" inputmode="numeric" placeholder="بلا قيمة"><label>العدد في اليوم — اختياري</label><input id="bsNewCap" inputmode="numeric" placeholder="بلا حد"><label>أيام العمل (بدون تحديد = كل الأيام)</label>'+wdBoxes('bswn_',null)+'<button class="btn" data-act="bsvAdd">إضافة الخدمة</button></div>';
   }
   return h;
 }
@@ -725,9 +726,9 @@ var ACT={
   bkDel:function(d){if(!confirm("حذف هذا الحجز نهائيًا؟"))return;api("DELETE","bookings?id=eq."+d.id,null,"return=minimal").then(function(){return loadBookings()}).then(function(){toast("تم الحذف");render()}).catch(fail)},
   bkEnable:function(){var v=!CUR.booking_enabled;api("PATCH","stores?id=eq."+CUR.id,{booking_enabled:v},"return=minimal").then(function(){CUR.booking_enabled=v;buildNav();return Promise.all([loadBookings(),loadBsv()])}).then(function(){toast(v?"تم تفعيل الحجز ✓ أضيفي الخدمات من تبويب الحجوزات":"تم إيقاف الحجز");render()}).catch(fail)},
   bsvAdd:function(){var n=($("bsNew").value||"").trim(),c=parseInt(lat($("bsNewCap").value),10);if(!n){toast("اكتب اسم الخدمة",true);return}
-    api("POST","booking_services",{store_id:CUR.id,name:n,capacity_per_day:c>0?c:null,grp:($("bsNewGrp").value||"").trim(),weekdays:wdRead("bswn_")},"return=minimal").then(function(){return loadBsv()}).then(function(){toast("تمت الإضافة ✓");render()}).catch(fail)},
+    api("POST","booking_services",{store_id:CUR.id,name:n,price:prc($("bsNewPrice").value),capacity_per_day:c>0?c:null,grp:($("bsNewGrp").value||"").trim(),weekdays:wdRead("bswn_")},"return=minimal").then(function(){return loadBsv()}).then(function(){toast("تمت الإضافة ✓");render()}).catch(fail)},
   bsvSave:function(d){var n=($("bsn_"+d.id).value||"").trim(),c=parseInt(lat($("bsc_"+d.id).value),10);if(!n){toast("اكتب اسم الخدمة",true);return}
-    api("PATCH","booking_services?id=eq."+d.id,{name:n,capacity_per_day:c>0?c:null,grp:($("bsg_"+d.id).value||"").trim(),weekdays:wdRead("bsw_"+d.id+"_")},"return=minimal").then(function(){return loadBsv()}).then(function(){toast("تم الحفظ ✓");render()}).catch(fail)},
+    api("PATCH","booking_services?id=eq."+d.id,{name:n,price:prc($("bsp_"+d.id).value),capacity_per_day:c>0?c:null,grp:($("bsg_"+d.id).value||"").trim(),weekdays:wdRead("bsw_"+d.id+"_")},"return=minimal").then(function(){return loadBsv()}).then(function(){toast("تم الحفظ ✓");render()}).catch(fail)},
   bsvToggle:function(d){var v=BSV.filter(function(x){return x.id===d.id})[0];api("PATCH","booking_services?id=eq."+d.id,{paused:!v.paused},"return=minimal").then(function(){return loadBsv()}).then(function(){render()}).catch(fail)},
   bsvDel:function(d){if(!confirm("حذف الخدمة؟ الحجوزات السابقة تبقى محفوظة."))return;api("DELETE","booking_services?id=eq."+d.id,null,"return=minimal").then(function(){return loadBsv()}).then(function(){toast("تم الحذف");render()}).catch(fail)},
   backup:function(){

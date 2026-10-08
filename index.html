@@ -355,7 +355,7 @@ function loadSupabase(){
     sbGet("delivery_zones?select=name,fee&order=sort_order,name&limit=100").catch(function(){return []}),
     sbGet("app_settings?select=key,value&limit=20").catch(function(){return []}),
     sbGet("product_feedback?select=product_id,kind,rating&limit=5000").catch(function(){return []}),
-    sbGet("booking_services?select=id,store_id,name,grp,weekdays,paused&order=sort_order,name&limit=200").catch(function(){return sbGet("booking_services?select=id,store_id,name,grp,weekdays&order=sort_order,name&limit=200")}).catch(function(){return sbGet("booking_services?select=id,store_id,name&order=sort_order,name&limit=200")}).catch(function(){return []})
+    sbGet("booking_services?select=id,store_id,name,grp,weekdays,paused,price&order=sort_order,name&limit=200").catch(function(){return sbGet("booking_services?select=id,store_id,name,grp,weekdays,paused&order=sort_order,name&limit=200")}).catch(function(){return sbGet("booking_services?select=id,store_id,name,grp,weekdays&order=sort_order,name&limit=200")}).catch(function(){return sbGet("booking_services?select=id,store_id,name&order=sort_order,name&limit=200")}).catch(function(){return []})
   ]).then(function(r){
     BKS=Array.isArray(r[8])?r[8]:[];
     FB={};(Array.isArray(r[7])?r[7]:[]).forEach(function(x){var f=FB[x.product_id]||(FB[x.product_id]={rn:0,rs:0,q:0});if(x.kind==="review"){f.rn++;f.rs+=Number(x.rating)||0}else f.q++});
@@ -923,7 +923,7 @@ function bkDraw(){
       (BKP.phone?'<a class="wa" target="_blank" rel="noopener" href="https://wa.me/'+esc(BKP.phone)+'?text='+encodeURIComponent(msg)+'">أرسل تفاصيل الحجز للمستوصف على واتساب</a>':'');
   }else{
     var grps=[];sv.forEach(function(v){var g=v.grp||"";if(grps.indexOf(g)<0)grps.push(g)});
-    h+='<h4>القسم / الطبيب</h4>'+grps.map(function(g){return (g?'<div class="note" style="margin:6px 0 0"><b>'+esc(g)+'</b></div>':'')+'<div class="svcs">'+sv.filter(function(v){return (v.grp||"")===g}).map(function(v){return v.paused?'<button type="button" disabled class="off">'+esc(v.name)+' — متوقفة مؤقتًا</button>':'<button type="button" data-bksvc="'+esc(v.id)+'" class="'+(BKSV===v.id?'on':'')+'">'+esc(v.name)+'</button>'}).join("")+'</div>'}).join("");
+    h+='<h4>القسم / الطبيب</h4>'+grps.map(function(g){return (g?'<div class="note" style="margin:6px 0 0"><b>'+esc(g)+'</b></div>':'')+'<div class="svcs">'+sv.filter(function(v){return (v.grp||"")===g}).map(function(v){return v.paused?'<button type="button" disabled class="off">'+esc(v.name)+' — متوقفة مؤقتًا</button>':'<button type="button" data-bksvc="'+esc(v.id)+'" class="'+(BKSV===v.id?'on':'')+'">'+esc(v.name)+(v.price>0?' — '+Number(v.price).toLocaleString()+' ج.س':'')+'</button>'}).join("")+'</div>'}).join("");
     var cur=sv.filter(function(v){return v.id===BKSV})[0];
     h+='<h4>اليوم'+(cur&&cur.weekdays&&cur.weekdays.length?' <span class="note">(أيام عمل هذا القسم فقط)</span>':'')+'</h4><div class="days">'+[0,1,2,3,4,5,6].filter(function(o){return bkOk(cur,khDay(o))}).map(function(o){var d=khDay(o);return '<button type="button" data-bkday="'+d+'" class="'+(BKD===d?'on':'')+'">'+esc(khLabel(o))+'</button>'}).join("")+'</div>';
     h+='<input id="bkName" maxlength="60" placeholder="اسم المريض" value="'+esc(nm)+'">'+
