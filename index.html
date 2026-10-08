@@ -649,7 +649,8 @@ function loadState(){
 }
 function shareStore(name){
   var url=location.origin+location.pathname+"?store="+encodeURIComponent(name);
-  var msg="🛍️ تسوّق من "+name+" عبر سوق الرهد:\n"+url;
+  var isBk=stores.some(function(x){return x.name===name&&x.bk});
+  var msg=isBk?("🩺 احجز موعدك في "+name+" عبر سوق الرهد:\n"+url):("🛍️ تسوّق من "+name+" عبر سوق الرهد:\n"+url);
   window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
 }
 function storeLabel(s){return s.name.length>16?s.name.slice(0,15)+"…":s.name}

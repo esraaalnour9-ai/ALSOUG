@@ -212,6 +212,11 @@ function imgUrl(u){
   return m?"https://drive.google.com/thumbnail?id="+m[1]+"&sz=w200":u;
 }
 function thumb(u,cls,ph){var s=imgUrl(u);return '<div class="'+(cls||"thumb")+'">'+(s?'<img src="'+esc(s)+'" alt="" referrerpolicy="no-referrer" onerror="this.parentElement.textContent=\''+(ph||"📦")+'\'">':(ph||"📦"))+'</div>'}
+var DEPTS=["الأسنان","الباطنية","الجراحة","الأطفال","النساء والولادة","أطباء عموميون","المختبر","الأشعة"];
+function deptSelect(id,cur){
+  var l=DEPTS.slice();BSV.forEach(function(v){if(v.grp&&l.indexOf(v.grp)<0)l.push(v.grp)});
+  if(cur&&l.indexOf(cur)<0)l.push(cur);
+  return '<select id="'+id+'" data-dept="1"><option value="">— اختاري القسم —</option>'+l.map(function(x){return '<option'+(x===cur?' selected':'')+'>'+esc(x)+'</option>'}).join("")+'<option value="__new">➕ قسم جديد…</option></select>'}
 function storeById(id){return STORES.filter(function(s){return s.id===id})[0]}
 
 // ===== رفع الصور (من المعرض أو الكاميرا) إلى Supabase Storage =====
@@ -385,11 +390,11 @@ function bkHtml(){
     h+='<div class="card"><h2>⚙️ خدمات الحجز — '+esc(CUR.name)+'</h2><div class="hint" style="margin:0 0 8px">«العدد في اليوم» اتركه فارغًا إذا لا تريد حدًّا، وإذا كتبت رقمًا يتوقف الحجز عند اكتمال العدد ليوم واحد.</div>';
     BSV.forEach(function(v){
       h+='<div class="item"><div class="iname"'+(v.paused?' style="opacity:.5"':'')+'>'+esc(v.name)+(v.grp?' · '+esc(v.grp):'')+(v.paused?' (متوقفة مؤقتًا)':'')+'</div><div class="imeta">'+(v.weekdays&&v.weekdays.length?v.weekdays.map(function(i){return WD[i]}).join('، '):'كل الأيام')+'</div>'+
-        '<div class="grid3"><div><label>الاسم (قسم أو طبيب)</label><input id="bsn_'+esc(v.id)+'" maxlength="80" value="'+esc(v.name)+'"></div><div><label>المجموعة (مثل: الباطنية)</label><input id="bsg_'+esc(v.id)+'" maxlength="60" value="'+esc(v.grp||"")+'"></div>'+
+        '<div class="grid3"><div><label>الاسم (قسم أو طبيب)</label><input id="bsn_'+esc(v.id)+'" maxlength="80" value="'+esc(v.name)+'"></div><div><label>القسم</label>'+deptSelect('bsg_'+v.id,v.grp||"")+'</div>'+
         '<div><label>العدد في اليوم</label><input id="bsc_'+esc(v.id)+'" inputmode="numeric" placeholder="بلا حد" value="'+(v.capacity_per_day==null?'':v.capacity_per_day)+'"></div></div><label>أيام العمل (بدون تحديد = كل الأيام)</label>'+wdBoxes('bsw_'+v.id+'_',v.weekdays)+
         '<div class="acts"><button class="btn btn-sm" data-act="bsvSave" data-id="'+esc(v.id)+'">حفظ</button><button class="btn btn-line btn-sm" data-act="bsvToggle" data-id="'+esc(v.id)+'">'+(v.paused?'استئناف الخدمة':'إيقاف مؤقت')+'</button><button class="btn btn-red btn-sm" data-act="bsvDel" data-id="'+esc(v.id)+'">حذف</button></div></div>';
     });
-    h+='<label>خدمة جديدة (مثل: كشف أسنان)</label><input id="bsNew" maxlength="80"><label>المجموعة — اختياري (مثل: الباطنية، الجراحة، الأطفال)</label><input id="bsNewGrp" maxlength="60"><label>العدد في اليوم — اختياري</label><input id="bsNewCap" inputmode="numeric" placeholder="بلا حد"><label>أيام العمل (بدون تحديد = كل الأيام)</label>'+wdBoxes('bswn_',null)+'<button class="btn" data-act="bsvAdd">إضافة الخدمة</button></div>';
+    h+='<label>الاسم (الخدمة أو الطبيب)</label><input id="bsNew" maxlength="80"><label>القسم</label>'+deptSelect('bsNewGrp',"")+'<label>العدد في اليوم — اختياري</label><input id="bsNewCap" inputmode="numeric" placeholder="بلا حد"><label>أيام العمل (بدون تحديد = كل الأيام)</label>'+wdBoxes('bswn_',null)+'<button class="btn" data-act="bsvAdd">إضافة الخدمة</button></div>';
   }
   return h;
 }
@@ -692,7 +697,8 @@ function adminHtml(){
     h+='<div class="item"><div class="row"><div class="iname">'+esc(s.name)+'</div><span class="badge '+(s.active?'green':'red')+'">'+(s.active?'ظاهر':'مخفي')+'</span></div>'+
       '<div class="acts"><button class="btn btn-line btn-sm" data-act="openStore" data-id="'+esc(s.id)+'">إدارة</button>'+
       '<button class="btn btn-line btn-sm" data-act="renameStore" data-id="'+esc(s.id)+'">تغيير الاسم</button>'+
-      '<button class="btn btn-sm '+(s.active?'btn-red':'btn-green')+'" data-act="toggleStore" data-id="'+esc(s.id)+'">'+(s.active?'إخفاء':'إظهار')+'</button></div></div>';
+      '<button class="btn btn-sm '+(s.active?'btn-red':'btn-green')+'" data-act="toggleStore" data-id="'+esc(s.id)+'">'+(s.active?'إخفاء':'إظهار')+'</button>'+
+      '<button class="btn btn-sm btn-red" data-act="delStore" data-id="'+esc(s.id)+'">🗑 حذف</button></div></div>';
   });
   h+='</div>';
   h+='<div class="card"><h2>💳 وسائل الدفع (القائمة التي يختار منها التجار)</h2>'+
@@ -836,6 +842,15 @@ var ACT={
   backAll:function(){ALLV=true;setTab("home")},
   openStore:function(d){ALLV=false;CUR=storeById(d.id);try{localStorage.setItem("sr_adm_store",CUR.id)}catch(e){}loadStoreData().then(function(){setTab("products")})},
   renameStore:function(d){var s=storeById(d.id);var n=prompt("الاسم الجديد للمتجر:",s.name);if(!n||!n.trim()||n.trim()===s.name)return;api("PATCH","stores?id=eq."+d.id,{name:n.trim()},"return=representation").then(function(r){if(r&&r[0])Object.assign(s,r[0]);toast("تم التغيير ✓");render()}).catch(fail)},
+  delStore:function(d){var s=storeById(d.id);if(!s)return;
+    if(!confirm("حذف متجر «"+s.name+"» نهائيًا مع أصنافه وعروضه وآرائه وحجوزاته؟ لا يمكن التراجع."))return;
+    if(!confirm("تأكيد أخير: حذف «"+s.name+"»؟"))return;
+    api("DELETE","stores?id=eq."+d.id,null,"return=representation").then(function(r){
+      if(!r||!r.length){toast("لم يُحذف المتجر. جرّبي الإخفاء بدل الحذف",true);return}
+      STORES=STORES.filter(function(x){return x.id!==d.id});
+      if(CUR&&CUR.id===d.id)CUR=STORES[0]||null;
+      buildNav();toast("تم حذف المتجر");render()
+    }).catch(function(e){toast("لا يمكن حذف متجر عليه طلبات سابقة. استخدمي الإخفاء",true)})},
   toggleStore:function(d){var s=storeById(d.id);api("PATCH","stores?id=eq."+d.id,{active:!s.active},"return=minimal").then(function(){s.active=!s.active;render()}).catch(fail)},
   addProv:function(){var n=$("pvName").value.trim();if(!n){toast("اكتب اسم الوسيلة",true);return}api("POST","payment_providers",{name:n,sort_order:PROVIDERS.length+1},"return=representation").then(function(r){if(r&&r[0])PROVIDERS.push(r[0]);toast("تمت الإضافة ✓");render()}).catch(fail)},
   renameProv:function(d){
@@ -854,6 +869,8 @@ document.addEventListener("click",function(e){
 });
 document.addEventListener("change",function(e){
   var t=e.target;
+  if(t&&t.dataset&&t.dataset.dept&&t.value==="__new"){var nn=(prompt("اسم القسم الجديد:")||"").trim().slice(0,60);
+    if(nn){var o=document.createElement("option");o.textContent=nn;t.insertBefore(o,t.lastChild);t.value=nn}else t.value="";return}
   if(t&&t.dataset&&t.dataset.upl&&t.files&&t.files[0]){uploadImage(t.files[0],t.dataset.upl,t.dataset.pv);return}
   if(e.target.id==="storeSel"){
     if(e.target.value==="__all"){ALLV=true;editingId=null;render();return}
