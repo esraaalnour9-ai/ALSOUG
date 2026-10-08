@@ -302,6 +302,7 @@ function boot(){
     var ids=(r[1]||[]).map(function(x){return x.store_id});
     STORES=ME.master?r[2]:r[2].filter(function(s){return ids.indexOf(s.id)>-1});
     PROVIDERS=r[3]||[];
+    if(ME.master)STORES.forEach(function(st){if(!st.booking_enabled&&isClinicSec(st.section)){st.booking_enabled=true;api("PATCH","stores?id=eq."+st.id,{booking_enabled:true},"return=minimal").catch(function(){st.booking_enabled=false})}});
     if(!STORES.length&&!ME.master){
       $("app").innerHTML='<div class="card"><div class="err">حسابك غير مرتبط بأي متجر بعد. تواصل مع إدارة سوق الرهد.</div><button class="btn btn-line" data-act="logout">تسجيل الخروج</button></div>';
       $("outBtn").hidden=false;return;
@@ -311,7 +312,7 @@ function boot(){
     $("hTitle").textContent=ME.master?"إدارة سوق الرهد":"إدارة المتجر";
     $("muteBtn").hidden=false;$("outBtn").hidden=false;$("bottomNav").hidden=false;
     if(ME.master){TAB="admin";ALLV=true}
-    buildNav();loadStoreData().then(function(){startPolling()});
+    fixTab();buildNav();loadStoreData().then(function(){startPolling()});
   }).catch(function(e){if(String(e.message)!=="nosess"&&String(e.message)!=="expired")fail(e);else showLogin()});
 }
 function loadStoreData(){
@@ -350,6 +351,10 @@ function fbHtml(){
   return h;
 }
 function lat(v){return String(v||'').replace(/[٠-٩]/g,function(c){return c.charCodeAt(0)-1632})}
+function isClinicSec(x){return /مستشفى|مستوصف|عيادة|مركز طبي|مركز صحي/.test(x||"")}
+function isBkStore(st){return !!st&&(st.booking_enabled||isClinicSec(st.section))}
+function fixTab(){if(!ALLV&&isBkStore(CUR)&&(TAB==="products"||TAB==="offers"||TAB==="orders"))TAB="bk";
+  if(!hasBk()&&TAB==="bk")TAB="home"}
 function hasBk(){return STORES.some(function(s){return s.booking_enabled})}
 function loadBookings(){
   if(!hasBk()){BKL=[];return Promise.resolve()}
@@ -439,7 +444,8 @@ document.addEventListener("click",function(){try{audioCtx=audioCtx||new (window.
 // ===== التبويبات =====
 function buildNav(){
   var tabs=[["home","🏠","الرئيسية"],["orders","🧾","الطلبات"],["products","🛍️","الأصناف"],["offers","🏷️","العروض"],["fb","💬","الآراء"],["settings","⚙️","الإعدادات"]];
-  if(hasBk()){tabs.splice(5,0,["bk","🩺","الحجوزات"])}
+  if(!ALLV&&isBkStore(CUR)){tabs=[["home","🏠","الرئيسية"],["bk","🩺","الحجوزات"],["fb","💬","الآراء"],["settings","⚙️","الإعدادات"]]}
+  else if(hasBk()){tabs.splice(5,0,["bk","🩺","الحجوزات"])}
   if(ME.master)tabs.push(["admin","🏬","الإدارة"]);
   $("bottomNav").innerHTML=tabs.map(function(t){
     return '<button class="navbtn" data-tab="'+t[0]+'"><span class="navicon"><span style="font-size:19px">'+t[1]+'</span>'+(t[0]==="orders"?'<span class="navbadge" id="navBadge_orders" hidden>0</span>':'')+(t[0]==="fb"?'<span class="navbadge" id="navBadge_fb" hidden>0</span>':'')+(t[0]==="bk"?'<span class="navbadge" id="navBadge_bk" hidden>0</span>':'')+'</span><span>'+t[2]+'</span></button>';
@@ -456,6 +462,7 @@ function storeSwitch(){
 }
 function render(){
   if(!SESS)return;
+  fixTab();
   document.querySelectorAll(".navbtn").forEach(function(b){b.classList.toggle("active",b.getAttribute("data-tab")===TAB)});
   var h="";
   var storeTab=TAB==="products"||TAB==="offers"||TAB==="settings";
@@ -836,11 +843,11 @@ var ACT={
   },
   addStore:function(){
     var n=$("nsName").value.trim();if(!n){toast("أدخل اسم المتجر",true);return}
-    api("POST","stores",{name:n,section:$("nsSec").value,owner_name:$("nsOwner").value.trim(),whatsapp:waNum($("nsWa").value)},"return=representation").then(function(r){if(r&&r[0]){STORES.push(r[0]);STORES.sort(function(a,b){return a.name.localeCompare(b.name,"ar")})}toast("تمت إضافة المتجر ✓");render()}).catch(fail);
+    api("POST","stores",{name:n,section:$("nsSec").value,owner_name:$("nsOwner").value.trim(),whatsapp:waNum($("nsWa").value),booking_enabled:isClinicSec($("nsSec").value)},"return=representation").then(function(r){if(r&&r[0]){STORES.push(r[0]);STORES.sort(function(a,b){return a.name.localeCompare(b.name,"ar")})}toast("تمت إضافة المتجر ✓");render()}).catch(fail);
   },
   backAdmin:function(){setTab("admin")},
-  backAll:function(){ALLV=true;setTab("home")},
-  openStore:function(d){ALLV=false;CUR=storeById(d.id);try{localStorage.setItem("sr_adm_store",CUR.id)}catch(e){}loadStoreData().then(function(){setTab("products")})},
+  backAll:function(){ALLV=true;buildNav();setTab("home")},
+  openStore:function(d){ALLV=false;CUR=storeById(d.id);try{localStorage.setItem("sr_adm_store",CUR.id)}catch(e){}loadStoreData().then(function(){buildNav();setTab(isBkStore(CUR)?"bk":"products")})},
   renameStore:function(d){var s=storeById(d.id);var n=prompt("الاسم الجديد للمتجر:",s.name);if(!n||!n.trim()||n.trim()===s.name)return;api("PATCH","stores?id=eq."+d.id,{name:n.trim()},"return=representation").then(function(r){if(r&&r[0])Object.assign(s,r[0]);toast("تم التغيير ✓");render()}).catch(fail)},
   delStore:function(d){var s=storeById(d.id);if(!s)return;
     if(!confirm("حذف متجر «"+s.name+"» نهائيًا مع أصنافه وعروضه وآرائه وحجوزاته؟ لا يمكن التراجع."))return;
@@ -873,8 +880,8 @@ document.addEventListener("change",function(e){
     if(nn){var o=document.createElement("option");o.textContent=nn;t.insertBefore(o,t.lastChild);t.value=nn}else t.value="";return}
   if(t&&t.dataset&&t.dataset.upl&&t.files&&t.files[0]){uploadImage(t.files[0],t.dataset.upl,t.dataset.pv);return}
   if(e.target.id==="storeSel"){
-    if(e.target.value==="__all"){ALLV=true;editingId=null;render();return}
-    ALLV=false;CUR=storeById(e.target.value);try{localStorage.setItem("sr_adm_store",CUR.id)}catch(x){}editingId=null;loadStoreData()}
+    if(e.target.value==="__all"){ALLV=true;editingId=null;buildNav();render();return}
+    ALLV=false;CUR=storeById(e.target.value);try{localStorage.setItem("sr_adm_store",CUR.id)}catch(x){}editingId=null;buildNav();loadStoreData().then(buildNav)}
 });
 document.addEventListener("input",function(e){if(e.target.id==="searchBox"){searchQ=e.target.value;render()}});
 document.addEventListener("keydown",function(e){if(e.key==="Enter"&&e.target.id==="lgPass")doLogin()});
