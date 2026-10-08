@@ -212,6 +212,18 @@ footer .fbottom p b{color:#94a3b8}
 .card.vis .custom{flex-wrap:wrap}.card.vis .custom .amt{flex:1 1 60px;width:auto}.card.vis .custom .note{flex:1 1 100%;order:3}
 footer{padding-bottom:12px}
 body:has(#cartBar:not([hidden])) footer{padding-bottom:96px}
+.grid,.grid.visgrid{grid-template-columns:1fr!important;gap:14px;max-width:560px;margin-inline:auto}
+.card.vis{padding:12px;gap:10px;overflow:hidden}
+.card.vis .vtop{display:flex;gap:12px;align-items:flex-start}
+.card.vis .vimg{flex:0 0 118px;width:118px;height:118px;aspect-ratio:auto;border-radius:14px;font-size:44px}
+.card.vis .vhead{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.card.vis .cname{font-size:16px;line-height:1.45}
+.card.vis .vrow{padding:7px 8px}
+.card.vis .custom{flex-wrap:nowrap}.card.vis .custom .amt{flex:0 0 74px;width:74px}.card.vis .custom .note{flex:1;order:0}
+html{overflow-x:hidden}body{overflow-x:clip}
+#cartBar{left:50%;right:auto;transform:translateX(-50%);width:calc(100% - 28px);max-width:420px;margin:0}
+html:has(#lb.show){overflow:hidden}
+#lb{overscroll-behavior:contain}
 </style>
 </head>
 <body>
@@ -409,7 +421,7 @@ var typeLabels={};// key(normalized first word) -> display label (raw first word
 function normAr(s){return String(s||"").replace(/[\u064B-\u065F]/g,"").replace(/[إأآ]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").trim()}
 function firstWord(name){var w=String(name||"").trim().split(/\s+/)[0];return w||name}
 function classifyStore(name){return normAr(firstWord(name))}
-var VISUAL_TYPES=["ملابس","مستحضرات","ازياء","عطور","احذيه","حقائب","اكسسوارات","مكياج","عبايات","اقمشه"];
+var VISUAL_TYPES=["ملابس","مستحضرات","ازياء","عطور","احذيه","حقائب","اكسسوارات","مكياج","عبايات","اقمشه","بوتيك","اواني"];
 function isVisual(t){return VISUAL_TYPES.indexOf(normAr(t))>-1}
 
 var toastTimer=null;
@@ -641,25 +653,18 @@ function render(){
 }
 function card(p){
   var ok=avail(p.status);
-  var cr='<div class="custom"><input class="amt" type="number" placeholder="'+(p.minAmt>0?'أقل '+p.minAmt:'مبلغ')+'" data-a="'+esc(p.id)+'"'+(ok?'':' disabled')+'><input class="note" placeholder="وصف الطلب" data-n="'+esc(p.id)+'"'+(ok?'':' disabled')+'><button data-custom="'+esc(p.id)+'"'+(ok?'':' disabled')+' title="أضف إلى السلة">🛒</button></div>';
   var vs=p.v.map(function(v,i){
     var k=p.id+"|"+i,q=qty[k]||p.minQty||1;
     return '<div class="vrow"><div class="vinfo"><b>'+esc(v.unit)+(p.minQty>1?' · أقل كمية '+p.minQty:'')+'</b><span>'+v.price.toLocaleString()+' ج.س</span></div>'+
     '<div class="vctl"><div class="qty"><button data-q="'+esc(k)+'" data-d="-1"'+(ok?'':' disabled')+'>−</button><span>'+q+'</span><button data-q="'+esc(k)+'" data-d="1"'+(ok?'':' disabled')+'>+</button></div>'+
     '<button class="addbtn" data-add="'+esc(p.id)+'" data-i="'+i+'"'+(ok?'':' disabled')+' title="أضف إلى السلة">🛒</button></div></div>';
   }).join("");
-  if(p.visual){
-    return '<div class="card vis'+(ok?'':' off')+'">'+
-    '<div class="vimg">'+(p.image?'<img src="'+esc(p.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.innerHTML=\''+icon(p.cat)+'\'">':icon(p.cat))+'</div>'+
-    '<div class="vbody"><div class="cname">'+esc(p.name)+'</div><span class="tag" style="align-self:flex-start">'+esc(p.store)+'</span>'+(newP[p.id]||newS.indexOf(p.store)>-1?'<span class="badge-new">🆕 جديد</span>':'')+
-    (ok?'':'<span class="badge-off">غير متوفر حالياً</span>')+
-    '<div class="vlist">'+vs+'</div>'+cr+'</div></div>';
-  }
-  return '<div class="card'+(ok?'':' off')+'">'+
-  '<div class="chead"><div class="cinfo"><div class="cico">'+(p.image?'<img src="'+esc(p.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.innerHTML=\''+icon(p.cat)+'\'">':icon(p.cat))+'</div><div class="cname">'+esc(p.name)+'</div></div><span class="tag">'+esc(p.store)+'</span></div>'+(newP[p.id]||newS.indexOf(p.store)>-1?'<span class="badge-new">🆕 جديد</span>':'')+
+  var im=(p.image?'<img src="'+esc(p.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.innerHTML=\''+icon(p.cat)+'\'">':icon(p.cat));
+  var top=p.visual?'<div class="vtop"><div class="vimg">'+im+'</div><div class="vhead"><div class="cname">'+esc(p.name)+'</div><span class="tag">'+esc(p.store)+'</span>':'<div class="chead"><div class="cinfo"><div class="cico">'+im+'</div><div class="cname">'+esc(p.name)+'</div></div><span class="tag">'+esc(p.store)+'</span></div>';
+  return '<div class="card'+(p.visual?' vis':'')+(ok?'':' off')+'">'+top+(newP[p.id]||newS.indexOf(p.store)>-1?'<span class="badge-new">🆕 جديد</span>':'')+
   (ok?'':'<span class="badge-off">غير متوفر حالياً</span> <button class="notifybtn" data-notify="'+esc(p.id)+'">🔔 أعلمني عند التوفر</button>')+
   ((pop[p.id]>0)?'<span class="badge-off" style="color:var(--amberd);background:var(--amberbg)">🔁 طلبته من قبل</span>':'')+
-  '<div class="vlist">'+vs+'</div>'+
+  (p.visual?'</div></div>':'')+'<div class="vlist">'+vs+'</div>'+
   '<div class="custom"><input class="amt" type="number" placeholder="'+(p.minAmt>0?'أقل '+p.minAmt:'مبلغ')+'" data-a="'+esc(p.id)+'"'+(ok?'':' disabled')+'><input class="note" placeholder="وصف الطلب" data-n="'+esc(p.id)+'"'+(ok?'':' disabled')+'>'+
   '<button data-custom="'+esc(p.id)+'"'+(ok?'':' disabled')+' title="أضف إلى السلة">🛒</button></div></div>';
 }
