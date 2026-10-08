@@ -149,6 +149,15 @@ main{max-width:1150px;margin:0 auto;padding:22px 14px 16px}
 #bkm .okmsg{background:#e7f8ee;color:#15803d;border-radius:12px;padding:10px;font-weight:700;margin-top:10px}
 #bkm .hp{position:absolute;left:-9999px;opacity:0;height:0;width:0}
 .bkcard{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:10px}
+.bkgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px}
+@media(min-width:720px){.bkgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.bksc{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px;display:flex;flex-direction:column;gap:6px;box-shadow:0 2px 10px rgba(15,23,42,.05)}
+.bksc .im{height:110px;border-radius:12px;background:#eef3f6;display:flex;align-items:center;justify-content:center;font-size:42px;overflow:hidden}
+.bksc .im img{width:100%;height:100%;object-fit:cover}
+.bksc .nm{font-weight:900;font-size:15px}.bksc .gr{font-size:11px;color:var(--amberd);background:#fff4dc;border-radius:999px;padding:2px 8px;align-self:flex-start}
+.bksc .mt{font-size:12px;color:var(--muted)}.bksc .pr{font-weight:900;color:var(--amberd)}
+.bksc button{background:linear-gradient(135deg,var(--amber2),var(--amberd));color:#fff;font-weight:900;border-radius:12px;padding:9px;margin-top:auto}
+.bksc button:disabled{background:#cbd5e1;color:#64748b}
 .bkcard b{font-size:15px}.bkcard .muted{font-size:12px;color:var(--muted)}
 .bkcard button{background:linear-gradient(135deg,var(--amber2),var(--amberd));color:#fff;font-weight:900;border-radius:12px;padding:10px 14px;white-space:nowrap}
 #bkm .days{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
@@ -355,7 +364,7 @@ function loadSupabase(){
     sbGet("delivery_zones?select=name,fee&order=sort_order,name&limit=100").catch(function(){return []}),
     sbGet("app_settings?select=key,value&limit=20").catch(function(){return []}),
     sbGet("product_feedback?select=product_id,kind,rating&limit=5000").catch(function(){return []}),
-    sbGet("booking_services?select=id,store_id,name,grp,weekdays,paused,price&order=sort_order,name&limit=200").catch(function(){return sbGet("booking_services?select=id,store_id,name,grp,weekdays,paused&order=sort_order,name&limit=200")}).catch(function(){return sbGet("booking_services?select=id,store_id,name,grp,weekdays&order=sort_order,name&limit=200")}).catch(function(){return sbGet("booking_services?select=id,store_id,name&order=sort_order,name&limit=200")}).catch(function(){return []})
+    sbGet("booking_services?select=id,store_id,name,grp,weekdays,paused,price,image_url&order=sort_order,name&limit=200").catch(function(){return sbGet("booking_services?select=id,store_id,name,grp,weekdays,paused,price&order=sort_order,name&limit=200")}).catch(function(){return sbGet("booking_services?select=id,store_id,name,grp,weekdays,paused&order=sort_order,name&limit=200")}).catch(function(){return sbGet("booking_services?select=id,store_id,name,grp,weekdays&order=sort_order,name&limit=200")}).catch(function(){return sbGet("booking_services?select=id,store_id,name&order=sort_order,name&limit=200")}).catch(function(){return []})
   ]).then(function(r){
     BKS=Array.isArray(r[8])?r[8]:[];
     FB={};(Array.isArray(r[7])?r[7]:[]).forEach(function(x){var f=FB[x.product_id]||(FB[x.product_id]={rn:0,rs:0,q:0});if(x.kind==="review"){f.rn++;f.rs+=Number(x.rating)||0}else f.q++});
@@ -708,7 +717,14 @@ function render(){
   $("n").textContent=list.length+" صنف";
   $("grid").classList.toggle("visgrid",list.length>0&&list.every(function(p){return p.visual}));
   var bks=stores.filter(function(s){return s.bk&&BKS.some(function(v){return v.store_id===s.sid})&&(selStore==="all"||selStore===s.name)&&(selType==="all"||s.type===selType)&&(!t||normAr(s.name.toLowerCase()).indexOf(t)>-1)});
-  $("bkBox").innerHTML=bks.map(function(s){return '<div class="bkcard"><div><b>🩺 '+esc(s.name)+'</b><div class="muted">احجز موعدك بدون زحمة</div></div><button type="button" data-bk="'+esc(s.sid)+'">احجز موعدًا</button></div>'}).join("");
+  var WDN=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"],bcs=[];
+  bks.forEach(function(s){BKS.filter(function(v){return v.store_id===s.sid}).forEach(function(v){
+    var im=imgUrl(v.image_url,false),dy=Array.isArray(v.weekdays)&&v.weekdays.length?v.weekdays.map(function(i){return WDN[i]}).join("، "):"كل الأيام";
+    bcs.push('<div class="bksc"><div class="im">'+(im?'<img src="'+esc(im)+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'🩺')+'</div>'+
+      '<div class="nm">'+esc(v.name)+'</div>'+(v.grp?'<div class="gr">'+esc(v.grp)+'</div>':'')+
+      '<div class="mt">'+esc(s.name)+' · '+dy+'</div>'+(v.price>0?'<div class="pr">'+Number(v.price).toLocaleString()+' ج.س</div>':'')+
+      (v.paused?'<button type="button" disabled>متوقفة مؤقتًا</button>':'<button type="button" data-bk="'+esc(s.sid)+'" data-bks="'+esc(v.id)+'">احجز</button>')+'</div>')})});
+  $("bkBox").innerHTML=bcs.length?'<div class="bkgrid">'+bcs.join("")+'</div>':"";
   $("grid").innerHTML=list.length?list.map(card).join(""):(bks.length?"":'<div class="empty" style="grid-column:1/-1">لا توجد أصناف مطابقة حالياً.</div>');
   drawCart();
 }
@@ -905,10 +921,10 @@ function khDay(off){var d=new Date(Date.now()+off*864e5);return new Intl.DateTim
 function khLabel(off){if(off===0)return"اليوم";if(off===1)return"غدًا";var d=new Date(Date.now()+off*864e5);return new Intl.DateTimeFormat("ar-EG",{timeZone:"Africa/Khartoum",weekday:"long",day:"numeric",month:"numeric"}).format(d)}
 function bkDow(d){return new Date(d+"T12:00:00Z").getUTCDay()}
 function bkOk(v,d){return !v||!Array.isArray(v.weekdays)||!v.weekdays.length||v.weekdays.indexOf(bkDow(d))>-1}
-function openBk(sid){
+function openBk(sid,svc){
   var st=stores.filter(function(s){return s.sid===sid})[0];if(!st)return;
   var sv=BKS.filter(function(v){return v.store_id===sid});if(!sv.length)return;
-  BKP=st;BKSV=(sv.length===1&&!sv[0].paused)?sv[0].id:"";BKD=khDay(0);bkFix();BKG="";BKDONE=null;bkDraw();$("bkm").classList.add("show");
+  BKP=st;BKSV=(svc&&sv.some(function(x){return x.id===svc&&!x.paused}))?svc:((sv.length===1&&!sv[0].paused)?sv[0].id:"");BKD=khDay(0);bkFix();BKG="";BKDONE=null;bkDraw();$("bkm").classList.add("show");
 }
 function bkFix(){var v=BKS.filter(function(x){return x.id===BKSV})[0];if(!v||bkOk(v,BKD))return;for(var o=0;o<7;o++){if(bkOk(v,khDay(o))){BKD=khDay(o);return}}}
 function bkDraw(){
@@ -1032,7 +1048,7 @@ document.addEventListener("click",function(e){
   if(d.fbkind){FBK=d.fbkind;FBR=0;fbDraw(false);return}
   if(d.fbstar){FBR=+d.fbstar;fbDraw(false);return}
   if(d.fbsend){fbSend();return}
-  if(d.bk!==undefined){openBk(d.bk);return}
+  if(d.bk!==undefined){openBk(d.bk,d.bks);return}
   if(d.bkclose){$("bkm").classList.remove("show");BKP=null;return}
   if(d.bksvc){BKSV=d.bksvc;bkFix();bkDraw();return}
   if(d.bkday){BKD=d.bkday;bkDraw();return}
