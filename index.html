@@ -277,6 +277,7 @@ body:has(#cartBar:not([hidden])) footer{padding-bottom:96px}
 .newb button{background:#16a34a;color:#fff;border-radius:99px;padding:8px 16px;font-weight:800;font-size:13px;min-height:38px}
 .newb button.nx{background:#fff;color:#065f46;border:1px solid #86efac}
 .badge-new{align-self:flex-start;background:#16a34a;color:#fff;font-size:11px;font-weight:800;padding:2px 9px;border-radius:99px}
+.card.pic.sq .vimg{aspect-ratio:1/1}
 @media (max-width:480px){.panel{border-radius:0}}
 </style>
 </head>
@@ -707,20 +708,13 @@ function render(){
 }
 function card(p){
   var ok=avail(p.status);
-  var vs=(p.visual?p.v.slice(0,1):p.v).map(function(v,i){
+  var vs=p.v.map(function(v,i){
     var k=p.id+"|"+i,q=qty[k]||p.minQty||1;
     return '<div class="vrow"><div class="vinfo"><b>'+esc(v.unit)+(p.minQty>1?' · أقل كمية '+p.minQty:'')+'</b><span>'+v.price.toLocaleString()+' ج.س</span></div>'+
     '<div class="vctl"><div class="qty"><button data-q="'+esc(k)+'" data-d="-1"'+(ok?'':' disabled')+'>−</button><span>'+q+'</span><button data-q="'+esc(k)+'" data-d="1"'+(ok?'':' disabled')+'>+</button></div>'+
     '<button class="addbtn" data-add="'+esc(p.id)+'" data-i="'+i+'"'+(ok?'':' disabled')+'>🛒 أضف</button></div></div>';
   }).join("");
-  if(p.visual){
-    return '<div class="card vis'+(ok?'':' off')+'">'+
-    '<div class="vimg">'+(p.image?'<img src="'+esc(p.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.innerHTML=\''+icon(p.cat)+'\'">':icon(p.cat))+'</div>'+
-    '<div class="vbody"><div class="cname">'+esc(p.name)+'</div><span class="tag" style="align-self:flex-start">'+esc(p.store)+'</span>'+(newP[p.id]||newS.indexOf(p.store)>-1?'<span class="badge-new">🆕 جديد</span>':'')+
-    (ok?'':'<span class="badge-off">غير متوفر حالياً</span>')+
-    '<div class="vlist">'+vs+'</div></div></div>';
-  }
-  return '<div class="card pic'+(ok?'':' off')+'"><div class="vimg">'+(p.image?'<img src="'+esc(p.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.innerHTML=\''+icon(p.cat)+'\'">':icon(p.cat))+'</div><div class="vbody"><div class="cname">'+esc(p.name)+'</div><span class="tag" style="align-self:flex-start">'+esc(p.store)+'</span>'+(newP[p.id]||newS.indexOf(p.store)>-1?'<span class="badge-new">🆕 جديد</span>':'')+
+  return '<div class="card pic'+(p.visual?' sq':'')+(ok?'':' off')+'"><div class="vimg">'+(p.image?'<img src="'+esc(p.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.innerHTML=\''+icon(p.cat)+'\'">':icon(p.cat))+'</div><div class="vbody"><div class="cname">'+esc(p.name)+'</div><span class="tag" style="align-self:flex-start">'+esc(p.store)+'</span>'+(newP[p.id]||newS.indexOf(p.store)>-1?'<span class="badge-new">🆕 جديد</span>':'')+
   (ok?'':'<span class="badge-off">غير متوفر حالياً</span> <button class="notifybtn" data-notify="'+esc(p.id)+'">🔔 أعلمني عند التوفر</button>')+
   ((pop[p.id]>0)?'<span class="badge-off" style="color:var(--amberd);background:var(--amberbg)">🔁 طلبته من قبل</span>':'')+
   '<div class="vlist">'+vs+'</div>'+
