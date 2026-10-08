@@ -626,7 +626,7 @@ function offersHtml(){
 // ===== الإعدادات + حسابات الدفع =====
 function settingsHtml(){
   if(!CUR)return '<div class="card"><div class="empty">لا يوجد متجر.</div></div>';
-  var h=(ME.master?'<div class="card"><h2>🩺 الحجز بموعد</h2><div class="hint" style="margin:0 0 8px">للعيادات والخدمات التي تعمل بحجز مواعيد بدل السلة.</div><button class="btn '+(CUR.booking_enabled?'btn-red':'btn-green')+'" data-act="bkEnable">'+(CUR.booking_enabled?'إيقاف الحجز لهذا المتجر':'تفعيل الحجز لهذا المتجر')+'</button></div>':'')+'<div class="card"><h2>بيانات المتجر</h2>'+
+  var h=(ME.master?'<div class="card"><h2>🩺 الحجز بموعد</h2><button class="btn '+(CUR.booking_enabled?'btn-red':'btn-green')+'" data-act="bkEnable">'+(CUR.booking_enabled?'إيقاف الحجز لهذا المتجر':'تفعيل الحجز لهذا المتجر')+'</button></div>':'')+'<div class="card"><h2>بيانات المتجر</h2>'+
     '<label>اسم صاحب المتجر</label><input id="sOwner" value="'+esc(CUR.owner_name||"")+'">'+
     '<label>نوع المحل (القسم)</label>'+secSelect("sSec",CUR.section||"")+
     '<label>رقم واتساب (بالصيغة الدولية، مثل 249912345678)</label><input id="sWa" class="ltr" inputmode="numeric" value="'+esc(CUR.whatsapp||"")+'">'+
@@ -667,7 +667,7 @@ function settingsHtml(){
 
 // ===== الإدارة العامة (المدير فقط) =====
 function adminHtml(){
-  var h='<div class="card"><h2>💾 نسخة احتياطية</h2><div class="hint" style="margin:0 0 8px">تنزيل ملف فيه كل بيانات السوق (المتاجر والأصناف والطلبات والآراء ومناطق التوصيل). احتفظي به في مكان آمن، ويُفضَّل مرة كل أسبوع.</div><button class="btn" id="bkBtn" data-act="backup">⬇️ تنزيل نسخة احتياطية الآن</button><div class="muted" id="bkMsg" style="margin-top:6px"></div></div>'+
+  var h='<div class="card"><h2>💾 نسخة احتياطية</h2><button class="btn" id="bkBtn" data-act="backup">⬇️ تنزيل نسخة احتياطية الآن</button><div class="muted" id="bkMsg" style="margin-top:6px"></div></div>'+
     '<div class="card"><h2>➕ إضافة متجر جديد</h2>'+
     '<label>اسم المتجر</label><input id="nsName" maxlength="80">'+
     '<label>نوع المحل (القسم)</label>'+secSelect("nsSec","")+
