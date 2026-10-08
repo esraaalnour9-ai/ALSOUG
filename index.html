@@ -66,7 +66,7 @@ header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:va
 .chip{white-space:nowrap;padding:7px 13px;border-radius:11px;background:var(--soft);font-weight:700;font-size:12.5px;color:var(--text);border:1px solid transparent}
 .chip.on{background:var(--amber);color:#111;box-shadow:0 2px 6px rgba(245,158,11,.35)}
 .chip.c.on{background:var(--text);color:var(--bg)}
-.hero{background:linear-gradient(160deg,#d97706,#92400e);color:#fff;padding:26px 18px 30px;position:relative;overflow:hidden}
+.hero{background:linear-gradient(160deg,#ea580c,#9a3412);color:#fff;padding:26px 18px 30px;position:relative;overflow:hidden}
 .storepick{background:var(--card);border-bottom:1px solid var(--line);padding:14px 14px 4px}
 .storepick .in{max-width:1150px;margin:0 auto}
 .storepick h3{margin:0 0 10px;font-size:14px;font-weight:800;display:flex;align-items:center;gap:6px}
@@ -77,7 +77,7 @@ header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:va
 .hero p{margin:0;opacity:.95;font-size:13.5px;line-height:1.7}
 .perks{display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap}
 .perk{background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);border-radius:12px;padding:8px 12px;font-size:11.5px;font-weight:800;display:flex;align-items:center;gap:5px}
-.welcome-ticker{background:#0f172a;color:#fde68a;overflow:hidden;white-space:nowrap;padding:8px 0}
+.welcome-ticker{background:linear-gradient(120deg,#0e5f5c,#f2b134);color:#fff;overflow:hidden;white-space:nowrap;padding:8px 0}
 .welcome-ticker .ttrack{display:inline-block;padding-inline-start:100%;animation:tickerScroll 22s linear infinite}
 .welcome-ticker:hover .ttrack{animation-play-state:paused}
 .welcome-ticker .titem{font-size:12.5px;font-weight:800;margin:0 14px}
@@ -91,7 +91,7 @@ main{max-width:1150px;margin:0 auto;padding:22px 14px 16px}
 .store-banner{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .store-banner[hidden]{display:none}
 .store-banner .sbinfo{display:flex;flex-direction:column;gap:3px;min-width:0}
-.store-offer{display:flex;align-items:center;gap:10px;margin:8px 0;padding:11px 14px;border-radius:16px;background:linear-gradient(120deg,#0f172a,#334155);color:#fff;font-weight:800;font-size:13px;box-shadow:0 8px 20px -10px rgba(15,23,42,.6)}
+.store-offer{display:flex;align-items:center;gap:10px;margin:8px 0;padding:11px 14px;border-radius:16px;background:linear-gradient(120deg,#0b3536,#0e8a86);color:#fff;font-weight:800;font-size:13px;box-shadow:0 8px 20px -10px rgba(11,53,54,.6)}
 .offer-top .store-offer{margin:0;border-radius:0;box-shadow:none;padding:12px 16px;font-size:13.5px}
 .store-offer[hidden]{display:none}.store-offer .pmsg{flex:1;min-width:0}
 .store-offer .pcode{background:rgba(255,255,255,.18);border:1px dashed rgba(255,255,255,.8);border-radius:8px;padding:2px 9px;margin-inline-start:6px;cursor:pointer;font:inherit;color:inherit;font-weight:900;white-space:nowrap}
@@ -109,15 +109,13 @@ main{max-width:1150px;margin:0 auto;padding:22px 14px 16px}
 #lb.show{display:flex}
 #lb img{max-width:100%;max-height:88vh;border-radius:12px;object-fit:contain;touch-action:pinch-zoom}
 #lb button{position:absolute;top:12px;inset-inline-start:12px;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.2);color:#fff;font-size:24px;line-height:1}
-.card.vis,.card.pic{padding:0;overflow:hidden;gap:0}
-.card.vis .vimg,.card.pic .vimg{aspect-ratio:1/1;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:54px;overflow:hidden}
-.card.vis .vimg img,.card.pic .vimg img{width:100%;height:100%;object-fit:cover}
-.card.vis .vbody,.card.pic .vbody{padding:10px;display:flex;flex-direction:column;gap:7px}
-.card.vis .cname,.card.pic .cname{font-size:14px}
-.card.vis .vrow,.card.pic .vrow{padding:6px 7px}
+.card.vis{padding:0;overflow:hidden;gap:0}
+.card.vis .vimg{aspect-ratio:1/1;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:54px;overflow:hidden}
+.card.vis .vimg img{width:100%;height:100%;object-fit:cover}
+.card.vis .vbody{padding:10px;display:flex;flex-direction:column;gap:7px}
+.card.vis .cname{font-size:14px}
+.card.vis .vrow{padding:6px 7px}
 .grid.visgrid{grid-template-columns:repeat(auto-fill,minmax(165px,1fr))}
-.card.pic .vimg{aspect-ratio:4/3;font-size:40px}
-.card.pic .custom{flex-wrap:wrap}.card.pic .custom .amt{flex:1 1 60px;width:auto}.card.pic .custom .note{flex:1 1 100%;order:3}.card.pic .custom button{min-height:32px}
 @media (max-width:480px){.grid.visgrid{grid-template-columns:repeat(2,1fr);gap:9px}}
 
 .chead{display:flex;justify-content:space-between;align-items:flex-start;gap:6px}
@@ -205,80 +203,15 @@ footer .fbottom p b{color:#94a3b8}
 .promo-bar .pcode{background:rgba(255,255,255,.22);border:1px dashed rgba(255,255,255,.75);border-radius:8px;padding:2px 9px;margin-inline-start:6px;cursor:pointer;letter-spacing:.5px;white-space:nowrap;font:inherit;color:inherit;font-weight:900}
 .promo-bar .pclose{background:rgba(255,255,255,.22);color:#fff;width:24px;height:24px;border-radius:50%;flex-shrink:0;font-size:16px;line-height:1;display:flex;align-items:center;justify-content:center;border:0}
 </style>
-<style id="modern">
-/* ===== واجهة عصرية بأسلوب تطبيقات التسوق العالمية ===== */
-:root{--bg:#f4f5f7;--line:#eceef2;--soft:#f3f4f6;--shadow:0 1px 2px rgba(16,24,40,.06),0 4px 14px rgba(16,24,40,.06)}
-header{border-bottom:0;box-shadow:0 1px 0 var(--line),0 6px 18px rgba(16,24,40,.05);padding:10px 14px 12px}
-.htop{flex-wrap:wrap;row-gap:10px}
-.logo{font-size:17px;letter-spacing:-.2px}
-.logo .ic{width:34px;height:34px;font-size:17px}
-.logo small{background:none;padding:0;color:var(--muted);font-size:10.5px;font-weight:600}
-#refresh{margin-inline-start:auto;border-radius:50%;width:38px;height:38px}
-.cartbtn{border-radius:99px;padding:8px 14px;box-shadow:0 4px 12px rgba(245,158,11,.35)}
-.swrap{order:3;flex:1 1 100%}
-#q{background:var(--soft);border:1.5px solid transparent;border-radius:14px;padding:12px 40px 12px 14px;font-size:14px;transition:border-color .15s,background .15s}
-#q:focus{outline:0;background:var(--card);border-color:var(--amber)}
-.hero{margin:12px 12px 0;border-radius:20px;background:linear-gradient(135deg,#f59e0b,#b45309);box-shadow:var(--shadow)}
-.hero h2{font-size:23px}
-.badge{background:rgba(255,255,255,.2)}
-.perk{border-radius:99px;background:rgba(255,255,255,.18)}
-main{padding-top:16px}
-.sec-title b{font-size:17px;font-weight:900}
-.chip{border-radius:99px;padding:8px 15px;background:var(--card);border:1px solid var(--line);font-weight:700}
-.chip.on{background:var(--text);color:var(--bg);border-color:var(--text);box-shadow:none}
-.chip.c.on{background:var(--text);color:var(--bg)}
-.store-banner,.store-offer{border-radius:18px;border:0;box-shadow:var(--shadow)}
-.grid{gap:12px}
-.card{border:0;border-radius:18px;box-shadow:var(--shadow)}
-.card:hover{transform:none;box-shadow:var(--shadow)}
-.card.vis .vimg,.card.pic .vimg{background:var(--soft)}
-.card.vis .vbody,.card.pic .vbody{padding:11px 12px 12px;gap:6px}
-.card.vis .cname,.card.pic .cname{font-size:14px;font-weight:800;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.8em}
-.card.vis .tag,.card.pic .tag{background:none;padding:0;color:var(--muted);font-size:11.5px;font-weight:700}
-.vlist{gap:8px}
-.card.vis .vrow,.card.pic .vrow{background:none;border:0;padding:0;border-radius:0}
-.card.vis .vrow+.vrow,.card.pic .vrow+.vrow{border-top:1px solid var(--line);padding-top:8px}
-.vinfo b{font-size:11.5px;color:var(--muted);font-weight:700}
-.vinfo span{font-size:15.5px;font-weight:900;color:var(--text)}
-.qty{border:0;background:var(--soft);border-radius:99px}
-.qty button{padding:5px 9px;font-size:14px}
-.addbtn{width:36px;height:36px;border-radius:50%;box-shadow:0 3px 8px rgba(245,158,11,.4)}
-.addbtn:active{transform:scale(.92)}
-.custom{border-top:1px solid var(--line)}
-.custom input{border:0;border-radius:99px;padding:8px 12px;background:var(--soft)}
-.custom button{border-radius:99px}
-#cartBar{border-radius:99px;background:#0f172a;color:#fff;padding:8px 8px 8px 18px;box-shadow:0 10px 28px rgba(15,23,42,.35)}
-#cartBar .cbtot small{opacity:.7}
-#cartBar button{background:linear-gradient(135deg,var(--amber2),var(--amber));color:#111;border-radius:99px;padding:11px 18px}
-.panel{border-radius:22px 0 0 22px}
-.pfoot button,.send,.total,.sub,.it,.grp{border-radius:14px}
-footer{border-radius:26px 26px 0 0}
-body{font-size:16px}
-.chip{min-height:42px;font-size:14px}
-.qty button{min-width:40px;min-height:40px;font-size:18px}
-.qty span{min-width:26px;font-size:15px}
-.card.vis .vrow,.card.pic .vrow{flex-wrap:wrap;gap:8px}
-.card.vis .vinfo,.card.pic .vinfo{flex:1 1 100%;flex-direction:row;align-items:baseline;justify-content:space-between}
-.card.vis .vctl,.card.pic .vctl{flex:1 1 100%;gap:8px}
-.card.vis .vctl .qty,.card.pic .vctl .qty{flex:0 0 auto}
-.addbtn{width:auto;height:42px;border-radius:99px;padding:0 14px;font-size:14px;font-weight:800;gap:6px}
-.card.vis .addbtn,.card.pic .addbtn{flex:1}
-.vinfo span{font-size:17px}
-.vinfo b{font-size:12.5px}
-.card.vis .cname,.card.pic .cname{font-size:15px}
-.custom input,.pb input,.pb textarea,#q{font-size:16px}
-#toast{font-size:15px;padding:12px 22px}
-.hero p{display:none}
-:focus-visible{outline:3px solid var(--amber);outline-offset:2px}
+<style id="extras">
+.newb{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:#ecfdf5;border:1px solid #86efac;color:#065f46;border-radius:14px;padding:10px 12px;margin-bottom:12px;font-weight:800;font-size:13px}
+.newb[hidden]{display:none}.newb .nacts{display:flex;gap:6px}
+.newb button{background:#16a34a;color:#fff;border-radius:99px;padding:7px 14px;font-weight:800;font-size:12.5px}
+.newb button.nx{background:#fff;color:#065f46;border:1px solid #86efac}
+.badge-new{background:#16a34a;color:#fff;font-size:11px;font-weight:800;padding:2px 9px;border-radius:99px;align-self:flex-start;display:inline-block}
+.card.vis .custom{flex-wrap:wrap}.card.vis .custom .amt{flex:1 1 60px;width:auto}.card.vis .custom .note{flex:1 1 100%;order:3}
 footer{padding-bottom:12px}
 body:has(#cartBar:not([hidden])) footer{padding-bottom:96px}
-.newb{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;background:#ecfdf5;border:1px solid #86efac;color:#065f46;border-radius:16px;padding:10px 12px;margin-bottom:12px;font-weight:800;font-size:14px}
-.newb[hidden]{display:none}.newb .nacts{display:flex;gap:6px}
-.newb button{background:#16a34a;color:#fff;border-radius:99px;padding:8px 16px;font-weight:800;font-size:13px;min-height:38px}
-.newb button.nx{background:#fff;color:#065f46;border:1px solid #86efac}
-.badge-new{align-self:flex-start;background:#16a34a;color:#fff;font-size:11px;font-weight:800;padding:2px 9px;border-radius:99px}
-.card.pic.sq .vimg{aspect-ratio:1/1}
-@media (max-width:480px){.panel{border-radius:0}}
 </style>
 </head>
 <body>
@@ -293,7 +226,7 @@ body:has(#cartBar:not([hidden])) footer{padding-bottom:96px}
 <header>
   <div class="htop">
     <div class="logo"><span class="ic">🏪</span><div>سوق الرهد ابودكنه<small>شمال كردفان</small></div></div>
-    <div class="swrap"><input id="q" placeholder="🔍 ابحث عن سلعة أو محل"><button id="qx" aria-label="مسح البحث">&times;</button><div id="storeSuggest"></div></div>
+    <div class="swrap"><input id="q" placeholder="ابحث عن السلع أو اسم المحل..."><button id="qx" aria-label="مسح البحث">&times;</button><div id="storeSuggest"></div></div>
     <button class="iconbtn" id="refresh" title="تحديث البيانات">↻</button>
     <button class="cartbtn" id="openCart">🛒 السلة<b id="cnt" hidden>0</b></button>
   </div>
@@ -323,7 +256,7 @@ body:has(#cartBar:not([hidden])) footer{padding-bottom:96px}
 </main>
 <div id="toast"></div>
 <div id="lb" role="dialog" aria-label="عرض الصورة"><button type="button" aria-label="إغلاق">&times;</button><img alt=""></div>
-<div id="cartBar" hidden><div class="cbtot"><small>الإجمالي</small><b id="cbTotal">0</b></div><button id="cbOpen">اطلب الآن ✓</button></div>
+<div id="cartBar" hidden><div class="cbtot"><small>الإجمالي</small><b id="cbTotal">0</b></div><button id="cbOpen">🛒 إتمام الطلب</button></div>
 <div id="drawer"><div class="panel">
   <div class="ph"><span>🛒 سلة المشتريات</span><button id="closeCart">&times;</button></div>
   <div class="pb" id="cartBody"></div>
@@ -620,7 +553,7 @@ function build(d){
       if(Number(p.price_full)>0)v.push({unit:p.unit||"كامل",price:Number(p.price_full),tier:"full"});
       if(Number(p.price_half)>0)v.push({unit:"نصف "+u,price:Number(p.price_half),tier:"half"});
       if(Number(p.price_quarter)>0)v.push({unit:"ربع "+u,price:Number(p.price_quarter),tier:"quarter"});
-      products.push({uid:String(p.id||""),id:s+"-"+(p.id||i),name:p.name||"منتج بدون اسم",cat:p.category||"عام",store:s,storeType:classifyStore(s),phone:phone(st.whatsapp),status:p.status||"موجود",image:imgUrl(p.image||p.img||p.photo||"",true),visual:isVisual(tKey),minAmt:Number(p.min_amount||p.min)||0,minQty:Math.max(1,Math.floor(Number(p.min_qty||p.minQty)||1)),v:v});
+      products.push({uid:String(p.id||""),id:s+"-"+(p.id||i),name:p.name||"منتج بدون اسم",cat:p.category||"عام",store:s,storeType:classifyStore(s),phone:phone(st.whatsapp),status:p.status||"موجود",image:imgUrl(p.image||p.img||p.photo||"",isVisual(tKey)),visual:isVisual(tKey),minAmt:Number(p.min_amount||p.min)||0,minQty:Math.max(1,Math.floor(Number(p.min_qty||p.minQty)||1)),v:v});
     });
   });
   if(!build.urlApplied){
@@ -702,24 +635,33 @@ function render(){
     return pa!==pb?pb-pa:a.i-b.i;
   }).map(function(x){return x.p});
   $("n").textContent=list.length+" صنف";
-  $("grid").classList.toggle("visgrid",list.length>0);
+  $("grid").classList.toggle("visgrid",list.length>0&&list.every(function(p){return p.visual}));
   $("grid").innerHTML=list.length?list.map(card).join(""):'<div class="empty" style="grid-column:1/-1">لا توجد أصناف مطابقة حالياً.</div>';
   drawCart();
 }
 function card(p){
   var ok=avail(p.status);
+  var cr='<div class="custom"><input class="amt" type="number" placeholder="'+(p.minAmt>0?'أقل '+p.minAmt:'مبلغ')+'" data-a="'+esc(p.id)+'"'+(ok?'':' disabled')+'><input class="note" placeholder="وصف الطلب" data-n="'+esc(p.id)+'"'+(ok?'':' disabled')+'><button data-custom="'+esc(p.id)+'"'+(ok?'':' disabled')+' title="أضف إلى السلة">🛒</button></div>';
   var vs=p.v.map(function(v,i){
     var k=p.id+"|"+i,q=qty[k]||p.minQty||1;
     return '<div class="vrow"><div class="vinfo"><b>'+esc(v.unit)+(p.minQty>1?' · أقل كمية '+p.minQty:'')+'</b><span>'+v.price.toLocaleString()+' ج.س</span></div>'+
     '<div class="vctl"><div class="qty"><button data-q="'+esc(k)+'" data-d="-1"'+(ok?'':' disabled')+'>−</button><span>'+q+'</span><button data-q="'+esc(k)+'" data-d="1"'+(ok?'':' disabled')+'>+</button></div>'+
-    '<button class="addbtn" data-add="'+esc(p.id)+'" data-i="'+i+'"'+(ok?'':' disabled')+'>🛒 أضف</button></div></div>';
+    '<button class="addbtn" data-add="'+esc(p.id)+'" data-i="'+i+'"'+(ok?'':' disabled')+' title="أضف إلى السلة">🛒</button></div></div>';
   }).join("");
-  return '<div class="card pic'+(p.visual?' sq':'')+(ok?'':' off')+'"><div class="vimg">'+(p.image?'<img src="'+esc(p.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.innerHTML=\''+icon(p.cat)+'\'">':icon(p.cat))+'</div><div class="vbody"><div class="cname">'+esc(p.name)+'</div><span class="tag" style="align-self:flex-start">'+esc(p.store)+'</span>'+(newP[p.id]||newS.indexOf(p.store)>-1?'<span class="badge-new">🆕 جديد</span>':'')+
+  if(p.visual){
+    return '<div class="card vis'+(ok?'':' off')+'">'+
+    '<div class="vimg">'+(p.image?'<img src="'+esc(p.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.innerHTML=\''+icon(p.cat)+'\'">':icon(p.cat))+'</div>'+
+    '<div class="vbody"><div class="cname">'+esc(p.name)+'</div><span class="tag" style="align-self:flex-start">'+esc(p.store)+'</span>'+(newP[p.id]||newS.indexOf(p.store)>-1?'<span class="badge-new">🆕 جديد</span>':'')+
+    (ok?'':'<span class="badge-off">غير متوفر حالياً</span>')+
+    '<div class="vlist">'+vs+'</div>'+cr+'</div></div>';
+  }
+  return '<div class="card'+(ok?'':' off')+'">'+
+  '<div class="chead"><div class="cinfo"><div class="cico">'+(p.image?'<img src="'+esc(p.image)+'" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentElement.innerHTML=\''+icon(p.cat)+'\'">':icon(p.cat))+'</div><div class="cname">'+esc(p.name)+'</div></div><span class="tag">'+esc(p.store)+'</span></div>'+(newP[p.id]||newS.indexOf(p.store)>-1?'<span class="badge-new">🆕 جديد</span>':'')+
   (ok?'':'<span class="badge-off">غير متوفر حالياً</span> <button class="notifybtn" data-notify="'+esc(p.id)+'">🔔 أعلمني عند التوفر</button>')+
   ((pop[p.id]>0)?'<span class="badge-off" style="color:var(--amberd);background:var(--amberbg)">🔁 طلبته من قبل</span>':'')+
   '<div class="vlist">'+vs+'</div>'+
-  '<div class="custom"><input class="amt" type="number" placeholder="'+(p.minAmt>0?'أقل '+p.minAmt:'المبلغ')+'" data-a="'+esc(p.id)+'"'+(ok?'':' disabled')+'><input class="note" placeholder="ملاحظة (اختياري)" data-n="'+esc(p.id)+'"'+(ok?'':' disabled')+'>'+
-  '<button data-custom="'+esc(p.id)+'"'+(ok?'':' disabled')+' title="أضف إلى السلة">🛒</button></div></div></div>';
+  '<div class="custom"><input class="amt" type="number" placeholder="'+(p.minAmt>0?'أقل '+p.minAmt:'مبلغ')+'" data-a="'+esc(p.id)+'"'+(ok?'':' disabled')+'><input class="note" placeholder="وصف الطلب" data-n="'+esc(p.id)+'"'+(ok?'':' disabled')+'>'+
+  '<button data-custom="'+esc(p.id)+'"'+(ok?'':' disabled')+' title="أضف إلى السلة">🛒</button></div></div>';
 }
 function find(id){return products.filter(function(p){return p.id===id})[0]}
 function addItem(p,unit,price,n,id){
