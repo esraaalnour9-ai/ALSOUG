@@ -723,7 +723,10 @@ function pushOn(){
 function pushSync(){
   if(!pushSupported()||Notification.permission!=="granted")return;
   try{if(Date.now()-(+localStorage.getItem("sr_push_sync")||0)<864e5)return}catch(e){}
-  navigator.serviceWorker.ready.then(function(reg){return reg.pushManager.getSubscription()}).then(function(s){
+  navigator.serviceWorker.ready.then(function(reg){
+    // الإذن ممنوح: إن لم يوجد اشتراك (مثلًا بعد مسح بيانات الموقع) نُنشئه بلا سؤال
+    return reg.pushManager.getSubscription().then(function(s){return s||reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID_PUB)})});
+  }).then(function(s){
     if(!s)return;
     return pushSave(s).then(function(ok){if(ok){try{localStorage.setItem("sr_push_sync",String(Date.now()))}catch(e){}}});
   }).catch(function(){});
