@@ -91,27 +91,6 @@ button:active{transform:scale(.96)}
 #toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:99px;font-weight:800;font-size:13px;z-index:70;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw;text-align:center}
 #toast.show{opacity:1}#toast.bad{background:var(--red)}
 a.lnk{color:var(--amberd);font-weight:800;text-decoration:none}
-.afoot{background:var(--ink,#0f172a);color:#cbd5e1;margin:18px 12px 0;border-radius:22px;padding:16px 16px 14px}
-.afrow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.afbrand{display:flex;align-items:center;gap:10px;min-width:0}
-.afmark{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--amber2,#fbbf24),var(--amber,#f59e0b));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.afbrand b{display:block;color:#fff;font-size:14px;font-weight:800}.afbrand small{font-size:11px;color:#94a3b8}
-.afbtns{display:flex;gap:8px}
-.afb{display:inline-flex;align-items:center;gap:6px;min-height:42px;padding:0 16px;border-radius:99px;background:rgba(255,255,255,.1);color:#fff;font-weight:800;font-size:13px;text-decoration:none}
-.afb.wa{background:#16a34a}
-.afcopy{margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.12);text-align:center;font-size:12px;color:#94a3b8}.afcopy b{color:#fff}
-body:has(#bottomNav:not([hidden])) .afoot{margin-bottom:120px}
-.afoot{background:transparent;color:#64748b;border-radius:0;border-top:1px solid rgba(100,116,139,.25);padding:14px 4px 10px;margin:auto 0 12px;width:calc(100% - 28px);max-width:616px;align-self:center}
-.afrow{justify-content:space-between}
-.afbrand b{color:var(--ink,#0f172a);font-size:13px}.afbrand small{color:#64748b}
-.afmark{width:34px;height:34px;font-size:16px}
-.afb{background:rgba(15,118,110,.1);color:#0f766e;min-height:36px;font-size:12.5px;padding:0 13px}
-.afb.wa{background:#16a34a;color:#fff}
-.afcopy{border-top:0;margin-top:8px;padding-top:0;color:#64748b;font-size:11.5px;line-height:1.7}.afcopy b{color:#334155}.afcopy .ver{opacity:.7}
-body{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
-main#app{flex:1 0 auto;width:100%;box-sizing:border-box}
-#bottomNav[hidden]{display:none!important}
-body:has(#bottomNav:not([hidden])) .afoot{margin-bottom:112px}
 </style>
 </head>
 <body>
@@ -124,7 +103,6 @@ body:has(#bottomNav:not([hidden])) .afoot{margin-bottom:112px}
 </header>
 <div id="updBar" hidden><span>✨ يوجد تحديث جديد للوحة</span><button data-act="reload">تحديث الآن</button></div>
 <main id="app"><div class="empty">⏳ جاري التحميل...</div></main>
-<footer class="afoot"><div class="afrow"><div class="afbrand"><span class="afmark">🏪</span><div><b>سوق الرهد ابودكنه</b><small>شمال كردفان، السودان</small></div></div><div class="afbtns"><a class="afb wa" href="https://wa.me/249115819197?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%A3%D8%AD%D8%AA%D8%A7%D8%AC%20%D9%85%D8%B3%D8%A7%D8%B9%D8%AF%D8%A9%20%D9%81%D9%8A%20%D9%84%D9%88%D8%AD%D8%A9%20%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9%20%D8%B3%D9%88%D9%82%20%D8%A7%D9%84%D8%B1%D9%87%D8%AF" target="_blank" rel="noopener">💬 تواصل معنا</a><a class="afb" href="https://mail.google.com/mail/?view=cm&fs=1&to=Vsob99@gmail.com" target="_blank" rel="noopener">✉️ بريد</a></div></div><div class="afcopy">© 2026 سوق الرهد ابودكنه — جميع الحقوق محفوظة لدى <b style="white-space:nowrap">إسراء النور</b> <span class="ver">· الإصدار 42</span></div></footer>
 <nav id="bottomNav" class="bnav" hidden></nav>
 <div id="toast"></div>
 <script>
@@ -218,7 +196,6 @@ function adminFn(payload){
 }
 // ===== الحالة =====
 var STATS=[],ALLV=false,ME={master:false},STORES=[],CUR=null,PROVIDERS=[],PRODUCTS=[],OFFERS=[],ACCTS=[],ORDERS=[],FBS=[],FBF='approved',BKL=[],BSV=[],BKF='pending';
-var offAllLoaded=false;
 var TAB="home",editingId=null,searchQ="",ordersLimit=20;
 var notif={lastSeen:0,muted:false},lastMax=0,audioCtx=null,pollTimer=null;
 try{var _n=localStorage.getItem("sr_adm_notif");if(_n)notif=Object.assign(notif,JSON.parse(_n))}catch(e){}
@@ -235,12 +212,6 @@ function imgUrl(u){
   return m?"https://drive.google.com/thumbnail?id="+m[1]+"&sz=w200":u;
 }
 function thumb(u,cls,ph){var s=imgUrl(u);return '<div class="'+(cls||"thumb")+'">'+(s?'<img src="'+esc(s)+'" alt="" referrerpolicy="no-referrer" onerror="this.parentElement.textContent=\''+(ph||"📦")+'\'">':(ph||"📦"))+'</div>'}
-function prc(x){var n=parseInt(lat(x),10);return n>0?n:null}
-var DEPTS=["الأسنان","الباطنية","الجراحة","الأطفال","النساء والولادة","أطباء عموميون","المختبر","الأشعة"];
-function deptSelect(id,cur){
-  var l=DEPTS.slice();BSV.forEach(function(v){if(v.grp&&l.indexOf(v.grp)<0)l.push(v.grp)});
-  if(cur&&l.indexOf(cur)<0)l.push(cur);
-  return '<select id="'+id+'" data-dept="1"><option value="">— اختاري القسم —</option>'+l.map(function(x){return '<option'+(x===cur?' selected':'')+'>'+esc(x)+'</option>'}).join("")+'<option value="__new">➕ قسم جديد…</option></select>'}
 function storeById(id){return STORES.filter(function(s){return s.id===id})[0]}
 
 // ===== رفع الصور (من المعرض أو الكاميرا) إلى Supabase Storage =====
@@ -263,7 +234,7 @@ function uploadImage(file,inputId,pvId){
   if(!/^image\//.test(file.type||"")){toast("اختر ملف صورة",true);return}
   toast("⏳ جاري رفع الصورة...");
   var path=CUR.id+"/"+Date.now().toString(36)+Math.random().toString(36).slice(2,7)+".jpg";
-  compressImage(file,900,.8).then(function(blob){
+  compressImage(file,640,.78).then(function(blob){
     return ready().then(function(){
       return fetch(SB_URL+"/storage/v1/object/product-images/"+path,{method:"POST",headers:{apikey:SB_KEY,Authorization:"Bearer "+SESS.access,"Content-Type":"image/jpeg","cache-control":"max-age=31536000"},body:blob});
     });
@@ -326,7 +297,6 @@ function boot(){
     var ids=(r[1]||[]).map(function(x){return x.store_id});
     STORES=ME.master?r[2]:r[2].filter(function(s){return ids.indexOf(s.id)>-1});
     PROVIDERS=r[3]||[];
-    if(ME.master)STORES.forEach(function(st){if(!st.booking_enabled&&isClinicSec(st.section)){st.booking_enabled=true;api("PATCH","stores?id=eq."+st.id,{booking_enabled:true},"return=minimal").catch(function(){st.booking_enabled=false})}});
     if(!STORES.length&&!ME.master){
       $("app").innerHTML='<div class="card"><div class="err">حسابك غير مرتبط بأي متجر بعد. تواصل مع إدارة سوق الرهد.</div><button class="btn btn-line" data-act="logout">تسجيل الخروج</button></div>';
       $("outBtn").hidden=false;return;
@@ -336,11 +306,10 @@ function boot(){
     $("hTitle").textContent=ME.master?"إدارة سوق الرهد":"إدارة المتجر";
     $("muteBtn").hidden=false;$("outBtn").hidden=false;$("bottomNav").hidden=false;
     if(ME.master){TAB="admin";ALLV=true}
-    fixTab();buildNav();loadStoreData().then(function(){startPolling()});
+    buildNav();loadStoreData().then(function(){startPolling()});
   }).catch(function(e){if(String(e.message)!=="nosess"&&String(e.message)!=="expired")fail(e);else showLogin()});
 }
 function loadStoreData(){
-  offAllLoaded=false;
   var sid=CUR&&CUR.id;
   var jobs=[loadOrders(),loadStats(),loadFeedback(),loadBookings(),loadBsv()];
   if(sid){
@@ -376,10 +345,6 @@ function fbHtml(){
   return h;
 }
 function lat(v){return String(v||'').replace(/[٠-٩]/g,function(c){return c.charCodeAt(0)-1632})}
-function isClinicSec(x){return /مستشفى|مستوصف|عيادة|مركز طبي|مركز صحي/.test(x||"")}
-function isBkStore(st){return !!st&&(st.booking_enabled||isClinicSec(st.section))}
-function fixTab(){if(!ALLV&&isBkStore(CUR)&&(TAB==="products"||TAB==="offers"||TAB==="orders"))TAB="bk";
-  if(!hasBk()&&TAB==="bk")TAB="home"}
 function hasBk(){return STORES.some(function(s){return s.booking_enabled})}
 function loadBookings(){
   if(!hasBk()){BKL=[];return Promise.resolve()}
@@ -420,11 +385,11 @@ function bkHtml(){
     h+='<div class="card"><h2>⚙️ خدمات الحجز — '+esc(CUR.name)+'</h2><div class="hint" style="margin:0 0 8px">«العدد في اليوم» اتركه فارغًا إذا لا تريد حدًّا، وإذا كتبت رقمًا يتوقف الحجز عند اكتمال العدد ليوم واحد.</div>';
     BSV.forEach(function(v){
       h+='<div class="item"><div class="iname"'+(v.paused?' style="opacity:.5"':'')+'>'+esc(v.name)+(v.grp?' · '+esc(v.grp):'')+(v.paused?' (متوقفة مؤقتًا)':'')+'</div><div class="imeta">'+(v.weekdays&&v.weekdays.length?v.weekdays.map(function(i){return WD[i]}).join('، '):'كل الأيام')+'</div>'+
-        '<label>الصورة</label>'+imgPicker('bsi_'+v.id,'bspv_'+v.id,v.image_url,'🩺')+'<input id="bsi_'+esc(v.id)+'" type="hidden" value="'+esc(v.image_url||"")+'"><div class="grid3" style="grid-template-columns:1fr 1fr"><div><label>الاسم (قسم أو طبيب)</label><input id="bsn_'+esc(v.id)+'" maxlength="80" value="'+esc(v.name)+'"></div><div><label>القسم</label>'+deptSelect('bsg_'+v.id,v.grp||"")+'</div>'+
-        '<div><label>العدد في اليوم</label><input id="bsc_'+esc(v.id)+'" inputmode="numeric" placeholder="بلا حد" value="'+(v.capacity_per_day==null?'':v.capacity_per_day)+'"></div><div><label>قيمة الحجز (اختياري)</label><input id="bsp_'+esc(v.id)+'" inputmode="numeric" placeholder="بلا قيمة" value="'+(v.price==null?'':v.price)+'"></div></div><label>أيام العمل (بدون تحديد = كل الأيام)</label>'+wdBoxes('bsw_'+v.id+'_',v.weekdays)+
+        '<div class="grid3"><div><label>الاسم (قسم أو طبيب)</label><input id="bsn_'+esc(v.id)+'" maxlength="80" value="'+esc(v.name)+'"></div><div><label>المجموعة (مثل: الباطنية)</label><input id="bsg_'+esc(v.id)+'" maxlength="60" value="'+esc(v.grp||"")+'"></div>'+
+        '<div><label>العدد في اليوم</label><input id="bsc_'+esc(v.id)+'" inputmode="numeric" placeholder="بلا حد" value="'+(v.capacity_per_day==null?'':v.capacity_per_day)+'"></div></div><label>أيام العمل (بدون تحديد = كل الأيام)</label>'+wdBoxes('bsw_'+v.id+'_',v.weekdays)+
         '<div class="acts"><button class="btn btn-sm" data-act="bsvSave" data-id="'+esc(v.id)+'">حفظ</button><button class="btn btn-line btn-sm" data-act="bsvToggle" data-id="'+esc(v.id)+'">'+(v.paused?'استئناف الخدمة':'إيقاف مؤقت')+'</button><button class="btn btn-red btn-sm" data-act="bsvDel" data-id="'+esc(v.id)+'">حذف</button></div></div>';
     });
-    h+='<label>صورة القسم أو الطبيب — اختياري</label>'+imgPicker("bsNewImg","bsNewPv","","🩺")+'<input id="bsNewImg" type="hidden"><label>الاسم (الخدمة أو الطبيب)</label><input id="bsNew" maxlength="80"><label>القسم</label>'+deptSelect('bsNewGrp',"")+'<label>قيمة الحجز — اختياري</label><input id="bsNewPrice" inputmode="numeric" placeholder="بلا قيمة"><label>العدد في اليوم — اختياري</label><input id="bsNewCap" inputmode="numeric" placeholder="بلا حد"><label>أيام العمل (بدون تحديد = كل الأيام)</label>'+wdBoxes('bswn_',null)+'<button class="btn" data-act="bsvAdd">إضافة الخدمة</button></div>';
+    h+='<label>خدمة جديدة (مثل: كشف أسنان)</label><input id="bsNew" maxlength="80"><label>المجموعة — اختياري (مثل: الباطنية، الجراحة، الأطفال)</label><input id="bsNewGrp" maxlength="60"><label>العدد في اليوم — اختياري</label><input id="bsNewCap" inputmode="numeric" placeholder="بلا حد"><label>أيام العمل (بدون تحديد = كل الأيام)</label>'+wdBoxes('bswn_',null)+'<button class="btn" data-act="bsvAdd">إضافة الخدمة</button></div>';
   }
   return h;
 }
@@ -469,8 +434,7 @@ document.addEventListener("click",function(){try{audioCtx=audioCtx||new (window.
 // ===== التبويبات =====
 function buildNav(){
   var tabs=[["home","🏠","الرئيسية"],["orders","🧾","الطلبات"],["products","🛍️","الأصناف"],["offers","🏷️","العروض"],["fb","💬","الآراء"],["settings","⚙️","الإعدادات"]];
-  if(!ALLV&&isBkStore(CUR)){tabs=[["home","🏠","الرئيسية"],["bk","🩺","الحجوزات"],["fb","💬","الآراء"],["settings","⚙️","الإعدادات"]]}
-  else if(hasBk()){tabs.splice(5,0,["bk","🩺","الحجوزات"])}
+  if(hasBk()){tabs.splice(5,0,["bk","🩺","الحجوزات"])}
   if(ME.master)tabs.push(["admin","🏬","الإدارة"]);
   $("bottomNav").innerHTML=tabs.map(function(t){
     return '<button class="navbtn" data-tab="'+t[0]+'"><span class="navicon"><span style="font-size:19px">'+t[1]+'</span>'+(t[0]==="orders"?'<span class="navbadge" id="navBadge_orders" hidden>0</span>':'')+(t[0]==="fb"?'<span class="navbadge" id="navBadge_fb" hidden>0</span>':'')+(t[0]==="bk"?'<span class="navbadge" id="navBadge_bk" hidden>0</span>':'')+'</span><span>'+t[2]+'</span></button>';
@@ -487,19 +451,18 @@ function storeSwitch(){
 }
 function render(){
   if(!SESS)return;
-  fixTab();
   document.querySelectorAll(".navbtn").forEach(function(b){b.classList.toggle("active",b.getAttribute("data-tab")===TAB)});
   var h="";
   var storeTab=TAB==="products"||TAB==="offers"||TAB==="settings";
   if(ME.master&&!ALLV&&storeTab&&CUR)h='<div class="card" style="background:#fff7e0;border:1px solid #f0c24b"><div style="font-size:13px;margin-bottom:8px">أنتِ تعملين الآن على متجر: <b>'+esc(CUR.name)+'</b></div><div class="acts" style="margin:0"><button class="btn btn-sm" data-act="backAll">🏠 لوحتي (كل المتاجر)</button><button class="btn btn-line btn-sm" data-act="backAdmin">🏬 الإدارة</button></div></div>';
-  if(ME.master&&ALLV&&storeTab&&TAB!=="offers"){
+  if(ME.master&&ALLV&&storeTab){
     $("app").innerHTML=storeSwitch()+'<div class="card"><div class="empty">اختاري متجرًا من القائمة أعلاه لتعدّلي أصنافه أو عروضه أو إعداداته.</div></div>';
     badge();return;
   }
   if(TAB==="home")h+=homeHtml();
   else if(TAB==="orders")h+=ordersHtml();
   else if(TAB==="products")h+=storeSwitch()+productsHtml();
-  else if(TAB==="offers"){if(ALLV&&!offAllLoaded){offAllLoaded=true;api("GET","offers?select=*&order=created_at.desc&limit=500").then(function(x){OFFERS=x||[];render()}).catch(fail)}h+=storeSwitch()+offersHtml()}
+  else if(TAB==="offers")h+=storeSwitch()+offersHtml();
   else if(TAB==="settings")h+=storeSwitch()+settingsHtml();
   else if(TAB==="fb")h+=fbHtml();
   else if(TAB==="bk")h+=bkHtml();
@@ -603,9 +566,8 @@ function productFormHtml(p){
     '<div class="grid2"><div><label>الفئة</label><input id="pCat" list="catList" value="'+esc(p.category||"")+'"><datalist id="catList">'+Object.keys(cats).map(function(c){return '<option value="'+esc(c)+'">'}).join("")+'</datalist></div>'+
     '<div><label>الوحدة</label><input id="pUnit" placeholder="كيلو، قطعة..." value="'+esc(p.unit||"")+'"></div></div>'+
     '<div class="grid3"><div><label>السعر</label><input id="pFull" type="number" inputmode="decimal" value="'+(p.price_full||"")+'"></div>'+
-    ('<div><label>سعر النصف</label><input id="pHalf" type="number" inputmode="decimal" value="'+(p.price_half||"")+'"></div><div><label>سعر الربع</label><input id="pQuarter" type="number" inputmode="decimal" value="'+(p.price_quarter||"")+'"></div>')+'</div>'+
-    ('<label>أقل مبلغ للطلب بالمبلغ — اختياري</label><input id="pMin" type="number" inputmode="decimal" placeholder="مثال: 1000" value="'+(p.min_amount||"")+'"><div class="hint">أقل مبلغ يستطيع الزبون أن يطلب به هذا الصنف (خانة «مبلغ»).</div>')+
-    '<label>أقل كمية للبيع — اختياري</label><input id="pMinQty" type="number" inputmode="numeric" min="1" placeholder="مثال: 3" value="'+(p.min_qty>1?p.min_qty:"")+'"><div class="hint">مثال: السكر لا يُباع بأقل من 3، فلا يستطيع الزبون طلب أقل من ذلك.</div>'+
+    (vis?'':'<div><label>سعر النصف</label><input id="pHalf" type="number" inputmode="decimal" value="'+(p.price_half||"")+'"></div><div><label>سعر الربع</label><input id="pQuarter" type="number" inputmode="decimal" value="'+(p.price_quarter||"")+'"></div>')+'</div>'+
+    (vis?'':'<label>أقل مبلغ للطلب بالمبلغ — اختياري</label><input id="pMin" type="number" inputmode="decimal" placeholder="مثال: 1000" value="'+(p.min_amount||"")+'"><div class="hint">أقل مبلغ يستطيع الزبون أن يطلب به هذا الصنف (خانة «مبلغ»).</div>')+
     '<label>الحالة</label><select id="pStatus"><option'+((p.status||"موجود")==="موجود"?' selected':'')+'>موجود</option><option'+(p.status==="نفد"?' selected':'')+'>نفد</option></select>'+
     '<label>صورة الصنف — اختياري</label>'+imgPicker("pImg","pPv",p.image_url,"📦")+'<input id="pImg" class="ltr" placeholder="أو الصق رابطًا" value="'+esc(p.image_url||"")+'">'+
     '<div class="acts"><button class="btn" data-act="saveProduct">'+(p.id?'حفظ التعديل':'إضافة الصنف')+'</button>'+(p.id?'<button class="btn btn-line" data-act="cancelEdit">إلغاء</button>':'')+'</div>';
@@ -634,8 +596,6 @@ function saveProduct(){
     price_half:$("pHalf")?num($("pHalf").value):0,price_quarter:$("pQuarter")?num($("pQuarter").value):0,
     status:$("pStatus").value,image_url:$("pImg").value.trim()};
   if($("pMin"))row.min_amount=num($("pMin").value);
-  var mq=Math.floor(num($("pMinQty").value))||1;
-  if(mq>1||(editingId&&PRODUCTS.some(function(o){return o.id===editingId&&o.min_qty>1})))row.min_qty=Math.max(1,mq);
   var p=editingId?api("PATCH","products?id=eq."+editingId,row,"return=representation"):api("POST","products",Object.assign({store_id:CUR.id},row),"return=representation");
   p.then(function(r){
     var x=r&&r[0];if(x){if(editingId)PRODUCTS=PRODUCTS.map(function(o){return o.id===x.id?x:o});else PRODUCTS.unshift(x)}
@@ -645,20 +605,19 @@ function saveProduct(){
 
 // ===== العروض =====
 function offersHtml(){
-  if(!CUR&&!ALLV)return '<div class="card"><div class="empty">لا يوجد متجر.</div></div>';
+  if(!CUR)return '<div class="card"><div class="empty">لا يوجد متجر.</div></div>';
   var today=new Date().toISOString().slice(0,10);
   var h='<div class="card"><h2>🏷️ عرض جديد</h2>'+
-    (ME.master?'<label>يظهر في</label><select id="ofScope">'+((ALLV||!CUR)?'<option value="all">كل المتاجر (عرض عام)</option>'+STORES.map(function(s){return '<option value="'+esc(s.id)+'">'+esc(s.name)+'</option>'}).join(""):'<option value="store">'+esc(CUR.name)+'</option><option value="all">كل المتاجر (عرض عام)</option>')+'</select>':'')+
+    (ME.master?'<label>يظهر في</label><select id="ofScope"><option value="store">'+esc(CUR.name)+'</option><option value="all">كل المتاجر (عرض عام)</option></select>':'')+
     '<label>نص العرض (حتى 120 حرفًا)</label><input id="ofText" maxlength="120" placeholder="مثال: خصم 10% على الزيوت">'+
     '<label>كود الخصم — اختياري</label><input id="ofCode" maxlength="20" class="ltr">'+
     '<label>ينتهي في — اختياري</label><input id="ofUntil" type="date">'+
-    '<label>مدة ظهور العرض في الشريط بالثواني — اختياري</label><input id="ofSecs" type="number" inputmode="numeric" min="3" max="120" placeholder="مثال: 10"><div class="hint">كم ثانية يبقى هذا العرض ظاهراً قبل أن يتبدّل للعرض التالي. إن تركتها فارغة يظهر 4.5 ثانية.</div>'+
     '<button class="btn" data-act="addOffer">نشر العرض</button></div>';
   h+='<div class="card"><h2>العروض ('+OFFERS.length+')</h2>';
   if(!OFFERS.length)h+='<div class="empty">لا توجد عروض.</div>';
   OFFERS.forEach(function(o){
     var exp=o.until&&o.until<today;
-    h+='<div class="item"><div class="iname">'+esc(o.text)+'</div><div class="imeta">'+(o.store_id?(ALLV?'<span class="badge">'+esc((storeById(o.store_id)||{}).name||'')+'</span> ':''):'<span class="badge">عام</span> ')+(o.code?'كود: '+esc(o.code)+' · ':'')+(o.until?(exp?'<span class="off">منتهٍ '+esc(o.until)+'</span>':'ينتهي '+esc(o.until)):'بدون انتهاء')+(o.show_seconds>0?' · يظهر '+o.show_seconds+' ث':'')+'</div>'+
+    h+='<div class="item"><div class="iname">'+esc(o.text)+'</div><div class="imeta">'+(o.store_id?'':'<span class="badge">عام</span> ')+(o.code?'كود: '+esc(o.code)+' · ':'')+(o.until?(exp?'<span class="off">منتهٍ '+esc(o.until)+'</span>':'ينتهي '+esc(o.until)):'بدون انتهاء')+'</div>'+
       '<div class="acts"><button class="btn btn-red btn-sm" data-act="delOffer" data-id="'+esc(o.id)+'">حذف</button></div></div>';
   });
   return h+'</div>';
@@ -733,8 +692,7 @@ function adminHtml(){
     h+='<div class="item"><div class="row"><div class="iname">'+esc(s.name)+'</div><span class="badge '+(s.active?'green':'red')+'">'+(s.active?'ظاهر':'مخفي')+'</span></div>'+
       '<div class="acts"><button class="btn btn-line btn-sm" data-act="openStore" data-id="'+esc(s.id)+'">إدارة</button>'+
       '<button class="btn btn-line btn-sm" data-act="renameStore" data-id="'+esc(s.id)+'">تغيير الاسم</button>'+
-      '<button class="btn btn-sm '+(s.active?'btn-red':'btn-green')+'" data-act="toggleStore" data-id="'+esc(s.id)+'">'+(s.active?'إخفاء':'إظهار')+'</button>'+
-      '<button class="btn btn-sm btn-red" data-act="delStore" data-id="'+esc(s.id)+'">🗑 حذف</button></div></div>';
+      '<button class="btn btn-sm '+(s.active?'btn-red':'btn-green')+'" data-act="toggleStore" data-id="'+esc(s.id)+'">'+(s.active?'إخفاء':'إظهار')+'</button></div></div>';
   });
   h+='</div>';
   h+='<div class="card"><h2>💳 وسائل الدفع (القائمة التي يختار منها التجار)</h2>'+
@@ -754,9 +712,9 @@ var ACT={
   bkDel:function(d){if(!confirm("حذف هذا الحجز نهائيًا؟"))return;api("DELETE","bookings?id=eq."+d.id,null,"return=minimal").then(function(){return loadBookings()}).then(function(){toast("تم الحذف");render()}).catch(fail)},
   bkEnable:function(){var v=!CUR.booking_enabled;api("PATCH","stores?id=eq."+CUR.id,{booking_enabled:v},"return=minimal").then(function(){CUR.booking_enabled=v;buildNav();return Promise.all([loadBookings(),loadBsv()])}).then(function(){toast(v?"تم تفعيل الحجز ✓ أضيفي الخدمات من تبويب الحجوزات":"تم إيقاف الحجز");render()}).catch(fail)},
   bsvAdd:function(){var n=($("bsNew").value||"").trim(),c=parseInt(lat($("bsNewCap").value),10);if(!n){toast("اكتب اسم الخدمة",true);return}
-    api("POST","booking_services",{store_id:CUR.id,name:n,image_url:($("bsNewImg").value||"").trim()||null,price:prc($("bsNewPrice").value),capacity_per_day:c>0?c:null,grp:($("bsNewGrp").value||"").trim(),weekdays:wdRead("bswn_")},"return=minimal").then(function(){return loadBsv()}).then(function(){toast("تمت الإضافة ✓");render()}).catch(fail)},
+    api("POST","booking_services",{store_id:CUR.id,name:n,capacity_per_day:c>0?c:null,grp:($("bsNewGrp").value||"").trim(),weekdays:wdRead("bswn_")},"return=minimal").then(function(){return loadBsv()}).then(function(){toast("تمت الإضافة ✓");render()}).catch(fail)},
   bsvSave:function(d){var n=($("bsn_"+d.id).value||"").trim(),c=parseInt(lat($("bsc_"+d.id).value),10);if(!n){toast("اكتب اسم الخدمة",true);return}
-    api("PATCH","booking_services?id=eq."+d.id,{name:n,image_url:($("bsi_"+d.id).value||"").trim()||null,price:prc($("bsp_"+d.id).value),capacity_per_day:c>0?c:null,grp:($("bsg_"+d.id).value||"").trim(),weekdays:wdRead("bsw_"+d.id+"_")},"return=minimal").then(function(){return loadBsv()}).then(function(){toast("تم الحفظ ✓");render()}).catch(fail)},
+    api("PATCH","booking_services?id=eq."+d.id,{name:n,capacity_per_day:c>0?c:null,grp:($("bsg_"+d.id).value||"").trim(),weekdays:wdRead("bsw_"+d.id+"_")},"return=minimal").then(function(){return loadBsv()}).then(function(){toast("تم الحفظ ✓");render()}).catch(fail)},
   bsvToggle:function(d){var v=BSV.filter(function(x){return x.id===d.id})[0];api("PATCH","booking_services?id=eq."+d.id,{paused:!v.paused},"return=minimal").then(function(){return loadBsv()}).then(function(){render()}).catch(fail)},
   bsvDel:function(d){if(!confirm("حذف الخدمة؟ الحجوزات السابقة تبقى محفوظة."))return;api("DELETE","booking_services?id=eq."+d.id,null,"return=minimal").then(function(){return loadBsv()}).then(function(){toast("تم الحذف");render()}).catch(fail)},
   backup:function(){
@@ -842,11 +800,8 @@ var ACT={
   delProduct:function(d){if(!confirm("حذف هذا الصنف نهائيًا؟"))return;api("DELETE","products?id=eq."+d.id).then(function(){PRODUCTS=PRODUCTS.filter(function(x){return x.id!==d.id});toast("تم الحذف");render()}).catch(fail)},
   addOffer:function(){
     var t=$("ofText").value.trim();if(!t){toast("اكتب نص العرض",true);return}
-    var sc=$("ofScope")?$("ofScope").value:"store",sid=sc==="all"?null:(sc==="store"?(CUR&&CUR.id):sc);
-    if(sc==="store"&&!CUR){toast("اختاري المتجر",true);return}
-    var body={store_id:sid,text:t,code:$("ofCode").value.trim(),until:$("ofUntil").value||null};
-    var secs=Math.floor(Number($("ofSecs")&&$("ofSecs").value))||0;if(secs>0)body.show_seconds=Math.min(120,Math.max(3,secs));
-    api("POST","offers",body,"return=representation").then(function(r){if(r&&r[0])OFFERS.unshift(r[0]);toast("تم نشر العرض ✓");render()}).catch(fail);
+    var all=$("ofScope")&&$("ofScope").value==="all";
+    api("POST","offers",{store_id:all?null:CUR.id,text:t,code:$("ofCode").value.trim(),until:$("ofUntil").value||null},"return=representation").then(function(r){if(r&&r[0])OFFERS.unshift(r[0]);toast("تم نشر العرض ✓");render()}).catch(fail);
   },
   delOffer:function(d){if(!confirm("حذف العرض؟"))return;api("DELETE","offers?id=eq."+d.id).then(function(){OFFERS=OFFERS.filter(function(x){return x.id!==d.id});render()}).catch(fail)},
   saveDm:function(){
@@ -875,21 +830,12 @@ var ACT={
   },
   addStore:function(){
     var n=$("nsName").value.trim();if(!n){toast("أدخل اسم المتجر",true);return}
-    api("POST","stores",{name:n,section:$("nsSec").value,owner_name:$("nsOwner").value.trim(),whatsapp:waNum($("nsWa").value),booking_enabled:isClinicSec($("nsSec").value)},"return=representation").then(function(r){if(r&&r[0]){STORES.push(r[0]);STORES.sort(function(a,b){return a.name.localeCompare(b.name,"ar")})}toast("تمت إضافة المتجر ✓");render()}).catch(fail);
+    api("POST","stores",{name:n,section:$("nsSec").value,owner_name:$("nsOwner").value.trim(),whatsapp:waNum($("nsWa").value)},"return=representation").then(function(r){if(r&&r[0]){STORES.push(r[0]);STORES.sort(function(a,b){return a.name.localeCompare(b.name,"ar")})}toast("تمت إضافة المتجر ✓");render()}).catch(fail);
   },
   backAdmin:function(){setTab("admin")},
-  backAll:function(){ALLV=true;buildNav();setTab("home")},
-  openStore:function(d){ALLV=false;CUR=storeById(d.id);try{localStorage.setItem("sr_adm_store",CUR.id)}catch(e){}loadStoreData().then(function(){buildNav();setTab(isBkStore(CUR)?"bk":"products")})},
+  backAll:function(){ALLV=true;setTab("home")},
+  openStore:function(d){ALLV=false;CUR=storeById(d.id);try{localStorage.setItem("sr_adm_store",CUR.id)}catch(e){}loadStoreData().then(function(){setTab("products")})},
   renameStore:function(d){var s=storeById(d.id);var n=prompt("الاسم الجديد للمتجر:",s.name);if(!n||!n.trim()||n.trim()===s.name)return;api("PATCH","stores?id=eq."+d.id,{name:n.trim()},"return=representation").then(function(r){if(r&&r[0])Object.assign(s,r[0]);toast("تم التغيير ✓");render()}).catch(fail)},
-  delStore:function(d){var s=storeById(d.id);if(!s)return;
-    if(!confirm("حذف متجر «"+s.name+"» نهائيًا مع أصنافه وعروضه وآرائه وحجوزاته؟ لا يمكن التراجع."))return;
-    if(!confirm("تأكيد أخير: حذف «"+s.name+"»؟"))return;
-    api("DELETE","stores?id=eq."+d.id,null,"return=representation").then(function(r){
-      if(!r||!r.length){toast("لم يُحذف المتجر. جرّبي الإخفاء بدل الحذف",true);return}
-      STORES=STORES.filter(function(x){return x.id!==d.id});
-      if(CUR&&CUR.id===d.id)CUR=STORES[0]||null;
-      buildNav();toast("تم حذف المتجر");render()
-    }).catch(function(e){toast("لا يمكن حذف متجر عليه طلبات سابقة. استخدمي الإخفاء",true)})},
   toggleStore:function(d){var s=storeById(d.id);api("PATCH","stores?id=eq."+d.id,{active:!s.active},"return=minimal").then(function(){s.active=!s.active;render()}).catch(fail)},
   addProv:function(){var n=$("pvName").value.trim();if(!n){toast("اكتب اسم الوسيلة",true);return}api("POST","payment_providers",{name:n,sort_order:PROVIDERS.length+1},"return=representation").then(function(r){if(r&&r[0])PROVIDERS.push(r[0]);toast("تمت الإضافة ✓");render()}).catch(fail)},
   renameProv:function(d){
@@ -908,12 +854,10 @@ document.addEventListener("click",function(e){
 });
 document.addEventListener("change",function(e){
   var t=e.target;
-  if(t&&t.dataset&&t.dataset.dept&&t.value==="__new"){var nn=(prompt("اسم القسم الجديد:")||"").trim().slice(0,60);
-    if(nn){var o=document.createElement("option");o.textContent=nn;t.insertBefore(o,t.lastChild);t.value=nn}else t.value="";return}
   if(t&&t.dataset&&t.dataset.upl&&t.files&&t.files[0]){uploadImage(t.files[0],t.dataset.upl,t.dataset.pv);return}
   if(e.target.id==="storeSel"){
-    if(e.target.value==="__all"){ALLV=true;editingId=null;buildNav();render();return}
-    ALLV=false;CUR=storeById(e.target.value);try{localStorage.setItem("sr_adm_store",CUR.id)}catch(x){}editingId=null;buildNav();loadStoreData().then(buildNav)}
+    if(e.target.value==="__all"){ALLV=true;editingId=null;render();return}
+    ALLV=false;CUR=storeById(e.target.value);try{localStorage.setItem("sr_adm_store",CUR.id)}catch(x){}editingId=null;loadStoreData()}
 });
 document.addEventListener("input",function(e){if(e.target.id==="searchBox"){searchQ=e.target.value;render()}});
 document.addEventListener("keydown",function(e){if(e.key==="Enter"&&e.target.id==="lgPass")doLogin()});

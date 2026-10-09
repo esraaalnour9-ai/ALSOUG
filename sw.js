@@ -1,4 +1,4 @@
-var CACHE = "souq-v42"; // كل ما تعدّل index.html/admin.html غيّر هذا الرقم (v4, v5...) عشان يجبر المتصفح ياخذ آخر نسخة فورًا
+var CACHE = "souq-v34"; // كل ما تعدّل index.html/admin.html غيّر هذا الرقم (v4, v5...) عشان يجبر المتصفح ياخذ آخر نسخة فورًا
 var ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
 
 // يسمح للصفحة بإجبار نسخة SW الجديدة على التفعّل فوراً بدل انتظار إغلاق كل التبويبات
