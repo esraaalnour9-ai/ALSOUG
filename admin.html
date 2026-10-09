@@ -7,7 +7,7 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0b3536">
 <meta name="referrer" content="no-referrer">
-<meta name="app-version" content="2026-10-06.3">
+<meta name="app-version" content="2026-10-09.1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src https: data: blob:; connect-src 'self' https://paqxjptmmisybxlpyvsa.supabase.co; manifest-src 'self'; base-uri 'none'; form-action 'none'">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -91,27 +91,22 @@ button:active{transform:scale(.96)}
 #toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:99px;font-weight:800;font-size:13px;z-index:70;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw;text-align:center}
 #toast.show{opacity:1}#toast.bad{background:var(--red)}
 a.lnk{color:var(--amberd);font-weight:800;text-decoration:none}
-.afoot{background:var(--ink,#0f172a);color:#cbd5e1;margin:18px 12px 0;border-radius:22px;padding:16px 16px 14px}
-.afrow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.afbrand{display:flex;align-items:center;gap:10px;min-width:0}
-.afmark{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--amber2,#fbbf24),var(--amber,#f59e0b));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
-.afbrand b{display:block;color:#fff;font-size:14px;font-weight:800}.afbrand small{font-size:11px;color:#94a3b8}
-.afbtns{display:flex;gap:8px}
-.afb{display:inline-flex;align-items:center;gap:6px;min-height:42px;padding:0 16px;border-radius:99px;background:rgba(255,255,255,.1);color:#fff;font-weight:800;font-size:13px;text-decoration:none}
-.afb.wa{background:#16a34a}
-.afcopy{margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.12);text-align:center;font-size:12px;color:#94a3b8}.afcopy b{color:#fff}
-body:has(#bottomNav:not([hidden])) .afoot{margin-bottom:120px}
-.afoot{background:transparent;color:#64748b;border-radius:0;border-top:1px solid rgba(100,116,139,.25);padding:14px 4px 10px;margin:auto 0 12px;width:calc(100% - 28px);max-width:616px;align-self:center}
-.afrow{justify-content:space-between}
-.afbrand b{color:var(--ink,#0f172a);font-size:13px}.afbrand small{color:#64748b}
-.afmark{width:34px;height:34px;font-size:16px}
-.afb{background:rgba(15,118,110,.1);color:#0f766e;min-height:36px;font-size:12.5px;padding:0 13px}
-.afb.wa{background:#16a34a;color:#fff}
-.afcopy{border-top:0;margin-top:8px;padding-top:0;color:#64748b;font-size:11.5px;line-height:1.7}.afcopy b{color:#334155}.afcopy .ver{opacity:.7}
+/* الفوتر: بطاقة مدمجة بنفس أسلوب بطاقات اللوحة */
+.afoot{width:calc(100% - 32px);max-width:608px;align-self:center;margin:4px 0 12px;padding:10px 12px;background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh);color:var(--muted)}
+.afrow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.afbrand{display:flex;align-items:center;gap:8px;min-width:0}
+.afmark{width:30px;height:30px;border-radius:10px;background:linear-gradient(135deg,var(--amber2),var(--amber));display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.afbrand b{display:block;color:var(--text);font-size:12.5px;font-weight:800;line-height:1.3}
+.afbrand small{display:block;font-size:10.5px;color:var(--muted);line-height:1.3}
+.afbtns{display:flex;gap:6px;flex-shrink:0}
+.afb{display:inline-flex;align-items:center;justify-content:center;min-height:32px;padding:0 12px;border-radius:99px;background:var(--amberbg);color:var(--amberd);font-weight:800;font-size:12px;text-decoration:none;white-space:nowrap}
+.afb.wa{background:var(--green);color:#fff}
+.afcopy{margin-top:8px;padding-top:8px;border-top:1px solid var(--line);text-align:center;font-size:10.5px;line-height:1.6;color:var(--muted)}
+.afcopy b{color:var(--text)}.afcopy .ver{opacity:.7}
+body:has(#bottomNav:not([hidden])) .afoot{margin-bottom:100px}
 body{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
 main#app{flex:1 0 auto;width:100%;box-sizing:border-box}
 #bottomNav[hidden]{display:none!important}
-body:has(#bottomNav:not([hidden])) .afoot{margin-bottom:112px}
 </style>
 </head>
 <body>
@@ -124,7 +119,7 @@ body:has(#bottomNav:not([hidden])) .afoot{margin-bottom:112px}
 </header>
 <div id="updBar" hidden><span>✨ يوجد تحديث جديد للوحة</span><button data-act="reload">تحديث الآن</button></div>
 <main id="app"><div class="empty">⏳ جاري التحميل...</div></main>
-<footer class="afoot"><div class="afrow"><div class="afbrand"><span class="afmark">🏪</span><div><b>سوق الرهد ابودكنه</b><small>شمال كردفان، السودان</small></div></div><div class="afbtns"><a class="afb wa" href="https://wa.me/249115819197?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%A3%D8%AD%D8%AA%D8%A7%D8%AC%20%D9%85%D8%B3%D8%A7%D8%B9%D8%AF%D8%A9%20%D9%81%D9%8A%20%D9%84%D9%88%D8%AD%D8%A9%20%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9%20%D8%B3%D9%88%D9%82%20%D8%A7%D9%84%D8%B1%D9%87%D8%AF" target="_blank" rel="noopener">💬 تواصل معنا</a><a class="afb" href="https://mail.google.com/mail/?view=cm&fs=1&to=Vsob99@gmail.com" target="_blank" rel="noopener">✉️ بريد</a></div></div><div class="afcopy">© 2026 سوق الرهد ابودكنه — جميع الحقوق محفوظة لدى <b style="white-space:nowrap">إسراء النور</b> <span class="ver">· الإصدار 42</span></div></footer>
+<footer class="afoot"><div class="afrow"><div class="afbrand"><span class="afmark">🏪</span><div><b>سوق الرهد ابودكنه</b><small>شمال كردفان، السودان</small></div></div><div class="afbtns"><a class="afb wa" href="https://wa.me/249115819197?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%A3%D8%AD%D8%AA%D8%A7%D8%AC%20%D9%85%D8%B3%D8%A7%D8%B9%D8%AF%D8%A9%20%D9%81%D9%8A%20%D9%84%D9%88%D8%AD%D8%A9%20%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9%20%D8%B3%D9%88%D9%82%20%D8%A7%D9%84%D8%B1%D9%87%D8%AF" target="_blank" rel="noopener">💬 تواصل معنا</a><a class="afb" href="https://mail.google.com/mail/?view=cm&fs=1&to=Vsob99@gmail.com" target="_blank" rel="noopener">✉️ بريد</a></div></div><div class="afcopy">© 2026 سوق الرهد ابودكنه — جميع الحقوق محفوظة لدى <b style="white-space:nowrap">إسراء النور</b> <span class="ver">· الإصدار 1</span></div></footer>
 <nav id="bottomNav" class="bnav" hidden></nav>
 <div id="toast"></div>
 <script>
@@ -224,7 +219,7 @@ var notif={lastSeen:0,muted:false},lastMax=0,audioCtx=null,pollTimer=null;
 try{var _n=localStorage.getItem("sr_adm_notif");if(_n)notif=Object.assign(notif,JSON.parse(_n))}catch(e){}
 function saveNotif(){try{localStorage.setItem("sr_adm_notif",JSON.stringify(notif))}catch(e){}}
 
-var VISUAL=["ملابس","مستحضرات","ازياء","عطور","احذيه","حقائب","اكسسوارات","بوتيك","مكياج","عبايات","اقمشه"];
+var VISUAL=["ملابس","مستحضرات","ازياء","عطور","احذيه","حقائب","اكسسوارات","بوتيك","مكياج","عبايات","اقمشه","اواني","اثاث"];
 var SECTIONS=["بقالة","إجمالي","دكان","فواكه وخضروات","جزار","دواجن ولحوم","أسماك","فرن ومخبوزات","حلويات","مشتقات ألبان","مشروبات وعصائر","مطاعم وكافتيريا","أواني منزلية","مستحضرات تجميل","عطور","بوتيك","أحذية وحقائب","إلكترونيات وكهربائيات","صيدلية","مكتبة","سيارات","عقارات","أخرى"];
 function secSelect(id,cur){var l=SECTIONS.slice();if(cur&&l.indexOf(cur)<0)l.unshift(cur);return '<select id="'+id+'"><option value="">— اختاري القسم —</option>'+l.map(function(x){return '<option'+(x===cur?' selected':'')+'>'+esc(x)+'</option>'}).join("")+'</select>'}
 function normAr(s){return String(s||"").replace(/[ً-ٟ]/g,"").replace(/[إأآ]/g,"ا").replace(/ة/g,"ه").replace(/ى/g,"ي").trim()}
@@ -335,7 +330,7 @@ function boot(){
     CUR=storeById(saved)||STORES[0]||null;
     $("hTitle").textContent=ME.master?"إدارة سوق الرهد":"إدارة المتجر";
     $("muteBtn").hidden=false;$("outBtn").hidden=false;$("bottomNav").hidden=false;
-    if(ME.master){TAB="admin";ALLV=true}
+    if(ME.master){TAB="admin";ALLV=true;loadPushCount()}
     fixTab();buildNav();loadStoreData().then(function(){startPolling()});
   }).catch(function(e){if(String(e.message)!=="nosess"&&String(e.message)!=="expired")fail(e);else showLogin()});
 }
@@ -604,7 +599,7 @@ function productFormHtml(p){
     '<div><label>الوحدة</label><input id="pUnit" placeholder="كيلو، قطعة..." value="'+esc(p.unit||"")+'"></div></div>'+
     '<div class="grid3"><div><label>السعر</label><input id="pFull" type="number" inputmode="decimal" value="'+(p.price_full||"")+'"></div>'+
     ('<div><label>سعر النصف</label><input id="pHalf" type="number" inputmode="decimal" value="'+(p.price_half||"")+'"></div><div><label>سعر الربع</label><input id="pQuarter" type="number" inputmode="decimal" value="'+(p.price_quarter||"")+'"></div>')+'</div>'+
-    ('<label>أقل مبلغ للطلب بالمبلغ — اختياري</label><input id="pMin" type="number" inputmode="decimal" placeholder="مثال: 1000" value="'+(p.min_amount||"")+'"><div class="hint">أقل مبلغ يستطيع الزبون أن يطلب به هذا الصنف (خانة «مبلغ»).</div>')+
+    ('<label>أقل سعر شراء — اختياري</label><input id="pMin" type="number" inputmode="decimal" placeholder="مثال: 1000" value="'+(p.min_amount||"")+'"><div class="hint">إن حدّدته تظهر للزبون خانة «الطلب بمبلغ» لهذا الصنف فقط، ولا تقبل أقل من هذا المبلغ. اتركه فارغًا للأصناف ذات السعر الواحد فلا تظهر الخانة.</div>')+
     '<label>أقل كمية للبيع — اختياري</label><input id="pMinQty" type="number" inputmode="numeric" min="1" placeholder="مثال: 3" value="'+(p.min_qty>1?p.min_qty:"")+'"><div class="hint">مثال: السكر لا يُباع بأقل من 3، فلا يستطيع الزبون طلب أقل من ذلك.</div>'+
     '<label>الحالة</label><select id="pStatus"><option'+((p.status||"موجود")==="موجود"?' selected':'')+'>موجود</option><option'+(p.status==="نفد"?' selected':'')+'>نفد</option></select>'+
     '<label>صورة الصنف — اختياري</label>'+imgPicker("pImg","pPv",p.image_url,"📦")+'<input id="pImg" class="ltr" placeholder="أو الصق رابطًا" value="'+esc(p.image_url||"")+'">'+
@@ -653,6 +648,7 @@ function offersHtml(){
     '<label>كود الخصم — اختياري</label><input id="ofCode" maxlength="20" class="ltr">'+
     '<label>ينتهي في — اختياري</label><input id="ofUntil" type="date">'+
     '<label>مدة ظهور العرض في الشريط بالثواني — اختياري</label><input id="ofSecs" type="number" inputmode="numeric" min="3" max="120" placeholder="مثال: 10"><div class="hint">كم ثانية يبقى هذا العرض ظاهراً قبل أن يتبدّل للعرض التالي. إن تركتها فارغة يظهر 4.5 ثانية.</div>'+
+    (ME.master?'<label style="display:flex;gap:8px;align-items:center;margin:2px 0 10px;font-size:13px;color:var(--text)"><input id="ofPush" type="checkbox" style="width:auto;margin:0"> أرسل إشعارًا للزبائن بهذا العرض</label>':'')+
     '<button class="btn" data-act="addOffer">نشر العرض</button></div>';
   h+='<div class="card"><h2>العروض ('+OFFERS.length+')</h2>';
   if(!OFFERS.length)h+='<div class="empty">لا توجد عروض.</div>';
@@ -673,7 +669,7 @@ function settingsHtml(){
     '<label>رقم واتساب (بالصيغة الدولية، مثل 249912345678)</label><input id="sWa" class="ltr" inputmode="numeric" value="'+esc(CUR.whatsapp||"")+'">'+
     '<label>صورة المتجر — اختياري</label>'+imgPicker("sLogo","sPv",CUR.logo_url,"🏪")+'<input id="sLogo" class="ltr" placeholder="أو الصق رابطًا" value="'+esc(CUR.logo_url||"")+'">'+
     '<label>إعلان المتجر (يظهر للزبائن)</label><input id="sAnn" maxlength="120" value="'+esc(CUR.announcement||"")+'">'+
-    '<button class="btn" data-act="saveStore">حفظ</button></div>';
+    '<button class="btn" data-act="saveStore">حفظ</button></div>'+hoursHtml();
   if(ME.master){
     var dm=CUR.delivery_mode||"both";
     h+='<div class="card"><h2>🚚 التوصيل لهذا المتجر</h2>'+
@@ -706,10 +702,48 @@ function settingsHtml(){
   return h+'</div></div>';
 }
 
+function hoursHtml(){
+  return '<div class="card"><h2>🕒 ساعات العمل</h2>'+
+    '<div class="hint">يظهر للزبون «مفتوح الآن» أو «مغلق الآن» بتوقيت الخرطوم، ويُنبَّه قبل إرسال الطلب لمحل مغلق. اتركهما فارغين إن لم تريد عرض الحالة.</div>'+
+    '<div class="grid2"><div><label>يفتح الساعة</label><input id="sHf" type="time" class="ltr" value="'+esc(CUR.open_from||"")+'"></div>'+
+    '<div><label>يغلق الساعة</label><input id="sHt" type="time" class="ltr" value="'+esc(CUR.open_to||"")+'"></div></div>'+
+    '<label style="display:flex;gap:8px;align-items:center;margin:2px 0 10px;font-size:13px;color:var(--text)"><input id="sCl" type="checkbox" style="width:auto;margin:0"'+(CUR.closed_now?' checked':'')+'> إغلاق مؤقت الآن (يتجاهل الساعات)</label>'+
+    '<button class="btn" data-act="saveHours">حفظ ساعات العمل</button></div>';
+}
+// ===== إشعارات الزبائن (للمدير العام) =====
+var PUSHN=null;
+function loadPushCount(){
+  ready().then(function(){return fetch(SB_URL+"/rest/v1/push_subs?select=id",{method:"HEAD",headers:{apikey:SB_KEY,Authorization:"Bearer "+SESS.access,Prefer:"count=exact"}})}).then(function(r){
+    var m=/\/(\d+)$/.exec(r.headers.get("content-range")||"");
+    PUSHN=(r.ok&&m)?+m[1]:null;
+    var e=$("pushN");if(e)e.textContent=PUSHN==null?"—":PUSHN;
+  }).catch(function(){});
+}
+function pushFn(payload){
+  return ready().then(function(){
+    return fetch(SB_URL+"/functions/v1/send-push",{method:"POST",headers:{apikey:SB_KEY,Authorization:"Bearer "+SESS.access,"Content-Type":"application/json"},body:JSON.stringify(payload)}).catch(function(){throw new Error("تعذّر الاتصال بدالة الإشعارات")});
+  }).then(function(r){
+    return r.json().catch(function(){return{}}).then(function(j){
+      if(r.status===404&&!j.error)throw new Error("دالة send-push غير منشورة بعد.");
+      if(!r.ok||!j.ok){
+        var m={auth:"انتهت الجلسة، سجّل الدخول من جديد",forbidden:"هذا الإجراء للمدير العام فقط",bad_input:"اكتب عنوانًا ونصًّا للإشعار",not_configured:"مفاتيح الإشعارات غير مضبوطة في الخادم",server:"خطأ في الخادم، حاول لاحقًا"}[j.error];
+        throw new Error(m||("فشل الطلب ("+r.status+")"));
+      }
+      return j;
+    });
+  });
+}
+function pushCardHtml(){
+  return '<div class="card"><h2>🔔 إشعار لزبائن السوق</h2>'+
+    '<div class="hint">يصل لكل من فعّل الإشعارات من التطبيق. عدد المشتركين: <b id="pushN">'+(PUSHN==null?'—':PUSHN)+'</b></div>'+
+    '<label>العنوان</label><input id="pnTitle" maxlength="60" placeholder="مثال: عرض اليوم 🎉">'+
+    '<label>النص</label><input id="pnBody" maxlength="180" placeholder="مثال: خصم 10% على الزيوت في بقالة النور">'+
+    '<button class="btn" id="pnBtn" data-act="sendPush">إرسال الإشعار الآن</button></div>';
+}
 // ===== الإدارة العامة (المدير فقط) =====
 function adminHtml(){
   var h='<div class="card"><h2>💾 نسخة احتياطية</h2><button class="btn" id="bkBtn" data-act="backup">⬇️ تنزيل نسخة احتياطية الآن</button><div class="muted" id="bkMsg" style="margin-top:6px"></div></div>'+
-    '<div class="card"><h2>➕ إضافة متجر جديد</h2>'+
+    pushCardHtml()+'<div class="card"><h2>➕ إضافة متجر جديد</h2>'+
     '<label>اسم المتجر</label><input id="nsName" maxlength="80">'+
     '<label>نوع المحل (القسم)</label>'+secSelect("nsSec","")+
     '<label>اسم صاحب المتجر</label><input id="nsOwner">'+
@@ -846,12 +880,36 @@ var ACT={
     if(sc==="store"&&!CUR){toast("اختاري المتجر",true);return}
     var body={store_id:sid,text:t,code:$("ofCode").value.trim(),until:$("ofUntil").value||null};
     var secs=Math.floor(Number($("ofSecs")&&$("ofSecs").value))||0;if(secs>0)body.show_seconds=Math.min(120,Math.max(3,secs));
-    api("POST","offers",body,"return=representation").then(function(r){if(r&&r[0])OFFERS.unshift(r[0]);toast("تم نشر العرض ✓");render()}).catch(fail);
+    var doPush=!!($("ofPush")&&$("ofPush").checked),sn=sid&&storeById(sid)?storeById(sid).name:"";
+    api("POST","offers",body,"return=representation").then(function(r){
+      if(r&&r[0])OFFERS.unshift(r[0]);toast("تم نشر العرض ✓");render();
+      if(doPush)pushFn({title:"🏷️ عرض جديد"+(sn?" — "+sn:""),body:t}).then(function(j){toast("نُشر العرض وأُرسل إشعار إلى "+j.sent+" جهاز ✓")}).catch(fail);
+    }).catch(fail);
   },
   delOffer:function(d){if(!confirm("حذف العرض؟"))return;api("DELETE","offers?id=eq."+d.id).then(function(){OFFERS=OFFERS.filter(function(x){return x.id!==d.id});render()}).catch(fail)},
   saveDm:function(){
     var v=$("sDm").value;
     api("PATCH","stores?id=eq."+CUR.id,{delivery_mode:v},"return=representation").then(function(r){if(r&&r[0])Object.assign(CUR,r[0]);else CUR.delivery_mode=v;toast("تم حفظ نمط التوصيل ✓");render()}).catch(fail);
+  },
+  sendPush:function(){
+    var t=$("pnTitle").value.trim(),b=$("pnBody").value.trim();
+    if(t.length<2||b.length<2){toast("اكتب عنوانًا ونصًّا",true);return}
+    if(!confirm("إرسال هذا الإشعار إلى كل المشتركين"+(PUSHN?" ("+PUSHN+")":"")+"؟"))return;
+    var btn=$("pnBtn");btn.disabled=true;
+    pushFn({title:t,body:b}).then(function(j){
+      $("pnTitle").value="";$("pnBody").value="";
+      toast("أُرسل إلى "+j.sent+" جهاز"+(j.removed?" · أُزيل "+j.removed+" اشتراك قديم":"")+" ✓");loadPushCount();
+    }).catch(fail).then(function(){btn.disabled=false});
+  },
+  saveHours:function(){
+    var f=$("sHf").value||null,t=$("sHt").value||null,c=$("sCl").checked;
+    if((f&&!t)||(!f&&t)){toast("اكتب وقت الفتح والإغلاق معًا",true);return}
+    api("PATCH","stores?id=eq."+CUR.id,{open_from:f,open_to:t,closed_now:c},"return=representation").then(function(r){
+      if(r&&r[0])Object.assign(CUR,r[0]);else{CUR.open_from=f;CUR.open_to=t;CUR.closed_now=c}
+      toast("تم حفظ ساعات العمل ✓");render();
+    }).catch(function(e){
+      if(/column|open_from|open_to|closed_now/i.test(String((e&&e.message)||"")))toast("أعمدة ساعات العمل غير موجودة في قاعدة البيانات بعد",true);else fail(e);
+    });
   },
   saveStore:function(){
     var row={owner_name:$("sOwner").value.trim(),section:$("sSec").value,whatsapp:waNum($("sWa").value),logo_url:$("sLogo").value.trim(),announcement:$("sAnn").value.trim()};

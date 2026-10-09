@@ -1,4 +1,4 @@
-var CACHE = "souq-v42"; // كل ما تعدّل index.html/admin.html غيّر هذا الرقم (v4, v5...) عشان يجبر المتصفح ياخذ آخر نسخة فورًا
+var CACHE = "souq-v1"; // كل ما تعدّل index.html/admin.html غيّر هذا الرقم (v2, v3...) عشان يجبر المتصفح ياخذ آخر نسخة فورًا
 var ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
 
 // يسمح للصفحة بإجبار نسخة SW الجديدة على التفعّل فوراً بدل انتظار إغلاق كل التبويبات
@@ -38,4 +38,34 @@ self.addEventListener("fetch", function (e) {
       return caches.match(req).then(function (r) { return r || caches.match("./index.html"); });
     })
   );
+});
+
+// ===== الإشعارات (Web Push) =====
+self.addEventListener("push", function (e) {
+  var d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (x) { d = { body: e.data ? e.data.text() : "" }; }
+  e.waitUntil(self.registration.showNotification(d.title || "سوق الرهد", {
+    body: d.body || "",
+    icon: "./icon-192.png",
+    badge: "./icon-192.png",
+    dir: "rtl",
+    lang: "ar",
+    tag: d.tag || "souq",
+    data: { url: d.url || "./" }
+  }));
+});
+
+self.addEventListener("notificationclick", function (e) {
+  e.notification.close();
+  var target = self.location.origin + "/";
+  try {
+    var u = new URL((e.notification.data && e.notification.data.url) || "./", self.location.href);
+    if (u.origin === self.location.origin) target = u.href; // نفس الموقع فقط
+  } catch (x) {}
+  e.waitUntil(self.clients.matchAll({ type: "window", includeUncontrolled: true }).then(function (list) {
+    for (var i = 0; i < list.length; i++) {
+      if (list[i].url.indexOf(self.location.origin) === 0 && "focus" in list[i]) return list[i].focus();
+    }
+    return self.clients.openWindow(target);
+  }));
 });

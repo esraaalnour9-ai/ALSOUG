@@ -7,7 +7,7 @@
 <link rel="manifest" href="manifest-delivery.json">
 <meta name="theme-color" content="#0b3536">
 <meta name="referrer" content="no-referrer">
-<meta name="app-version" content="2026-10-05.1">
+<meta name="app-version" content="2026-10-09.1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src https: data: blob:; connect-src 'self' https://paqxjptmmisybxlpyvsa.supabase.co; manifest-src 'self'; base-uri 'none'; form-action 'none'">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -253,7 +253,7 @@ function logout(){
 }
 
 // ===== التحميل =====
-var ORD_SEL="orders?select=id,code,store_id,customer_name,customer_phone,customer_address,pay_method,total,status,created_at,delivery_type,delivery_status,delivery_fee,delivery_distance_km,delivery_weight_kg,delivery_note,driver_id,delivered_at,order_items(name,unit,qty,price)";
+var ORD_SEL="orders?select=id,code,store_id,customer_name,customer_phone,customer_address,pay_method,total,status,created_at,delivery_type,delivery_status,delivery_fee,delivery_distance_km,delivery_weight_kg,delivery_zone,delivery_note,driver_id,delivered_at,order_items(name,unit,qty,price)";
 function boot(){
   $("app").innerHTML='<div class="empty">⏳ جاري التحميل...</div>';
   Promise.all([api("GET","admins?select=user_id"),api("GET","delivery_staff?select=*&order=created_at"),api("GET","stores?select=id,name,whatsapp&order=name&limit=1000"),api("GET","delivery_zones?select=*&order=sort_order,name&limit=200").catch(function(){return[]}),api("GET","delivery_weight_tiers?select=*&order=over_kg").catch(function(){return[]}),api("GET","app_settings?select=key,value").catch(function(){return[]})]).then(function(r){
