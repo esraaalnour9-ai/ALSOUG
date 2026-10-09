@@ -101,6 +101,17 @@ a.lnk{color:var(--amberd);font-weight:800;text-decoration:none}
 .afb.wa{background:#16a34a}
 .afcopy{margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.12);text-align:center;font-size:12px;color:#94a3b8}.afcopy b{color:#fff}
 body:has(#bottomNav:not([hidden])) .afoot{margin-bottom:120px}
+.afoot{background:transparent;color:#64748b;border-radius:0;border-top:1px solid rgba(100,116,139,.25);padding:14px 4px 10px;margin:auto 0 12px;width:calc(100% - 28px);max-width:616px;align-self:center}
+.afrow{justify-content:space-between}
+.afbrand b{color:var(--ink,#0f172a);font-size:13px}.afbrand small{color:#64748b}
+.afmark{width:34px;height:34px;font-size:16px}
+.afb{background:rgba(15,118,110,.1);color:#0f766e;min-height:36px;font-size:12.5px;padding:0 13px}
+.afb.wa{background:#16a34a;color:#fff}
+.afcopy{border-top:0;margin-top:8px;padding-top:0;color:#64748b;font-size:11.5px;line-height:1.7}.afcopy b{color:#334155}.afcopy .ver{opacity:.7}
+body{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+main#app{flex:1 0 auto;width:100%;box-sizing:border-box}
+#bottomNav[hidden]{display:none!important}
+body:has(#bottomNav:not([hidden])) .afoot{margin-bottom:112px}
 </style>
 </head>
 <body>
@@ -113,7 +124,7 @@ body:has(#bottomNav:not([hidden])) .afoot{margin-bottom:120px}
 </header>
 <div id="updBar" hidden><span>✨ يوجد تحديث جديد للوحة</span><button data-act="reload">تحديث الآن</button></div>
 <main id="app"><div class="empty">⏳ جاري التحميل...</div></main>
-<footer class="afoot"><div class="afrow"><div class="afbrand"><span class="afmark">🏪</span><div><b>سوق الرهد ابودكنه</b><small>شمال كردفان، السودان</small></div></div><div class="afbtns"><a class="afb wa" href="https://wa.me/249115819197?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%A3%D8%AD%D8%AA%D8%A7%D8%AC%20%D9%85%D8%B3%D8%A7%D8%B9%D8%AF%D8%A9%20%D9%81%D9%8A%20%D9%84%D9%88%D8%AD%D8%A9%20%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9%20%D8%B3%D9%88%D9%82%20%D8%A7%D9%84%D8%B1%D9%87%D8%AF" target="_blank" rel="noopener">💬 تواصل معنا</a><a class="afb" href="https://mail.google.com/mail/?view=cm&fs=1&to=Vsob99@gmail.com" target="_blank" rel="noopener">✉️ بريد</a></div></div><div class="afcopy">© 2026 سوق الرهد ابودكنه — جميع الحقوق محفوظة لدى <b>إسراء النور</b></div></footer>
+<footer class="afoot"><div class="afrow"><div class="afbrand"><span class="afmark">🏪</span><div><b>سوق الرهد ابودكنه</b><small>شمال كردفان، السودان</small></div></div><div class="afbtns"><a class="afb wa" href="https://wa.me/249115819197?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%A3%D8%AD%D8%AA%D8%A7%D8%AC%20%D9%85%D8%B3%D8%A7%D8%B9%D8%AF%D8%A9%20%D9%81%D9%8A%20%D9%84%D9%88%D8%AD%D8%A9%20%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9%20%D8%B3%D9%88%D9%82%20%D8%A7%D9%84%D8%B1%D9%87%D8%AF" target="_blank" rel="noopener">💬 تواصل معنا</a><a class="afb" href="https://mail.google.com/mail/?view=cm&fs=1&to=Vsob99@gmail.com" target="_blank" rel="noopener">✉️ بريد</a></div></div><div class="afcopy">© 2026 سوق الرهد ابودكنه — جميع الحقوق محفوظة لدى <b style="white-space:nowrap">إسراء النور</b> <span class="ver">· الإصدار 42</span></div></footer>
 <nav id="bottomNav" class="bnav" hidden></nav>
 <div id="toast"></div>
 <script>
@@ -207,6 +218,7 @@ function adminFn(payload){
 }
 // ===== الحالة =====
 var STATS=[],ALLV=false,ME={master:false},STORES=[],CUR=null,PROVIDERS=[],PRODUCTS=[],OFFERS=[],ACCTS=[],ORDERS=[],FBS=[],FBF='approved',BKL=[],BSV=[],BKF='pending';
+var offAllLoaded=false;
 var TAB="home",editingId=null,searchQ="",ordersLimit=20;
 var notif={lastSeen:0,muted:false},lastMax=0,audioCtx=null,pollTimer=null;
 try{var _n=localStorage.getItem("sr_adm_notif");if(_n)notif=Object.assign(notif,JSON.parse(_n))}catch(e){}
@@ -328,6 +340,7 @@ function boot(){
   }).catch(function(e){if(String(e.message)!=="nosess"&&String(e.message)!=="expired")fail(e);else showLogin()});
 }
 function loadStoreData(){
+  offAllLoaded=false;
   var sid=CUR&&CUR.id;
   var jobs=[loadOrders(),loadStats(),loadFeedback(),loadBookings(),loadBsv()];
   if(sid){
@@ -479,14 +492,14 @@ function render(){
   var h="";
   var storeTab=TAB==="products"||TAB==="offers"||TAB==="settings";
   if(ME.master&&!ALLV&&storeTab&&CUR)h='<div class="card" style="background:#fff7e0;border:1px solid #f0c24b"><div style="font-size:13px;margin-bottom:8px">أنتِ تعملين الآن على متجر: <b>'+esc(CUR.name)+'</b></div><div class="acts" style="margin:0"><button class="btn btn-sm" data-act="backAll">🏠 لوحتي (كل المتاجر)</button><button class="btn btn-line btn-sm" data-act="backAdmin">🏬 الإدارة</button></div></div>';
-  if(ME.master&&ALLV&&storeTab){
+  if(ME.master&&ALLV&&storeTab&&TAB!=="offers"){
     $("app").innerHTML=storeSwitch()+'<div class="card"><div class="empty">اختاري متجرًا من القائمة أعلاه لتعدّلي أصنافه أو عروضه أو إعداداته.</div></div>';
     badge();return;
   }
   if(TAB==="home")h+=homeHtml();
   else if(TAB==="orders")h+=ordersHtml();
   else if(TAB==="products")h+=storeSwitch()+productsHtml();
-  else if(TAB==="offers")h+=storeSwitch()+offersHtml();
+  else if(TAB==="offers"){if(ALLV&&!offAllLoaded){offAllLoaded=true;api("GET","offers?select=*&order=created_at.desc&limit=500").then(function(x){OFFERS=x||[];render()}).catch(fail)}h+=storeSwitch()+offersHtml()}
   else if(TAB==="settings")h+=storeSwitch()+settingsHtml();
   else if(TAB==="fb")h+=fbHtml();
   else if(TAB==="bk")h+=bkHtml();
@@ -632,19 +645,20 @@ function saveProduct(){
 
 // ===== العروض =====
 function offersHtml(){
-  if(!CUR)return '<div class="card"><div class="empty">لا يوجد متجر.</div></div>';
+  if(!CUR&&!ALLV)return '<div class="card"><div class="empty">لا يوجد متجر.</div></div>';
   var today=new Date().toISOString().slice(0,10);
   var h='<div class="card"><h2>🏷️ عرض جديد</h2>'+
-    (ME.master?'<label>يظهر في</label><select id="ofScope"><option value="store">'+esc(CUR.name)+'</option><option value="all">كل المتاجر (عرض عام)</option></select>':'')+
+    (ME.master?'<label>يظهر في</label><select id="ofScope">'+((ALLV||!CUR)?'<option value="all">كل المتاجر (عرض عام)</option>'+STORES.map(function(s){return '<option value="'+esc(s.id)+'">'+esc(s.name)+'</option>'}).join(""):'<option value="store">'+esc(CUR.name)+'</option><option value="all">كل المتاجر (عرض عام)</option>')+'</select>':'')+
     '<label>نص العرض (حتى 120 حرفًا)</label><input id="ofText" maxlength="120" placeholder="مثال: خصم 10% على الزيوت">'+
     '<label>كود الخصم — اختياري</label><input id="ofCode" maxlength="20" class="ltr">'+
     '<label>ينتهي في — اختياري</label><input id="ofUntil" type="date">'+
+    '<label>مدة ظهور العرض في الشريط بالثواني — اختياري</label><input id="ofSecs" type="number" inputmode="numeric" min="3" max="120" placeholder="مثال: 10"><div class="hint">كم ثانية يبقى هذا العرض ظاهراً قبل أن يتبدّل للعرض التالي. إن تركتها فارغة يظهر 4.5 ثانية.</div>'+
     '<button class="btn" data-act="addOffer">نشر العرض</button></div>';
   h+='<div class="card"><h2>العروض ('+OFFERS.length+')</h2>';
   if(!OFFERS.length)h+='<div class="empty">لا توجد عروض.</div>';
   OFFERS.forEach(function(o){
     var exp=o.until&&o.until<today;
-    h+='<div class="item"><div class="iname">'+esc(o.text)+'</div><div class="imeta">'+(o.store_id?'':'<span class="badge">عام</span> ')+(o.code?'كود: '+esc(o.code)+' · ':'')+(o.until?(exp?'<span class="off">منتهٍ '+esc(o.until)+'</span>':'ينتهي '+esc(o.until)):'بدون انتهاء')+'</div>'+
+    h+='<div class="item"><div class="iname">'+esc(o.text)+'</div><div class="imeta">'+(o.store_id?(ALLV?'<span class="badge">'+esc((storeById(o.store_id)||{}).name||'')+'</span> ':''):'<span class="badge">عام</span> ')+(o.code?'كود: '+esc(o.code)+' · ':'')+(o.until?(exp?'<span class="off">منتهٍ '+esc(o.until)+'</span>':'ينتهي '+esc(o.until)):'بدون انتهاء')+(o.show_seconds>0?' · يظهر '+o.show_seconds+' ث':'')+'</div>'+
       '<div class="acts"><button class="btn btn-red btn-sm" data-act="delOffer" data-id="'+esc(o.id)+'">حذف</button></div></div>';
   });
   return h+'</div>';
@@ -828,8 +842,11 @@ var ACT={
   delProduct:function(d){if(!confirm("حذف هذا الصنف نهائيًا؟"))return;api("DELETE","products?id=eq."+d.id).then(function(){PRODUCTS=PRODUCTS.filter(function(x){return x.id!==d.id});toast("تم الحذف");render()}).catch(fail)},
   addOffer:function(){
     var t=$("ofText").value.trim();if(!t){toast("اكتب نص العرض",true);return}
-    var all=$("ofScope")&&$("ofScope").value==="all";
-    api("POST","offers",{store_id:all?null:CUR.id,text:t,code:$("ofCode").value.trim(),until:$("ofUntil").value||null},"return=representation").then(function(r){if(r&&r[0])OFFERS.unshift(r[0]);toast("تم نشر العرض ✓");render()}).catch(fail);
+    var sc=$("ofScope")?$("ofScope").value:"store",sid=sc==="all"?null:(sc==="store"?(CUR&&CUR.id):sc);
+    if(sc==="store"&&!CUR){toast("اختاري المتجر",true);return}
+    var body={store_id:sid,text:t,code:$("ofCode").value.trim(),until:$("ofUntil").value||null};
+    var secs=Math.floor(Number($("ofSecs")&&$("ofSecs").value))||0;if(secs>0)body.show_seconds=Math.min(120,Math.max(3,secs));
+    api("POST","offers",body,"return=representation").then(function(r){if(r&&r[0])OFFERS.unshift(r[0]);toast("تم نشر العرض ✓");render()}).catch(fail);
   },
   delOffer:function(d){if(!confirm("حذف العرض؟"))return;api("DELETE","offers?id=eq."+d.id).then(function(){OFFERS=OFFERS.filter(function(x){return x.id!==d.id});render()}).catch(fail)},
   saveDm:function(){

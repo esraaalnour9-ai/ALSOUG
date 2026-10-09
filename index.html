@@ -388,7 +388,7 @@ function loadSupabase(){
     sbGet("stores?select=id,name,owner_name,whatsapp,logo_url,announcement,delivery_mode,section,booking_enabled&order=name&limit=1000").catch(function(){return sbGet("stores?select=id,name,owner_name,whatsapp,logo_url,announcement,delivery_mode,section&order=name&limit=1000")}).catch(function(){return sbGet("stores?select=id,name,owner_name,whatsapp,logo_url,announcement,delivery_mode&order=name&limit=1000")}).catch(function(){return sbGet("stores?select=id,name,owner_name,whatsapp,logo_url,announcement&order=name&limit=1000")}),
     sbGet("products?select=id,store_id,name,category,unit,price_full,price_half,price_quarter,status,image_url,min_amount,min_qty&order=created_at&limit=5000").catch(function(){return sbGet("products?select=id,store_id,name,category,unit,price_full,price_half,price_quarter,status,image_url,min_amount&order=created_at&limit=5000")}),
     sbGet("store_payment_accounts?select=id,store_id,provider,account_number,account_name&order=sort_order&limit=2000"),
-    sbGet("offers?select=id,store_id,text,code,until&order=created_at.desc&limit=500"),
+    sbGet("offers?select=id,store_id,text,code,until,show_seconds&order=created_at.desc&limit=500").catch(function(){return sbGet("offers?select=id,store_id,text,code,until&order=created_at.desc&limit=500")}),
     sbGet("store_sections?select=name&order=sort_order,name&limit=200").catch(function(){return []}),
     sbGet("delivery_zones?select=name,fee&order=sort_order,name&limit=100").catch(function(){return []}),
     sbGet("app_settings?select=key,value&limit=20").catch(function(){return []}),
@@ -415,7 +415,7 @@ function loadSupabase(){
       d[n].payAccounts.push({id:a.id,provider:a.provider,number:a.account_number,name:a.account_name||""});
     });
     var offers=(r[3]||[]).map(function(o){
-      return {id:o.id,store:o.store_id?(byId[o.store_id]||""):"الكل",text:o.text,code:o.code||"",until:o.until||""};
+      return {id:o.id,store:o.store_id?(byId[o.store_id]||""):"الكل",text:o.text,code:o.code||"",until:o.until||"",secs:Math.max(0,Number(o.show_seconds)||0)};
     }).filter(function(o){return o.store});
     return {data:d,offers:offers};
   });
@@ -574,7 +574,7 @@ function renderPromos(){
   if(!active.length){box.hidden=true;box.innerHTML="";return}
   box.hidden=false;
   paintPromo();
-  if(active.length>1)promoTimer=setInterval(function(){promoIdx=(promoIdx+1)%promoActive.length;paintPromo()},4500);
+  if(active.length>1)(function tick(){var cur=promoActive[promoIdx]||{};promoTimer=setTimeout(function(){promoIdx=(promoIdx+1)%promoActive.length;paintPromo();tick()},(cur.secs>0?cur.secs:4.5)*1000)})();
 }
 function paintPromo(){
   var p=promoActive[promoIdx];if(!p)return;
