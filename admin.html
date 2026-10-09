@@ -91,6 +91,16 @@ button:active{transform:scale(.96)}
 #toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:99px;font-weight:800;font-size:13px;z-index:70;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw;text-align:center}
 #toast.show{opacity:1}#toast.bad{background:var(--red)}
 a.lnk{color:var(--amberd);font-weight:800;text-decoration:none}
+.afoot{background:var(--ink,#0f172a);color:#cbd5e1;margin:18px 12px 0;border-radius:22px;padding:16px 16px 14px}
+.afrow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.afbrand{display:flex;align-items:center;gap:10px;min-width:0}
+.afmark{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--amber2,#fbbf24),var(--amber,#f59e0b));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.afbrand b{display:block;color:#fff;font-size:14px;font-weight:800}.afbrand small{font-size:11px;color:#94a3b8}
+.afbtns{display:flex;gap:8px}
+.afb{display:inline-flex;align-items:center;gap:6px;min-height:42px;padding:0 16px;border-radius:99px;background:rgba(255,255,255,.1);color:#fff;font-weight:800;font-size:13px;text-decoration:none}
+.afb.wa{background:#16a34a}
+.afcopy{margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.12);text-align:center;font-size:12px;color:#94a3b8}.afcopy b{color:#fff}
+body:has(#bottomNav:not([hidden])) .afoot{margin-bottom:120px}
 </style>
 </head>
 <body>
@@ -103,6 +113,7 @@ a.lnk{color:var(--amberd);font-weight:800;text-decoration:none}
 </header>
 <div id="updBar" hidden><span>✨ يوجد تحديث جديد للوحة</span><button data-act="reload">تحديث الآن</button></div>
 <main id="app"><div class="empty">⏳ جاري التحميل...</div></main>
+<footer class="afoot"><div class="afrow"><div class="afbrand"><span class="afmark">🏪</span><div><b>سوق الرهد ابودكنه</b><small>شمال كردفان، السودان</small></div></div><div class="afbtns"><a class="afb wa" href="https://wa.me/249115819197?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%A3%D8%AD%D8%AA%D8%A7%D8%AC%20%D9%85%D8%B3%D8%A7%D8%B9%D8%AF%D8%A9%20%D9%81%D9%8A%20%D9%84%D9%88%D8%AD%D8%A9%20%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9%20%D8%B3%D9%88%D9%82%20%D8%A7%D9%84%D8%B1%D9%87%D8%AF" target="_blank" rel="noopener">💬 تواصل معنا</a><a class="afb" href="https://mail.google.com/mail/?view=cm&fs=1&to=Vsob99@gmail.com" target="_blank" rel="noopener">✉️ بريد</a></div></div><div class="afcopy">© 2026 سوق الرهد ابودكنه — جميع الحقوق محفوظة لدى <b>إسراء النور</b></div></footer>
 <nav id="bottomNav" class="bnav" hidden></nav>
 <div id="toast"></div>
 <script>
@@ -240,7 +251,7 @@ function uploadImage(file,inputId,pvId){
   if(!/^image\//.test(file.type||"")){toast("اختر ملف صورة",true);return}
   toast("⏳ جاري رفع الصورة...");
   var path=CUR.id+"/"+Date.now().toString(36)+Math.random().toString(36).slice(2,7)+".jpg";
-  compressImage(file,640,.78).then(function(blob){
+  compressImage(file,900,.8).then(function(blob){
     return ready().then(function(){
       return fetch(SB_URL+"/storage/v1/object/product-images/"+path,{method:"POST",headers:{apikey:SB_KEY,Authorization:"Bearer "+SESS.access,"Content-Type":"image/jpeg","cache-control":"max-age=31536000"},body:blob});
     });
@@ -579,8 +590,9 @@ function productFormHtml(p){
     '<div class="grid2"><div><label>الفئة</label><input id="pCat" list="catList" value="'+esc(p.category||"")+'"><datalist id="catList">'+Object.keys(cats).map(function(c){return '<option value="'+esc(c)+'">'}).join("")+'</datalist></div>'+
     '<div><label>الوحدة</label><input id="pUnit" placeholder="كيلو، قطعة..." value="'+esc(p.unit||"")+'"></div></div>'+
     '<div class="grid3"><div><label>السعر</label><input id="pFull" type="number" inputmode="decimal" value="'+(p.price_full||"")+'"></div>'+
-    (vis?'':'<div><label>سعر النصف</label><input id="pHalf" type="number" inputmode="decimal" value="'+(p.price_half||"")+'"></div><div><label>سعر الربع</label><input id="pQuarter" type="number" inputmode="decimal" value="'+(p.price_quarter||"")+'"></div>')+'</div>'+
-    (vis?'':'<label>أقل مبلغ للطلب بالمبلغ — اختياري</label><input id="pMin" type="number" inputmode="decimal" placeholder="مثال: 1000" value="'+(p.min_amount||"")+'"><div class="hint">أقل مبلغ يستطيع الزبون أن يطلب به هذا الصنف (خانة «مبلغ»).</div>')+
+    ('<div><label>سعر النصف</label><input id="pHalf" type="number" inputmode="decimal" value="'+(p.price_half||"")+'"></div><div><label>سعر الربع</label><input id="pQuarter" type="number" inputmode="decimal" value="'+(p.price_quarter||"")+'"></div>')+'</div>'+
+    ('<label>أقل مبلغ للطلب بالمبلغ — اختياري</label><input id="pMin" type="number" inputmode="decimal" placeholder="مثال: 1000" value="'+(p.min_amount||"")+'"><div class="hint">أقل مبلغ يستطيع الزبون أن يطلب به هذا الصنف (خانة «مبلغ»).</div>')+
+    '<label>أقل كمية للبيع — اختياري</label><input id="pMinQty" type="number" inputmode="numeric" min="1" placeholder="مثال: 3" value="'+(p.min_qty>1?p.min_qty:"")+'"><div class="hint">مثال: السكر لا يُباع بأقل من 3، فلا يستطيع الزبون طلب أقل من ذلك.</div>'+
     '<label>الحالة</label><select id="pStatus"><option'+((p.status||"موجود")==="موجود"?' selected':'')+'>موجود</option><option'+(p.status==="نفد"?' selected':'')+'>نفد</option></select>'+
     '<label>صورة الصنف — اختياري</label>'+imgPicker("pImg","pPv",p.image_url,"📦")+'<input id="pImg" class="ltr" placeholder="أو الصق رابطًا" value="'+esc(p.image_url||"")+'">'+
     '<div class="acts"><button class="btn" data-act="saveProduct">'+(p.id?'حفظ التعديل':'إضافة الصنف')+'</button>'+(p.id?'<button class="btn btn-line" data-act="cancelEdit">إلغاء</button>':'')+'</div>';
@@ -609,6 +621,8 @@ function saveProduct(){
     price_half:$("pHalf")?num($("pHalf").value):0,price_quarter:$("pQuarter")?num($("pQuarter").value):0,
     status:$("pStatus").value,image_url:$("pImg").value.trim()};
   if($("pMin"))row.min_amount=num($("pMin").value);
+  var mq=Math.floor(num($("pMinQty").value))||1;
+  if(mq>1||(editingId&&PRODUCTS.some(function(o){return o.id===editingId&&o.min_qty>1})))row.min_qty=Math.max(1,mq);
   var p=editingId?api("PATCH","products?id=eq."+editingId,row,"return=representation"):api("POST","products",Object.assign({store_id:CUR.id},row),"return=representation");
   p.then(function(r){
     var x=r&&r[0];if(x){if(editingId)PRODUCTS=PRODUCTS.map(function(o){return o.id===x.id?x:o});else PRODUCTS.unshift(x)}
