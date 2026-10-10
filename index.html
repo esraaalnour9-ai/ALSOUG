@@ -696,9 +696,21 @@ function reorder(i){
   showToast("أُضيفت "+added+" أصناف بأسعار اليوم"+(skipped?" · تعذّر "+skipped:""));
 }
 // ===== الإشعارات: اشتراك الزبون =====
-var VAPID_PUB="BBK45OzhDA17mnlC8lqv0RfmXMwViX731y3jaM94yk21CBdrOtyMTmjnqOB5YsgI_P93MaLlw7Y9M2SdNnnuvHk";
+var VAPID_PUB="BII2JE00Xpz6ZN2Ff8YQjC0FYnfWfVAobCaLB1DSZTZCOTGnbz3wlCoeYyIaqAyDMM4Dfx8BzNRUGFFbLFgg1bI";
 function pushSupported(){return "serviceWorker" in navigator&&"PushManager" in window&&"Notification" in window&&!!VAPID_PUB}
 function u8(b64){var p="=".repeat((4-b64.length%4)%4),r=atob((b64+p).replace(/-/g,"+").replace(/_/g,"/")),o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o}
+function pushGetSub(reg){
+  var want=u8(VAPID_PUB);
+  function make(){return reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:want})}
+  return reg.pushManager.getSubscription().then(function(s){
+    if(!s)return make();
+    var k=s.options&&s.options.applicationServerKey;
+    if(!k)return s;
+    var a=new Uint8Array(k),same=a.length===want.length;
+    for(var i=0;same&&i<a.length;i++){if(a[i]!==want[i])same=false}
+    return same?s:s.unsubscribe().then(make);
+  });
+}
 function pushSave(sub){
   var j=sub.toJSON(),k=j.keys||{};
   if(!j.endpoint||!k.p256dh||!k.auth)return Promise.resolve(false);
@@ -715,7 +727,7 @@ function pushOn(){
   Notification.requestPermission().then(function(p){
     if(p!=="granted"){paintPush();return}
     return navigator.serviceWorker.ready.then(function(reg){
-      return reg.pushManager.getSubscription().then(function(s){return s||reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID_PUB)})});
+      return pushGetSub(reg);
     }).then(pushSave).then(function(ok){paintPush();showToast(ok?"تم تفعيل الإشعارات <b>✓</b>":"تعذّر حفظ الاشتراك، حاول لاحقًا")});
   }).catch(function(){paintPush();showToast("تعذّر تفعيل الإشعارات")});
 }
@@ -725,7 +737,7 @@ function pushSync(){
   try{if(Date.now()-(+localStorage.getItem("sr_push_sync")||0)<864e5)return}catch(e){}
   navigator.serviceWorker.ready.then(function(reg){
     // الإذن ممنوح: إن لم يوجد اشتراك (مثلًا بعد مسح بيانات الموقع) نُنشئه بلا سؤال
-    return reg.pushManager.getSubscription().then(function(s){return s||reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID_PUB)})});
+    return pushGetSub(reg);
   }).then(function(s){
     if(!s)return;
     return pushSave(s).then(function(ok){if(ok){try{localStorage.setItem("sr_push_sync",String(Date.now()))}catch(e){}}});
