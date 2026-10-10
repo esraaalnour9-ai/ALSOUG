@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>إدارة المتجر - سوق الرهد</title>
+<title>إدارة المتجر - أسواق شمال كردفان</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0b3536">
 <meta name="referrer" content="no-referrer">
@@ -119,7 +119,7 @@ main#app{flex:1 0 auto;width:100%;box-sizing:border-box}
 </header>
 <div id="updBar" hidden><span>✨ يوجد تحديث جديد للوحة</span><button data-act="reload">تحديث الآن</button></div>
 <main id="app"><div class="empty">⏳ جاري التحميل...</div></main>
-<footer class="afoot"><div class="afrow"><div class="afbrand"><span class="afmark">🏪</span><div><b>سوق الرهد ابودكنه</b><small>شمال كردفان، السودان</small></div></div><div class="afbtns"><a class="afb wa" href="https://wa.me/249115819197?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%A3%D8%AD%D8%AA%D8%A7%D8%AC%20%D9%85%D8%B3%D8%A7%D8%B9%D8%AF%D8%A9%20%D9%81%D9%8A%20%D9%84%D9%88%D8%AD%D8%A9%20%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9%20%D8%B3%D9%88%D9%82%20%D8%A7%D9%84%D8%B1%D9%87%D8%AF" target="_blank" rel="noopener">💬 تواصل معنا</a><a class="afb" href="https://mail.google.com/mail/?view=cm&fs=1&to=Vsob99@gmail.com" target="_blank" rel="noopener">✉️ بريد</a></div></div><div class="afcopy">© 2026 سوق الرهد ابودكنه — جميع الحقوق محفوظة لدى <b style="white-space:nowrap">إسراء النور</b> <span class="ver">· الإصدار 1</span></div></footer>
+<footer class="afoot"><div class="afrow"><div class="afbrand"><span class="afmark">🏪</span><div><b>أسواق شمال كردفان</b><small>شمال كردفان، السودان</small></div></div><div class="afbtns"><a class="afb wa" href="https://wa.me/249115819197?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%A3%D8%AD%D8%AA%D8%A7%D8%AC%20%D9%85%D8%B3%D8%A7%D8%B9%D8%AF%D8%A9%20%D9%81%D9%8A%20%D9%84%D9%88%D8%AD%D8%A9%20%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9%20%D8%B3%D9%88%D9%82%20%D8%A7%D9%84%D8%B1%D9%87%D8%AF" target="_blank" rel="noopener">💬 تواصل معنا</a><a class="afb" href="https://mail.google.com/mail/?view=cm&fs=1&to=Vsob99@gmail.com" target="_blank" rel="noopener">✉️ بريد</a></div></div><div class="afcopy">© 2026 أسواق شمال كردفان — جميع الحقوق محفوظة لدى <b style="white-space:nowrap">إسراء النور</b> <span class="ver">· الإصدار 1</span></div></footer>
 <nav id="bottomNav" class="bnav" hidden></nav>
 <div id="toast"></div>
 <script>
@@ -212,6 +212,7 @@ function adminFn(payload){
   });
 }
 // ===== الحالة =====
+var CITIES=[],MARKETS=[];
 var STATS=[],ALLV=false,ME={master:false},STORES=[],CUR=null,PROVIDERS=[],PRODUCTS=[],OFFERS=[],ACCTS=[],ORDERS=[],FBS=[],FBF='approved',BKL=[],BSV=[],BKF='pending';
 var offAllLoaded=false;
 var TAB="home",editingId=null,searchQ="",ordersLimit=20;
@@ -284,7 +285,7 @@ function showLogin(msg){
     '<label>رقم الهاتف أو البريد الإلكتروني</label><input id="lgEmail" class="ltr" autocomplete="username" placeholder="09xxxxxxxx أو name@gmail.com">'+
     '<label>كلمة السر</label><input id="lgPass" type="password" class="ltr" autocomplete="current-password">'+
     '<button class="btn" style="width:100%" data-act="login">دخول</button>'+
-    '<div class="hint" style="margin-top:10px">الحسابات تُنشأ من إدارة سوق الرهد فقط.</div></div>';
+    '<div class="hint" style="margin-top:10px">الحسابات تُنشأ من إدارة أسواق شمال كردفان فقط.</div></div>';
 }
 // الدخول برقم الهاتف: يُحوَّل الرقم إلى بريد داخلي ثابت (لا يُرسَل له شيء)
 function loginId(v){
@@ -314,8 +315,9 @@ function logout(){
 // ===== التحميل الأولي =====
 function boot(){
   $("app").innerHTML='<div class="empty">⏳ جاري التحميل...</div>';
-  Promise.all([api("GET","admins?select=user_id"),api("GET","store_members?select=store_id"),api("GET","stores?select=*&order=name&limit=1000"),api("GET","payment_providers?select=*&order=sort_order,name"),api("GET","store_sections?select=name&order=sort_order,name&limit=200").catch(function(){return null})])
+  Promise.all([api("GET","admins?select=user_id"),api("GET","store_members?select=store_id"),api("GET","stores?select=*&order=name&limit=1000"),api("GET","payment_providers?select=*&order=sort_order,name"),api("GET","store_sections?select=name&order=sort_order,name&limit=200").catch(function(){return null}),api("GET","cities?select=*&order=sort_order,name").catch(function(){return[]}),api("GET","markets?select=*&order=sort_order,name").catch(function(){return[]})])
   .then(function(r){
+    CITIES=r[5]||[];MARKETS=r[6]||[];
     ME.master=!!(r[0]&&r[0].length);
     if(r[4]&&r[4].length)SECTIONS=r[4].map(function(x){return x.name});
     var ids=(r[1]||[]).map(function(x){return x.store_id});
@@ -323,12 +325,12 @@ function boot(){
     PROVIDERS=r[3]||[];
     if(ME.master)STORES.forEach(function(st){if(!st.booking_enabled&&isClinicSec(st.section)){st.booking_enabled=true;api("PATCH","stores?id=eq."+st.id,{booking_enabled:true},"return=minimal").catch(function(){st.booking_enabled=false})}});
     if(!STORES.length&&!ME.master){
-      $("app").innerHTML='<div class="card"><div class="err">حسابك غير مرتبط بأي متجر بعد. تواصل مع إدارة سوق الرهد.</div><button class="btn btn-line" data-act="logout">تسجيل الخروج</button></div>';
+      $("app").innerHTML='<div class="card"><div class="err">حسابك غير مرتبط بأي متجر بعد. تواصل مع إدارة أسواق شمال كردفان.</div><button class="btn btn-line" data-act="logout">تسجيل الخروج</button></div>';
       $("outBtn").hidden=false;return;
     }
     var saved="";try{saved=localStorage.getItem("sr_adm_store")||""}catch(e){}
     CUR=storeById(saved)||STORES[0]||null;
-    $("hTitle").textContent=ME.master?"إدارة سوق الرهد":"إدارة المتجر";
+    $("hTitle").textContent=ME.master?"إدارة أسواق شمال كردفان":"إدارة المتجر";
     $("muteBtn").hidden=false;$("outBtn").hidden=false;$("bottomNav").hidden=false;
     if(ME.master){TAB="admin";ALLV=true;loadPushCount()}
     fixTab();buildNav();loadStoreData().then(function(){startPolling()});
@@ -508,7 +510,7 @@ function render(){
 // ===== الرئيسية =====
 function homeHtml(){
   var hr=new Date().getHours(),g=hr>=5&&hr<12?"صباح الخير":"مساء الخير";
-  var who=ME.master?"مدير سوق الرهد":(CUR?CUR.name:"");
+  var who=ME.master?"مدير أسواق شمال كردفان":(CUR?CUR.name:"");
   var all=ME.master&&ALLV;
   var data=STATS.filter(function(o){return all||!CUR||o.store_id===CUR.id});
   var now=new Date(),d0=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();
@@ -666,6 +668,7 @@ function settingsHtml(){
   var h=(ME.master?'<div class="card"><h2>🩺 الحجز بموعد</h2><button class="btn '+(CUR.booking_enabled?'btn-red':'btn-green')+'" data-act="bkEnable">'+(CUR.booking_enabled?'إيقاف الحجز لهذا المتجر':'تفعيل الحجز لهذا المتجر')+'</button></div>':'')+'<div class="card"><h2>بيانات المتجر</h2>'+
     '<label>اسم صاحب المتجر</label><input id="sOwner" value="'+esc(CUR.owner_name||"")+'">'+
     '<label>نوع المحل (القسم)</label>'+secSelect("sSec",CUR.section||"")+
+    (ME.master&&CITIES.length?'<label>السوق</label>'+marketSelect("sMkt",CUR.market_id||""):'')+
     '<label>رقم واتساب (بالصيغة الدولية، مثل 249912345678)</label><input id="sWa" class="ltr" inputmode="numeric" value="'+esc(CUR.whatsapp||"")+'">'+
     '<label>صورة المتجر — اختياري</label>'+imgPicker("sLogo","sPv",CUR.logo_url,"🏪")+'<input id="sLogo" class="ltr" placeholder="أو الصق رابطًا" value="'+esc(CUR.logo_url||"")+'">'+
     '<label>إعلان المتجر (يظهر للزبائن)</label><input id="sAnn" maxlength="120" value="'+esc(CUR.announcement||"")+'">'+
@@ -710,6 +713,38 @@ function hoursHtml(){
     '<label style="display:flex;gap:8px;align-items:center;margin:2px 0 10px;font-size:13px;color:var(--text)"><input id="sCl" type="checkbox" style="width:auto;margin:0"'+(CUR.closed_now?' checked':'')+'> إغلاق مؤقت الآن (يتجاهل الساعات)</label>'+
     '<button class="btn" data-act="saveHours">حفظ ساعات العمل</button></div>';
 }
+// ===== المدن والأسواق =====
+function marketName(id){var m=MARKETS.filter(function(x){return x.id===id})[0];return m?m.name:""}
+function cityIdOfStore(st){var m=st&&MARKETS.filter(function(x){return x.id===st.market_id})[0];return m?m.city_id:""}
+function marketSelect(id,cur){
+  if(!CITIES.length)return '';
+  var h='<select id="'+id+'"><option value="">— بدون سوق —</option>';
+  CITIES.forEach(function(c){
+    var ms=MARKETS.filter(function(m){return m.city_id===c.id});
+    if(!ms.length)return;
+    h+='<optgroup label="'+esc(c.name)+'">'+ms.map(function(m){return '<option value="'+esc(m.id)+'"'+(m.id===cur?' selected':'')+'>'+esc(m.name)+'</option>'}).join("")+'</optgroup>';
+  });
+  return h+'</select>';
+}
+function geoCardHtml(){
+  if(!CITIES.length)return '<div class="card"><h2>🗺️ المدن والأسواق</h2><div class="hint">لم تُفعَّل بعد. شغّل ملف <b>geo-setup.sql</b> في Supabase ثم حدّث الصفحة.</div></div>';
+  var h='<div class="card"><h2>🗺️ المدن والأسواق</h2><div class="hint">كل متجر يتبع سوقًا واحدًا، والسوق يتبع مدينة. الزبون يختار مدينته فيرى محلاتها فقط، وأحياء التوصيل ورسومها تتبع المدينة.</div>';
+  CITIES.forEach(function(c){
+    var ms=MARKETS.filter(function(m){return m.city_id===c.id});
+    h+='<div class="item"><div class="row"><div class="iname">📍 '+esc(c.name)+' <span class="muted ltr">?c='+esc(c.slug)+'</span></div>'+
+      '<button class="btn btn-sm btn-red" data-act="delCity" data-id="'+esc(c.id)+'">حذف</button></div>';
+    ms.forEach(function(m){
+      var n=STORES.filter(function(s){return s.market_id===m.id}).length;
+      h+='<div class="row" style="padding:5px 0 0 0"><span>🏬 '+esc(m.name)+' <span class="muted">('+n+' متجر)</span></span><button class="btn btn-sm btn-line" data-act="delMarket" data-id="'+esc(m.id)+'">حذف</button></div>';
+    });
+    if(!ms.length)h+='<div class="hint">لا أسواق بعد. المتاجر بلا سوق تظهر في أول مدينة.</div>';
+    h+='</div>';
+  });
+  h+='<div class="dform"><label>➕ سوق جديد داخل مدينة</label><select id="mkCity">'+CITIES.map(function(c){return '<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>'}).join("")+'</select>'+
+    '<input id="mkName" maxlength="60" placeholder="اسم السوق، مثل: سوق الرديف"><button class="btn" data-act="addMarket">إضافة السوق</button></div>';
+  h+='<div class="dform"><label>➕ مدينة جديدة</label><input id="ctName" maxlength="60" placeholder="اسم المدينة"><input id="ctSlug" class="ltr" maxlength="20" placeholder="رمز إنجليزي للرابط، مثل: obeid"><button class="btn" data-act="addCity">إضافة المدينة</button></div></div>';
+  return h;
+}
 // ===== إشعارات الزبائن (للمدير العام) =====
 var PUSHN=null;
 function loadPushCount(){
@@ -736,6 +771,7 @@ function pushFn(payload){
 function pushCardHtml(){
   return '<div class="card"><h2>🔔 إشعار لزبائن السوق</h2>'+
     '<div class="hint">يصل لكل من فعّل الإشعارات من التطبيق. عدد المشتركين: <b id="pushN">'+(PUSHN==null?'—':PUSHN)+'</b></div>'+
+    (CITIES.length?'<label>المدينة</label><select id="pnCity"><option value="">كل المدن</option>'+CITIES.map(function(c){return '<option value="'+esc(c.id)+'">'+esc(c.name)+'</option>'}).join("")+'</select>':'')+
     '<label>العنوان</label><input id="pnTitle" maxlength="60" placeholder="مثال: عرض اليوم 🎉">'+
     '<label>النص</label><input id="pnBody" maxlength="180" placeholder="مثال: خصم 10% على الزيوت في بقالة النور">'+
     '<button class="btn" id="pnBtn" data-act="sendPush">إرسال الإشعار الآن</button></div>';
@@ -743,9 +779,10 @@ function pushCardHtml(){
 // ===== الإدارة العامة (المدير فقط) =====
 function adminHtml(){
   var h='<div class="card"><h2>💾 نسخة احتياطية</h2><button class="btn" id="bkBtn" data-act="backup">⬇️ تنزيل نسخة احتياطية الآن</button><div class="muted" id="bkMsg" style="margin-top:6px"></div></div>'+
-    pushCardHtml()+'<div class="card"><h2>➕ إضافة متجر جديد</h2>'+
+    pushCardHtml()+geoCardHtml()+'<div class="card"><h2>➕ إضافة متجر جديد</h2>'+
     '<label>اسم المتجر</label><input id="nsName" maxlength="80">'+
     '<label>نوع المحل (القسم)</label>'+secSelect("nsSec","")+
+    (CITIES.length?'<label>السوق</label>'+marketSelect("nsMkt",""):'')+
     '<label>اسم صاحب المتجر</label><input id="nsOwner">'+
     '<label>رقم واتساب (دولي)</label><input id="nsWa" class="ltr" inputmode="numeric">'+
     '<button class="btn" data-act="addStore">إضافة</button></div>';
@@ -883,7 +920,7 @@ var ACT={
     var doPush=!!($("ofPush")&&$("ofPush").checked),sn=sid&&storeById(sid)?storeById(sid).name:"";
     api("POST","offers",body,"return=representation").then(function(r){
       if(r&&r[0])OFFERS.unshift(r[0]);toast("تم نشر العرض ✓");render();
-      if(doPush)pushFn({title:"🏷️ عرض جديد"+(sn?" — "+sn:""),body:t}).then(function(j){toast("نُشر العرض وأُرسل إشعار إلى "+j.sent+" جهاز ✓")}).catch(fail);
+      if(doPush)pushFn({title:"🏷️ عرض جديد"+(sn?" — "+sn:""),body:t,city_id:(sid&&cityIdOfStore(storeById(sid)))||undefined}).then(function(j){toast("نُشر العرض وأُرسل إشعار إلى "+j.sent+" جهاز ✓")}).catch(fail);
     }).catch(fail);
   },
   delOffer:function(d){if(!confirm("حذف العرض؟"))return;api("DELETE","offers?id=eq."+d.id).then(function(){OFFERS=OFFERS.filter(function(x){return x.id!==d.id});render()}).catch(fail)},
@@ -896,7 +933,7 @@ var ACT={
     if(t.length<2||b.length<2){toast("اكتب عنوانًا ونصًّا",true);return}
     if(!confirm("إرسال هذا الإشعار إلى كل المشتركين"+(PUSHN?" ("+PUSHN+")":"")+"؟"))return;
     var btn=$("pnBtn");btn.disabled=true;
-    pushFn({title:t,body:b}).then(function(j){
+    pushFn({title:t,body:b,city_id:($("pnCity")&&$("pnCity").value)||undefined}).then(function(j){
       $("pnTitle").value="";$("pnBody").value="";
       toast("أُرسل إلى "+j.sent+" جهاز"+(j.removed?" · أُزيل "+j.removed+" اشتراك قديم":"")+" ✓");loadPushCount();
     }).catch(fail).then(function(){btn.disabled=false});
@@ -913,8 +950,42 @@ var ACT={
   },
   saveStore:function(){
     var row={owner_name:$("sOwner").value.trim(),section:$("sSec").value,whatsapp:waNum($("sWa").value),logo_url:$("sLogo").value.trim(),announcement:$("sAnn").value.trim()};
+    if($("sMkt"))row.market_id=$("sMkt").value||null;
     if(row.whatsapp&&(row.whatsapp.length<11||row.whatsapp.indexOf("249")!==0)){if(!confirm("الرقم لا يبدو بالصيغة الدولية (يبدأ بـ 249). حفظ على أي حال؟"))return}
     api("PATCH","stores?id=eq."+CUR.id,row,"return=representation").then(function(r){if(r&&r[0]){Object.assign(CUR,r[0])}toast("تم الحفظ ✓");render()}).catch(fail);
+  },
+  addCity:function(){
+    var n=$("ctName").value.trim(),sl=$("ctSlug").value.trim().toLowerCase();
+    if(n.length<2){toast("اكتب اسم المدينة",true);return}
+    if(!/^[a-z0-9-]{2,20}$/.test(sl)){toast("الرمز بحروف إنجليزية صغيرة وأرقام فقط (2 إلى 20)",true);return}
+    api("POST","cities",{name:n,slug:sl,sort_order:CITIES.length+1},"return=representation").then(function(r){if(r&&r[0])CITIES.push(r[0]);toast("أُضيفت المدينة ✓");render()}).catch(function(e){toast(/duplicate|unique|23505/.test(String((e&&e.message)||"")+(e&&e.code))?"الاسم أو الرمز موجود من قبل":niceErr(e),true)});
+  },
+  delCity:function(d){
+    var c=CITIES.filter(function(x){return x.id===d.id})[0];if(!c)return;
+    if(!confirm("حذف مدينة «"+c.name+"» وكل أسواقها؟ المتاجر تبقى لكن بلا سوق، وأحياء التوصيل التابعة للمدينة تُحذف."))return;
+    api("DELETE","cities?id=eq."+d.id,null,"return=representation").then(function(r){
+      if(!r||!r.length){toast("لم تُحذف المدينة",true);return}
+      CITIES=CITIES.filter(function(x){return x.id!==d.id});
+      var gone=MARKETS.filter(function(m){return m.city_id===d.id}).map(function(m){return m.id});
+      MARKETS=MARKETS.filter(function(m){return m.city_id!==d.id});
+      STORES.forEach(function(s){if(gone.indexOf(s.market_id)>-1)s.market_id=null});
+      toast("حُذفت المدينة");render();
+    }).catch(fail);
+  },
+  addMarket:function(){
+    var n=$("mkName").value.trim(),c=$("mkCity").value;
+    if(n.length<2||!c){toast("اختر المدينة واكتب اسم السوق",true);return}
+    api("POST","markets",{city_id:c,name:n,sort_order:MARKETS.filter(function(m){return m.city_id===c}).length+1},"return=representation").then(function(r){if(r&&r[0])MARKETS.push(r[0]);toast("أُضيف السوق ✓");render()}).catch(function(e){toast(/duplicate|unique|23505/.test(String((e&&e.message)||"")+(e&&e.code))?"هذا السوق موجود في المدينة":niceErr(e),true)});
+  },
+  delMarket:function(d){
+    var m=MARKETS.filter(function(x){return x.id===d.id})[0];if(!m)return;
+    if(!confirm("حذف «"+m.name+"»؟ متاجره تبقى لكن بلا سوق."))return;
+    api("DELETE","markets?id=eq."+d.id,null,"return=representation").then(function(r){
+      if(!r||!r.length){toast("لم يُحذف السوق",true);return}
+      MARKETS=MARKETS.filter(function(x){return x.id!==d.id});
+      STORES.forEach(function(s){if(s.market_id===d.id)s.market_id=null});
+      toast("حُذف السوق");render();
+    }).catch(fail);
   },
   addAcct:function(){
     var n=$("aNum").value.trim();if(!n){toast("أدخل رقم الحساب",true);return}
@@ -933,7 +1004,7 @@ var ACT={
   },
   addStore:function(){
     var n=$("nsName").value.trim();if(!n){toast("أدخل اسم المتجر",true);return}
-    api("POST","stores",{name:n,section:$("nsSec").value,owner_name:$("nsOwner").value.trim(),whatsapp:waNum($("nsWa").value),booking_enabled:isClinicSec($("nsSec").value)},"return=representation").then(function(r){if(r&&r[0]){STORES.push(r[0]);STORES.sort(function(a,b){return a.name.localeCompare(b.name,"ar")})}toast("تمت إضافة المتجر ✓");render()}).catch(fail);
+    api("POST","stores",Object.assign({name:n,section:$("nsSec").value,owner_name:$("nsOwner").value.trim(),whatsapp:waNum($("nsWa").value),booking_enabled:isClinicSec($("nsSec").value)},$("nsMkt")&&$("nsMkt").value?{market_id:$("nsMkt").value}:{}),"return=representation").then(function(r){if(r&&r[0]){STORES.push(r[0]);STORES.sort(function(a,b){return a.name.localeCompare(b.name,"ar")})}toast("تمت إضافة المتجر ✓");render()}).catch(fail);
   },
   backAdmin:function(){setTab("admin")},
   backAll:function(){ALLV=true;buildNav();setTab("home")},

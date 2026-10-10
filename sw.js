@@ -1,4 +1,4 @@
-var CACHE = "souq-v44"; // كل ما تعدّل index.html/admin.html غيّر هذا الرقم (v2, v3...) عشان يجبر المتصفح ياخذ آخر نسخة فورًا
+var CACHE = "souq-v1"; // كل ما تعدّل index.html/admin.html غيّر هذا الرقم (v2, v3...) عشان يجبر المتصفح ياخذ آخر نسخة فورًا
 var ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png"];
 
 // يسمح للصفحة بإجبار نسخة SW الجديدة على التفعّل فوراً بدل انتظار إغلاق كل التبويبات
@@ -44,12 +44,16 @@ self.addEventListener("fetch", function (e) {
 self.addEventListener("push", function (e) {
   var d = {};
   try { d = e.data ? e.data.json() : {}; } catch (x) { d = { body: e.data ? e.data.text() : "" }; }
-  e.waitUntil(self.registration.showNotification(d.title || "سوق الرهد", {
-    body: d.body || "",
+  // العنوان = اسم سوق المدينة (مثل «سوق الأبيض»)، ثم عنوان الرسالة ونصها في المتن
+  var head = d.brand || "";
+  e.waitUntil(self.registration.showNotification(head || d.title || "أسواق شمال كردفان", {
+    body: head ? ((d.title ? d.title + "\n" : "") + (d.body || "")) : (d.body || ""),
     icon: "./icon-192.png",
     badge: "./icon-192.png",
     dir: "rtl",
     lang: "ar",
+    vibrate: [250, 120, 250],
+    renotify: true,
     tag: d.tag || "souq",
     data: { url: d.url || "./" }
   }));
