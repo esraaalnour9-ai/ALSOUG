@@ -1,7 +1,7 @@
 {
-  "name": "سوق الرهد",
-  "short_name": "سوق الرهد",
-  "description": "سوق الرهد الإلكتروني - شمال كردفان",
+  "name": "أسواق شمال كردفان",
+  "short_name": "أسواق كردفان",
+  "description": "أسواق شمال كردفان الإلكترونية",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
