@@ -205,7 +205,7 @@ function adminFn(payload){
       if(r.status===404&&!j.error)throw new Error("دالة الخادم quick-task غير منشورة بعد.");
       if(!r.ok||!j.ok){
         var m={bad_login:"رقم الهاتف/البريد غير صحيح",bad_password:"كلمة السر يجب أن تكون 8 أحرف على الأقل",bad_store:"المتجر غير صحيح",not_found:"لا يوجد حساب بهذا الرقم/البريد. أنشئي له حسابًا أولًا من «حساب تاجر جديد»",forbidden:"هذا الإجراء للمدير العام فقط",auth:"انتهت الجلسة، سجّل الدخول من جديد",origin:"الموقع غير مسموح له باستدعاء الدالة",server:"خطأ في الخادم، حاول لاحقًا"}[j.error];
-        throw new Error(m||("فشل الطلب ("+r.status+")"));
+        throw new Error((m||("فشل الطلب ("+r.status+")"))+(j.reason?" — "+j.reason:""));
       }
       return j;
     });
@@ -645,7 +645,7 @@ function offersHtml(){
   if(!CUR&&!ALLV)return '<div class="card"><div class="empty">لا يوجد متجر.</div></div>';
   var today=new Date().toISOString().slice(0,10);
   var h='<div class="card"><h2>🏷️ عرض جديد</h2>'+
-    (ME.master?'<label>يظهر في</label><select id="ofScope">'+((ALLV||!CUR)?'<option value="all">كل المتاجر (عرض عام)</option>'+STORES.map(function(s){return '<option value="'+esc(s.id)+'">'+esc(s.name)+'</option>'}).join(""):'<option value="store">'+esc(CUR.name)+'</option><option value="all">كل المتاجر (عرض عام)</option>')+'</select>':'')+
+    (ME.master?'<label>يظهر في</label><select id="ofScope">'+((ALLV||!CUR)?'<option value="all">كل المتاجر في كل المدن (عرض عام)</option>':'<option value="store">'+esc(CUR.name)+'</option><option value="all">كل المتاجر في كل المدن (عرض عام)</option>')+CITIES.map(function(c){return '<option value="city:'+esc(c.id)+'">🏙 كل متاجر مدينة '+esc(c.name)+'</option>'}).join("")+((ALLV||!CUR)?STORES.map(function(s){return '<option value="'+esc(s.id)+'">'+esc(s.name)+'</option>'}).join(""):'')+'</select>':'')+
     '<label>نص العرض (حتى 120 حرفًا)</label><input id="ofText" maxlength="120" placeholder="مثال: خصم 10% على الزيوت">'+
     '<label>كود الخصم — اختياري</label><input id="ofCode" maxlength="20" class="ltr">'+
     '<label>ينتهي في — اختياري</label><input id="ofUntil" type="date">'+
@@ -656,7 +656,7 @@ function offersHtml(){
   if(!OFFERS.length)h+='<div class="empty">لا توجد عروض.</div>';
   OFFERS.forEach(function(o){
     var exp=o.until&&o.until<today;
-    h+='<div class="item"><div class="iname">'+esc(o.text)+'</div><div class="imeta">'+(o.store_id?(ALLV?'<span class="badge">'+esc((storeById(o.store_id)||{}).name||'')+'</span> ':''):'<span class="badge">عام</span> ')+(o.code?'كود: '+esc(o.code)+' · ':'')+(o.until?(exp?'<span class="off">منتهٍ '+esc(o.until)+'</span>':'ينتهي '+esc(o.until)):'بدون انتهاء')+(o.show_seconds>0?' · يظهر '+o.show_seconds+' ث':'')+'</div>'+
+    h+='<div class="item"><div class="iname">'+esc(o.text)+'</div><div class="imeta">'+(o.store_id?(ALLV?'<span class="badge">'+esc((storeById(o.store_id)||{}).name||'')+'</span> ':''):(o.city_id?'<span class="badge">🏙 '+esc(cityNameOf(o.city_id))+'</span> ':'<span class="badge">عام</span> '))+(o.code?'كود: '+esc(o.code)+' · ':'')+(o.until?(exp?'<span class="off">منتهٍ '+esc(o.until)+'</span>':'ينتهي '+esc(o.until)):'بدون انتهاء')+(o.show_seconds>0?' · يظهر '+o.show_seconds+' ث':'')+'</div>'+
       '<div class="acts"><button class="btn btn-red btn-sm" data-act="delOffer" data-id="'+esc(o.id)+'">حذف</button></div></div>';
   });
   return h+'</div>';
@@ -715,6 +715,7 @@ function hoursHtml(){
 }
 // ===== المدن والأسواق =====
 function marketName(id){var m=MARKETS.filter(function(x){return x.id===id})[0];return m?m.name:""}
+function cityNameOf(id){var c=CITIES.filter(function(x){return x.id===id})[0];return c?c.name:''}
 function cityIdOfStore(st){var m=st&&MARKETS.filter(function(x){return x.id===st.market_id})[0];return m?m.city_id:""}
 function marketSelect(id,cur){
   if(!CITIES.length)return '';
@@ -753,6 +754,11 @@ function loadPushCount(){
     PUSHN=(r.ok&&m)?+m[1]:null;
     var e=$("pushN");if(e)e.textContent=PUSHN==null?"—":PUSHN;
   }).catch(function(){});
+}
+function pushMsg(j){
+  if(!j.total)return{t:"لا يوجد مشتركون في هذا النطاق (0 جهاز مسجّل)",bad:true};
+  if(!j.sent&&j.failed)return{t:"فشل الإرسال لكل الأجهزة ("+j.failed+"): "+(j.reason||"سبب غير معروف"),bad:true};
+  return{t:"أُرسل إلى "+j.sent+" جهاز"+(j.failed?" · فشل "+j.failed+(j.reason?" ("+j.reason+")":""):"")+(j.removed?" · أُزيل "+j.removed+" اشتراك قديم":"")+" ✓",bad:false};
 }
 function pushFn(payload){
   return ready().then(function(){
@@ -913,13 +919,17 @@ var ACT={
   delProduct:function(d){if(!confirm("حذف هذا الصنف نهائيًا؟"))return;api("DELETE","products?id=eq."+d.id).then(function(){PRODUCTS=PRODUCTS.filter(function(x){return x.id!==d.id});toast("تم الحذف");render()}).catch(fail)},
   addOffer:function(){
     var t=$("ofText").value.trim();if(!t){toast("اكتب نص العرض",true);return}
-    var sc=$("ofScope")?$("ofScope").value:"store",sid=sc==="all"?null:(sc==="store"?(CUR&&CUR.id):sc);
+    var sc=$("ofScope")?$("ofScope").value:"store",cityPick=sc.indexOf("city:")===0?sc.slice(5):"",sid=(sc==="all"||cityPick)?null:(sc==="store"?(CUR&&CUR.id):sc);
     if(sc==="store"&&!CUR){toast("اختاري المتجر",true);return}
     var body={store_id:sid,text:t,code:$("ofCode").value.trim(),until:$("ofUntil").value||null};
+    if(cityPick)body.city_id=cityPick;
     var secs=Math.floor(Number($("ofSecs")&&$("ofSecs").value))||0;if(secs>0)body.show_seconds=Math.min(120,Math.max(3,secs));
     var doPush=!!($("ofPush")&&$("ofPush").checked),sn=sid&&storeById(sid)?storeById(sid).name:"";
     var noSecs=false;
+    var cityOfPush=cityPick||(sid&&cityIdOfStore(storeById(sid)))||undefined;
+    if(cityPick)sn=cityNameOf(cityPick);
     api("POST","offers",body,"return=representation").catch(function(e){
+      if(cityPick&&/city_id/i.test(String((e&&e.message)||""))){throw new Error("أضف عمود city_id للعروض من SQL أولاً")}
       // عمود show_seconds غير موجود في القاعدة بعد: ننشر العرض بدونه بدل أن يفشل
       if(body.show_seconds!=null&&/show_seconds|schema cache/i.test(String((e&&e.message)||""))){
         var b2=Object.assign({},body);delete b2.show_seconds;noSecs=true;
@@ -928,7 +938,7 @@ var ACT={
       throw e;
     }).then(function(r){
       if(r&&r[0])OFFERS.unshift(r[0]);toast(noSecs?"نُشر العرض، لكن مدة الظهور لم تُحفظ (أضف عمود show_seconds من SQL)":"تم نشر العرض ✓");render();
-      if(doPush)pushFn({title:"🏷️ عرض جديد"+(sn?" — "+sn:""),body:t,city_id:(sid&&cityIdOfStore(storeById(sid)))||undefined}).then(function(j){toast("نُشر العرض وأُرسل إشعار إلى "+j.sent+" جهاز ✓")}).catch(fail);
+      if(doPush)pushFn({title:"🏷️ عرض جديد"+(sn?" — "+sn:""),body:t,city_id:cityOfPush}).then(function(j){var m=pushMsg(j);toast("نُشر العرض · "+m.t,m.bad);if(m.bad)alert(m.t)}).catch(fail);
     }).catch(fail);
   },
   delOffer:function(d){if(!confirm("حذف العرض؟"))return;api("DELETE","offers?id=eq."+d.id).then(function(){OFFERS=OFFERS.filter(function(x){return x.id!==d.id});render()}).catch(fail)},
@@ -943,7 +953,7 @@ var ACT={
     var btn=$("pnBtn");btn.disabled=true;
     pushFn({title:t,body:b,city_id:($("pnCity")&&$("pnCity").value)||undefined}).then(function(j){
       $("pnTitle").value="";$("pnBody").value="";
-      toast("أُرسل إلى "+j.sent+" جهاز"+(j.removed?" · أُزيل "+j.removed+" اشتراك قديم":"")+" ✓");loadPushCount();
+      var m=pushMsg(j);toast(m.t,m.bad);if(m.bad)alert(m.t);loadPushCount();
     }).catch(fail).then(function(){btn.disabled=false});
   },
   saveHours:function(){
