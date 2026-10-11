@@ -337,7 +337,7 @@ html:has(#lb.show){overflow:hidden}
 <div id="promoBar" class="promo-bar" hidden></div>
 <section class="hero"><div class="in">
   <span class="badge">🛍️ سوق إلكتروني محلي</span>
-  <h2>أهلاً بك في أسواق شمال كردفان الإلكترونية</h2>
+  <h2>مرحباً بكم في أسواق شمال كردفان الإلكترونية</h2>
   <p>اختر بقالتك المفضلة، تصفح المنتجات بوحداتها المختلفة، وأرسل طلبك عبر الواتساب أو ادفع إلكترونيًا بكل سهولة وأمان.</p>
 </div></section>
 <section class="storepick"><div class="in">
@@ -804,6 +804,7 @@ function paintGeo(){
   var cs=GEO.cities,c=cityById(CITY),cb=$("cityBtn");
   if(!cs.length)return;
   if(cb){cb.textContent=c?("📍 "+c.name+(cs.length>1?" ▾":"")):"📍 اختر مدينتك ▾";cb.disabled=cs.length<2}
+  var hh=document.querySelector(".hero h2");if(hh)hh.textContent=c?("مرحباً بكم في سوق "+c.name+" الإلكتروني"):"مرحباً بكم في أسواق شمال كردفان الإلكترونية";
   var ms=c?GEO.markets.filter(function(m){return m.city_id===CITY}):[],bar=$("mkBar");
   if(bar){
     if(ms.length>1){bar.hidden=false;chips($("mkts"),[["all","🏬 كل الأسواق"]].concat(ms.map(function(m){return[m.id,m.name]})),MKT,"mkt","")}

@@ -918,8 +918,16 @@ var ACT={
     var body={store_id:sid,text:t,code:$("ofCode").value.trim(),until:$("ofUntil").value||null};
     var secs=Math.floor(Number($("ofSecs")&&$("ofSecs").value))||0;if(secs>0)body.show_seconds=Math.min(120,Math.max(3,secs));
     var doPush=!!($("ofPush")&&$("ofPush").checked),sn=sid&&storeById(sid)?storeById(sid).name:"";
-    api("POST","offers",body,"return=representation").then(function(r){
-      if(r&&r[0])OFFERS.unshift(r[0]);toast("تم نشر العرض ✓");render();
+    var noSecs=false;
+    api("POST","offers",body,"return=representation").catch(function(e){
+      // عمود show_seconds غير موجود في القاعدة بعد: ننشر العرض بدونه بدل أن يفشل
+      if(body.show_seconds!=null&&/show_seconds|schema cache/i.test(String((e&&e.message)||""))){
+        var b2=Object.assign({},body);delete b2.show_seconds;noSecs=true;
+        return api("POST","offers",b2,"return=representation");
+      }
+      throw e;
+    }).then(function(r){
+      if(r&&r[0])OFFERS.unshift(r[0]);toast(noSecs?"نُشر العرض، لكن مدة الظهور لم تُحفظ (أضف عمود show_seconds من SQL)":"تم نشر العرض ✓");render();
       if(doPush)pushFn({title:"🏷️ عرض جديد"+(sn?" — "+sn:""),body:t,city_id:(sid&&cityIdOfStore(storeById(sid)))||undefined}).then(function(j){toast("نُشر العرض وأُرسل إشعار إلى "+j.sent+" جهاز ✓")}).catch(fail);
     }).catch(fail);
   },
