@@ -723,10 +723,18 @@ function reorder(i){
 var VAPID_PUB="BBK45OzhDA17mnlC8lqv0RfmXMwViX731y3jaM94yk21CBdrOtyMTmjnqOB5YsgI_P93MaLlw7Y9M2SdNnnuvHk";
 function pushSupported(){return "serviceWorker" in navigator&&"PushManager" in window&&"Notification" in window&&!!VAPID_PUB}
 function u8(b64){var p="=".repeat((4-b64.length%4)%4),r=atob((b64+p).replace(/-/g,"+").replace(/_/g,"/")),o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o}
+var PUSH_DBG={save:""};
 function pushSave(sub){
   var j=sub.toJSON(),k=j.keys||{};
-  if(!j.endpoint||!k.p256dh||!k.auth)return Promise.resolve(false);
-  function post(body){return fetch(SB_URL+"/rest/v1/push_subs?on_conflict=endpoint",{method:"POST",headers:{apikey:SB_KEY,"Content-Type":"application/json",Prefer:"resolution=ignore-duplicates,return=minimal"},body:JSON.stringify(body)}).then(function(r){return r.ok},function(){return false})}
+  if(!j.endpoint||!k.p256dh||!k.auth){PUSH_DBG.save="no-keys";return Promise.resolve(false)}
+  // لا نحفظ قبل أن تُعرف مدينة الزبون (وإلا يُسجَّل اشتراكه بلا مدينة ولا تصله إشعارات مدينته)
+  if(GEO.cities.length>1&&!CITY){PUSH_DBG.save="wait-city";return Promise.resolve(false)}
+  function post(body){
+    return fetch(SB_URL+"/rest/v1/push_subs",{method:"POST",headers:{apikey:SB_KEY,"Content-Type":"application/json",Prefer:"return=minimal"},body:JSON.stringify(body)}).then(function(r){
+      if(r.ok||r.status===409){PUSH_DBG.save="ok "+r.status;return true} // 409 = الاشتراك محفوظ من قبل
+      return r.text().then(function(t){PUSH_DBG.save=r.status+" "+String(t).slice(0,160);return false});
+    },function(e){PUSH_DBG.save="net "+((e&&e.message)||e);return false});
+  }
   var base={endpoint:j.endpoint,p256dh:k.p256dh,auth:k.auth};
   if(!CITY)return post(base);
   return post(Object.assign({city_id:CITY},base)).then(function(ok){return ok||post(base)});
@@ -743,7 +751,12 @@ function pushOn(){
     if(p!=="granted"){paintPush();return}
     return navigator.serviceWorker.ready.then(function(reg){
       return reg.pushManager.getSubscription().then(function(s){return s||reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID_PUB)})});
-    }).then(pushSave).then(function(ok){paintPush();showToast(ok?"تم تفعيل الإشعارات <b>✓</b>":"تعذّر حفظ الاشتراك، حاول لاحقًا")});
+    }).then(pushSave).then(function(ok){
+      paintPush();
+      if(ok)showToast("تم تفعيل الإشعارات <b>✓</b>");
+      else if(PUSH_DBG.save==="wait-city")showToast("اختر مدينتك ليكتمل تفعيل الإشعارات");
+      else showToast("تعذّر حفظ الاشتراك (رمز "+String(PUSH_DBG.save).split(" ")[0].replace(/[^\w-]/g,"")+")، حاول لاحقًا");
+    });
   }).catch(function(){paintPush();showToast("تعذّر تفعيل الإشعارات")});
 }
 // تجديد حفظ الاشتراك مرة في اليوم لمن فعّل الإشعارات سابقًا (يتغيّر أحيانًا من المتصفح)
@@ -757,6 +770,22 @@ function pushSync(){
     if(!s)return;
     return pushSave(s).then(function(ok){if(ok){try{localStorage.setItem("sr_push_sync",String(Date.now()))}catch(e){}}});
   }).catch(function(){});
+}
+function pushDebug(){
+  var q="";try{q=new URLSearchParams(location.search).get("pushdebug")}catch(e){}
+  if(!q)return;
+  setTimeout(function(){
+    var out=["الإذن: "+(("Notification" in window)?Notification.permission:"غير مدعوم"),"دعم الإشعارات: "+pushSupported(),"المدينة: "+(CITY||"غير محددة")];
+    if(!("serviceWorker" in navigator)){alert(out.join("\n"));return}
+    navigator.serviceWorker.getRegistration().then(function(reg){
+      out.push("خدمة التشغيل: "+(reg?"مسجّلة":"غير مسجّلة"));
+      return reg&&reg.pushManager.getSubscription();
+    }).then(function(sub){
+      out.push("اشتراك الجهاز: "+(sub?"موجود":"غير موجود"));
+      if(!sub)return;
+      return pushSave(sub).then(function(){out.push("نتيجة الحفظ: "+PUSH_DBG.save)});
+    }).catch(function(e){out.push("خطأ: "+((e&&e.message)||e))}).then(function(){alert(out.join("\n"))});
+  },3500);
 }
 function storeMark(name){
   var s=stores.filter(function(z){return z.name===name})[0];
@@ -871,6 +900,7 @@ function build(d){
   computeNew();
   render();
   nudgeChips();
+  pushSync();
   if(GEO.cities.length>1&&!CITY)openCityPick(true);
 }
 function saveState(){
@@ -1482,7 +1512,7 @@ document.addEventListener("change",function(e){
 });
 loadState();
 load();
-paintPush();pushSync();
+paintPush();pushSync();pushDebug();
 
 // ===== شريط عروض المحل: يظهر تحت بطاقة المحل المختار، وفي "كل المتاجر" تظهر العروض العامة فقط =====
 function shuffle_(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
