@@ -183,6 +183,7 @@ function niceErr(e){
   var m=String((e&&e.message)||e||"");
   if(e&&e.code==="23505")return "هذا العنصر موجود مسبقًا.";
   if(e&&e.code==="42501"||/row-level security|permission denied/i.test(m))return "غير مسموح لك بهذا الإجراء.";
+  if(/offer_limit/.test(m))return "وصل هذا المتجر للحد الأقصى: 3 عروض سارية.";
   if(/Failed to fetch|NetworkError/i.test(m))return "تعذّر الاتصال، تأكد من الإنترنت.";
   return m||"حدث خطأ";
 }
@@ -649,14 +650,13 @@ function offersHtml(){
     '<label>نص العرض (حتى 120 حرفًا)</label><input id="ofText" maxlength="120" placeholder="مثال: خصم 10% على الزيوت">'+
     '<label>كود الخصم — اختياري</label><input id="ofCode" maxlength="20" class="ltr">'+
     '<label>ينتهي في — اختياري</label><input id="ofUntil" type="date">'+
-    '<label>مدة ظهور العرض في الشريط بالثواني — اختياري</label><input id="ofSecs" type="number" inputmode="numeric" min="3" max="120" placeholder="مثال: 10"><div class="hint">كم ثانية يبقى هذا العرض ظاهراً قبل أن يتبدّل للعرض التالي. إن تركتها فارغة يظهر 4.5 ثانية.</div>'+
     (ME.master?'<label style="display:flex;gap:8px;align-items:center;margin:2px 0 10px;font-size:13px;color:var(--text)"><input id="ofPush" type="checkbox" style="width:auto;margin:0"> أرسل إشعارًا للزبائن بهذا العرض</label>':'')+
     '<button class="btn" data-act="addOffer">نشر العرض</button></div>';
   h+='<div class="card"><h2>العروض ('+OFFERS.length+')</h2>';
   if(!OFFERS.length)h+='<div class="empty">لا توجد عروض.</div>';
   OFFERS.forEach(function(o){
     var exp=o.until&&o.until<today;
-    h+='<div class="item"><div class="iname">'+esc(o.text)+'</div><div class="imeta">'+(o.store_id?(ALLV?'<span class="badge">'+esc((storeById(o.store_id)||{}).name||'')+'</span> ':''):(o.city_id?'<span class="badge">🏙 '+esc(cityNameOf(o.city_id))+'</span> ':'<span class="badge">عام</span> '))+(o.code?'كود: '+esc(o.code)+' · ':'')+(o.until?(exp?'<span class="off">منتهٍ '+esc(o.until)+'</span>':'ينتهي '+esc(o.until)):'بدون انتهاء')+(o.show_seconds>0?' · يظهر '+o.show_seconds+' ث':'')+'</div>'+
+    h+='<div class="item"><div class="iname">'+esc(o.text)+'</div><div class="imeta">'+(o.store_id?(ALLV?'<span class="badge">'+esc((storeById(o.store_id)||{}).name||'')+'</span> ':''):(o.city_id?'<span class="badge">🏙 '+esc(cityNameOf(o.city_id))+'</span> ':'<span class="badge">عام</span> '))+(o.code?'كود: '+esc(o.code)+' · ':'')+(o.until?(exp?'<span class="off">منتهٍ '+esc(o.until)+'</span>':'ينتهي '+esc(o.until)):'بدون انتهاء')+'</div>'+
       '<div class="acts"><button class="btn btn-red btn-sm" data-act="delOffer" data-id="'+esc(o.id)+'">حذف</button></div></div>';
   });
   return h+'</div>';
@@ -923,21 +923,16 @@ var ACT={
     if(sc==="store"&&!CUR){toast("اختاري المتجر",true);return}
     var body={store_id:sid,text:t,code:$("ofCode").value.trim(),until:$("ofUntil").value||null};
     if(cityPick)body.city_id=cityPick;
-    var secs=Math.floor(Number($("ofSecs")&&$("ofSecs").value))||0;if(secs>0)body.show_seconds=Math.min(120,Math.max(3,secs));
+    // حدّ أقصى 3 عروض سارية لكل متجر (العروض العامة/المدن غير محدودة)
+    if(sid){var td=new Date().toISOString().slice(0,10);if(OFFERS.filter(function(o){return o.store_id===sid&&(!o.until||o.until>=td)}).length>=3){toast("وصل هذا المتجر للحد الأقصى: 3 عروض سارية. احذف عرضًا أو انتظر انتهاءه.",true);return}}
     var doPush=!!($("ofPush")&&$("ofPush").checked),sn=sid&&storeById(sid)?storeById(sid).name:"";
-    var noSecs=false;
     var cityOfPush=cityPick||(sid&&cityIdOfStore(storeById(sid)))||undefined;
     if(cityPick)sn=cityNameOf(cityPick);
     api("POST","offers",body,"return=representation").catch(function(e){
       if(cityPick&&/city_id/i.test(String((e&&e.message)||""))){throw new Error("أضف عمود city_id للعروض من SQL أولاً")}
-      // عمود show_seconds غير موجود في القاعدة بعد: ننشر العرض بدونه بدل أن يفشل
-      if(body.show_seconds!=null&&/show_seconds|schema cache/i.test(String((e&&e.message)||""))){
-        var b2=Object.assign({},body);delete b2.show_seconds;noSecs=true;
-        return api("POST","offers",b2,"return=representation");
-      }
       throw e;
     }).then(function(r){
-      if(r&&r[0])OFFERS.unshift(r[0]);toast(noSecs?"نُشر العرض، لكن مدة الظهور لم تُحفظ (أضف عمود show_seconds من SQL)":"تم نشر العرض ✓");render();
+      if(r&&r[0])OFFERS.unshift(r[0]);toast("تم نشر العرض ✓");render();
       if(doPush)pushFn({title:"🏷️ عرض جديد"+(sn?" — "+sn:""),body:t,city_id:cityOfPush}).then(function(j){var m=pushMsg(j);toast("نُشر العرض · "+m.t,m.bad);if(m.bad)alert(m.t)}).catch(fail);
     }).catch(fail);
   },

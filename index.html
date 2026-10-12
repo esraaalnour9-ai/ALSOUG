@@ -94,6 +94,10 @@ main{max-width:1150px;margin:0 auto;padding:22px 14px 16px}
 .store-banner[hidden]{display:none}
 .store-banner .sbinfo{display:flex;flex-direction:column;gap:3px;min-width:0}
 .store-offer{display:flex;align-items:center;gap:10px;margin:8px 0;padding:11px 14px;border-radius:16px;background:linear-gradient(120deg,#0b3536,#0e8a86);color:#fff;font-weight:800;font-size:13px;box-shadow:0 8px 20px -10px rgba(11,53,54,.6)}
+.offer-top{overflow:hidden}
+@keyframes offerIn{from{transform:translateX(105%);opacity:0}to{transform:translateX(0);opacity:1}}
+.store-offer .pmsg,.store-offer>span:first-child{animation:offerIn .8s cubic-bezier(.2,.8,.2,1) both}
+@media (prefers-reduced-motion:reduce){.store-offer .pmsg,.store-offer>span:first-child{animation:none}}
 .offer-top .store-offer{margin:0;border-radius:0;box-shadow:none;padding:12px 16px;font-size:13.5px}
 .store-offer[hidden]{display:none}.store-offer .pmsg{flex:1;min-width:0}
 .store-offer .pcode{background:rgba(255,255,255,.18);border:1px dashed rgba(255,255,255,.8);border-radius:8px;padding:2px 9px;margin-inline-start:6px;cursor:pointer;font:inherit;color:inherit;font-weight:900;white-space:nowrap}
@@ -401,7 +405,7 @@ html:has(#lb.show){overflow:hidden}
 </div></footer>
 <script>
 var PLATFORM="249115819197";
-var SCRIPT_URL="https://script.google.com/macros/s/AKfycbzXuDV6EXrtKxXGMte66aDQCnD-IF1BjL0fGtpEJTYtwNGf70ivpQCOHmYSaWkkFeJ6/exec";
+var SCRIPT_URL=""; // فُصل الربط مع شيت قوقل القديم: كل شيء الآن من Supabase
 // ===== Supabase (المفتاح العام publishable آمن في الواجهة؛ الحماية بسياسات RLS في القاعدة) =====
 var SB_URL="https://paqxjptmmisybxlpyvsa.supabase.co";
 var SB_KEY="sb_publishable_X8JfSPeds7BmkFXBCsgHgw_jPOcAVFu";
@@ -648,14 +652,7 @@ function load(){
   }else{
     loading=true;render();
   }
-  function fromSheet(){
-    var ctl=(typeof AbortController!=="undefined")?new AbortController():null;
-    var tmo=ctl?setTimeout(function(){ctl.abort()},20000):null;
-    return fetch(SCRIPT_URL,ctl?{signal:ctl.signal,cache:"no-store"}:{cache:"no-store"}).then(function(r){if(tmo)clearTimeout(tmo);if(!r.ok)throw new Error("http "+r.status);return r.json()}).then(function(d){
-      if(!validData(d))throw new Error("bad data");return {data:d,offers:null};
-    },function(e){if(tmo)clearTimeout(tmo);throw e});
-  }
-  loadSupabase().catch(function(){return fromSheet()}).then(function(res){
+  loadSupabase().then(function(res){
     var d=res.data;
     if(res.offers){SO=res.offers;buildAllView();soKey="";paintStoreOffer();sbOffers=true}
     loading=false;liveData=true;$("dataError").hidden=true;writeCache(d);build(d);
@@ -791,7 +788,7 @@ function pushDebug(){
   var q="";try{q=new URLSearchParams(location.search).get("pushdebug")}catch(e){}
   if(!q)return;
   setTimeout(function(){
-    var out=["الإذن: "+(("Notification" in window)?Notification.permission:"غير مدعوم"),"دعم الإشعارات: "+pushSupported(),"المدينة: "+(CITY||"غير محددة")];
+    var out=["الإذن: "+(("Notification" in window)?Notification.permission:"غير مدعوم"),"دعم الإشعارات: "+pushSupported(),"المدينة: "+(CITY||"غير محددة"),"مصدر البيانات: "+(typeof sheetMode!=="undefined"&&sheetMode?"شيت قوقل القديم (فشل Supabase)":"Supabase"),"عروض من: "+(sbOffers?"Supabase":"غير Supabase")];
     if(!("serviceWorker" in navigator)){alert(out.join("\n"));return}
     navigator.serviceWorker.getRegistration().then(function(reg){
       out.push("خدمة التشغيل: "+(reg?"مسجّلة":"غير مسجّلة"));
@@ -1147,42 +1144,10 @@ function drawCart(){
   b.innerHTML=h;
   saveState();
 }
-function logOrder(storeName,items,cust,payMethod){
-  try{
-    fetch(SCRIPT_URL,{
-      method:"POST",
-      headers:{"Content-Type":"text/plain;charset=utf-8"},
-      body:JSON.stringify({
-        action:"logOrder",
-        store:storeName,
-        items:items.map(function(c){return{name:c.name,unit:c.unit,qty:c.qty,price:c.price}}),
-        ts:new Date().toISOString(),
-        custName:cust.n,custPhone:cust.p,custAddress:cust.a,pay:payMethod
-      })
-    }).catch(function(){});
-  }catch(e){}
-}
+function logOrder(){} // لا يوجد تسجيل في شيت قوقل بعد الآن
 // يطلب من الخادم رقمًا مرجعيًا للطلب (يُسجَّل فورًا في شيت منفصل قبل ما يشوف الزبون رسالة واتساب أصلاً).
 // مهلة قصوى 6 ثوانٍ حتى لا يتعطل إرسال الطلب لو كان الاتصال بطيئًا؛ لو فشل الطلب يُرسل بلا رقم مرجعي بدل ما يتعطل كليًا.
-function reserveOrderCode(storeName,items,sub,pl){
-  var payload={
-    action:"reserveOrderCode",
-    store:storeName,
-    name:cust.n,phone:cust.p,address:cust.a,pay:pl,total:sub,
-    items:items.map(function(c){return{name:c.name,unit:c.unit,qty:c.qty,price:c.price}})
-  };
-  var ctrl=(typeof AbortController!=="undefined")?new AbortController():null;
-  var timer=ctrl?setTimeout(function(){ctrl.abort()},6000):null;
-  return fetch(SCRIPT_URL,{
-    method:"POST",
-    headers:{"Content-Type":"text/plain;charset=utf-8"},
-    body:JSON.stringify(payload),
-    signal:ctrl?ctrl.signal:undefined
-  }).then(function(r){return r.json()}).then(function(r){
-    if(timer)clearTimeout(timer);
-    return (r&&r.ok&&r.code)?r.code:null;
-  }).catch(function(){if(timer)clearTimeout(timer);return null});
-}
+function reserveOrderCode(){return Promise.resolve(null)} // بلا رقم مرجعي عند تعذّر Supabase
 var FB_URL=SB_URL+"/functions/v1/feedback";
 function stars(n){var s="";for(var i=1;i<=5;i++)s+=i<=n?"★":"☆";return s}
 function openFb(uid){
@@ -1517,7 +1482,7 @@ if("serviceWorker" in navigator){
 }
 
 // مهم: هذه المتغيرات لازم تُعرّف قبل استدعاء load()، وإلا يفشل الرسم عند وجود كاش
-var sbOffers=false,SO=[],SOALL=[],soIdx=0,soTimer=null,soKey="",soList=[];
+var sbOffers=false,sheetMode=false,SO=[],SOALL=[],soIdx=0,soTimer=null,soKey="",soList=[];
 document.addEventListener("change",function(e){
   var t=e.target;
   if(t&&t.dataset&&t.dataset.zone!==undefined){
@@ -1532,7 +1497,7 @@ document.addEventListener("change",function(e){
 loadState();
 load();
 paintPush();pushSync();pushDebug();
-try{if(typeof SO!=="undefined"&&SO&&SO.length){buildAllView();soKey="";paintStoreOffer()}}catch(e){}
+try{buildAllView();soKey="";paintStoreOffer()}catch(e){}
 
 // ===== شريط عروض المحل: يظهر تحت بطاقة المحل المختار، وفي "كل المتاجر" تظهر العروض العامة فقط =====
 function shuffle_(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
@@ -1548,8 +1513,7 @@ function buildAllView(){
   SOALL=glob.slice(0,2).concat(picks).slice(0,6);
 }
 function loadStoreOffers(){
-  if(sbOffers){loadSupabase().then(function(r){SO=r.offers;buildAllView();soKey="";paintStoreOffer()},function(){});return}
-  fetch(SCRIPT_URL+"?offers=1").then(function(r){return r.json()}).then(function(d){SO=(d&&d.offers)||[];buildAllView();soKey="";paintStoreOffer()},function(){});
+  if(sbOffers)loadSupabase().then(function(r){SO=r.offers;buildAllView();soKey="";paintStoreOffer()},function(){});
 }
 function paintStoreOffer(){
   var box=$("storeOffer");if(!box)return;
@@ -1558,9 +1522,14 @@ function paintStoreOffer(){
   var key=(all?"all":selStore)+"|"+list.map(function(o){return o.id}).join(",");
   if(key===soKey)return;
   soKey=key;soList=list;soIdx=0;clearInterval(soTimer);
-  if(!list.length){box.hidden=true;box.innerHTML="";return}
+  if(!list.length){
+    // لا عروض: رسالة ترحيب ثابتة بدل شريط فارغ
+    box.hidden=false;box.innerHTML='<span>🏷️</span><span class="pmsg">مرحباً بكم في أسواق السودان</span>';
+    return;
+  }
   box.hidden=false;drawStoreOffer();
-  if(list.length>1)soTimer=setInterval(function(){soIdx=(soIdx+1)%soList.length;drawStoreOffer()},5000);
+  // يدخل العرض من اليمين إلى اليسار ويستقر 8 ثوانٍ ليقرر الزبون، ثم يأتي التالي (الزمن ثابت من المنصة لا من التجار)
+  if(list.length>1)soTimer=setInterval(function(){soIdx=(soIdx+1)%soList.length;drawStoreOffer()},8000);
 }
 function drawStoreOffer(){
   var o=soList[soIdx];if(!o)return;
@@ -1569,7 +1538,7 @@ function drawStoreOffer(){
     (o.code?' <button class="pcode" data-copycode="'+esc(o.code)+'" title="اضغط لنسخ الكود">'+esc(o.code)+'</button>':'')+'</span>'+
     (showStore?'<button class="pcode" data-gostore="'+esc(o.store)+'">افتح المحل</button>':'');
 }
-loadStoreOffers();setInterval(loadStoreOffers,300000);
+setInterval(loadStoreOffers,300000); // لا نستدعيها فورًا: العروض تأتي من Supabase مع البيانات، وقوقل شيت القديم احتياطي فقط
 </script>
 </body>
 </html>
