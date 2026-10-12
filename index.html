@@ -69,10 +69,10 @@ header{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px
 .storepick{background:var(--card);border-bottom:1px solid var(--line);padding:14px 14px 4px}
 .storepick .in{max-width:1150px;margin:0 auto}
 .storepick h3{margin:0 0 10px;font-size:14px;font-weight:800;display:flex;align-items:center;gap:6px}
-.hero::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 85% -10%,rgba(255,255,255,.25),transparent 55%),radial-gradient(rgba(255,255,255,.12) 1px,transparent 1px);background-size:100% 100%,16px 16px}
+.hero::after{content:"";pointer-events:none;position:absolute;inset:0;background:radial-gradient(circle at 85% -10%,rgba(255,255,255,.25),transparent 55%),radial-gradient(rgba(255,255,255,.12) 1px,transparent 1px);background-size:100% 100%,16px 16px}
 .hero .in{position:relative;max-width:640px;margin:0 auto;text-align:center}
 .badge{display:inline-block;background:rgba(255,255,255,.22);backdrop-filter:blur(2px);border:1px solid rgba(255,255,255,.35);padding:5px 14px;border-radius:99px;font-size:12px;font-weight:800;margin-bottom:12px}
-.hero .cityhero{display:inline-flex;align-items:center;gap:8px;margin:14px auto 0;background:#fff;color:#9a3412;border:0;border-radius:99px;padding:11px 20px;font:inherit;font-weight:900;font-size:15px;box-shadow:0 8px 22px -8px rgba(0,0,0,.45);cursor:pointer}
+.hero .cityhero{position:relative;z-index:2;display:inline-flex;align-items:center;gap:8px;margin:14px auto 0;background:#fff;color:#9a3412;border:0;border-radius:99px;padding:11px 20px;font:inherit;font-weight:900;font-size:15px;box-shadow:0 8px 22px -8px rgba(0,0,0,.45);cursor:pointer}
 .hero .cityhero small{font-weight:700;color:#c2410c;font-size:12px}
 .hero .cityhero[hidden]{display:none}
 .hero h2{margin:0 0 8px;font-size:23px;font-weight:900;line-height:1.35}
@@ -341,7 +341,7 @@ html:has(#lb.show){overflow:hidden}
 <section class="hero"><div class="in">
   <span class="badge">🛍️ سوق إلكتروني محلي</span>
   <h2>مرحباً بكم في أسواق السودان الإلكترونية</h2>
-  <p>اختر بقالتك المفضلة، تصفح المنتجات بوحداتها المختلفة، وأرسل طلبك عبر الواتساب أو ادفع إلكترونيًا بكل سهولة وأمان.</p>
+  <p>اختر محلك المفضل، تصفح المنتجات بوحداتها المختلفة، وأرسل طلبك عبر الواتساب أو ادفع إلكترونيًا بكل سهولة وأمان.</p>
   <button type="button" class="cityhero" id="cityBtn2" data-city="open" hidden>📍 <span id="cityBtn2t">اختر مدينتك</span> <small>· تغيير المدينة ▾</small></button>
 </div></section>
 <section class="storepick"><div class="in">
@@ -941,6 +941,8 @@ function shareStore(name){
   var msg=isBk?("🩺 احجز موعدك في "+name+" عبر "+brandOf(name)+":\n"+url):("🛍️ تسوّق من "+name+" عبر "+brandOf(name)+":\n"+url);
   window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
 }
+var SRANK={};
+function srank(n){if(!(n in SRANK))SRANK[n]=Math.random();return SRANK[n]}
 function storeLabel(s){return s.name.length>16?s.name.slice(0,15)+"…":s.name}
 function chips(el,list,cur,key,cls){
   el.innerHTML=list.map(function(x){return '<button class="chip '+cls+(cur===x[0]?' on':'')+'" data-'+key+'="'+esc(x[0])+'">'+esc(x[1])+'</button>'}).join("");
@@ -962,7 +964,7 @@ function render(){
   chips($("types"),typeList,selType,"t","");
 
   var storesInType=stores.filter(function(s){return selType==="all"||s.type===selType});
-  var storeList=[["all","🛒 كل المتاجر"]].concat(storesInType.map(function(s){return[s.name,storeLabel(s)]}));
+  var storeList=[["all","🛒 كل المتاجر"]].concat(storesInType.slice().sort(function(a,b){return srank(a.name)-srank(b.name)}).map(function(s){return[s.name,storeLabel(s)]}));
   chips($("stores"),storeList,selStore,"s","");
   $("storeSel").innerHTML='<option value="all"'+(selStore==="all"?' selected':'')+'>🛒 كل المتاجر</option>'+
     storesInType.map(function(s){return '<option value="'+esc(s.name)+'"'+(selStore===s.name?' selected':'')+'>'+esc(s.name)+'</option>'}).join("");
@@ -993,7 +995,7 @@ function render(){
   pop=popMap();
   list=list.map(function(p,i){return{p:p,i:i}}).sort(function(a,b){
     var pa=pop[a.p.id]||0,pb=pop[b.p.id]||0;
-    return pa!==pb?pb-pa:a.i-b.i;
+    return pa!==pb?pb-pa:(a.p.store!==b.p.store?srank(a.p.store)-srank(b.p.store):a.i-b.i);
   }).map(function(x){return x.p});
   paintReorder();
   $("n").textContent=list.length+" صنف";
@@ -1130,14 +1132,14 @@ function drawCart(){
   var g={};cart.forEach(function(c){(g[c.store]=g[c.store]||[]).push(c)});
   var names=Object.keys(g);
   var h='<button class="clearcart" data-clearcart="1">🗑️ تفريغ السلة بالكامل</button>'+
-  (names.length>1?'<div class="info">سلتك تحتوي أصنافاً من '+names.length+' بقالات؛ يُرسل لكل بقالة طلب مستقل.</div>':'')+
+  (names.length>1?'<div class="info">سلتك تحتوي أصنافاً من '+(names.length===2?'محلين':names.length+' محلات')+'؛ يُرسل لكل محل طلب مستقل.</div>':'')+
   '<div><b style="font-size:13px">بياناتك:</b></div><div><input id="cn" placeholder="الاسم الكامل" value="'+esc(cust.n)+'"><input id="cp" placeholder="رقم الهاتف (واتساب)" value="'+esc(cust.p)+'"><textarea id="ca" rows="2" placeholder="عنوان التوصيل (الحي / الشارع) — مطلوب عند اختيار التوصيل">'+esc(cust.a)+'</textarea>'+
   '</div>';
   names.forEach(function(s){
     var st=stores.filter(function(x){return x.name===s})[0]||{},sub=g[s].reduce(function(a,c){return a+c.price*c.qty},0),ac=payAcct(s),stt=storeState(st);
     h+='<div class="grp"><b>'+storeMark(s)+esc(s)+'</b>'+(stt&&!stt.open?'<div class="info warn">🕒 '+esc(stt.txt)+'. يمكنك إرسال الطلب وسيصلك الرد عند فتح المحل.</div>':'')+g[s].map(function(c){
       return '<div class="it"><div><b>'+esc(c.name)+'</b> <small>('+esc(c.unit)+')</small><br><small>'+c.qty+' × '+c.price.toLocaleString()+' = '+(c.price*c.qty).toLocaleString()+' جنيه</small></div><button data-rm="'+esc(c.id)+'">حذف</button></div>';
-    }).join("")+'<div class="sub"><span>إجمالي البقالة:</span><span>'+sub.toLocaleString()+' جنيه</span></div>'+
+    }).join("")+'<div class="sub"><span>إجمالي المحل:</span><span>'+sub.toLocaleString()+' جنيه</span></div>'+
     recvBlock(s,st)+payBlock(s,st,ac)+
     '<button class="send" data-send="'+esc(s)+'">إرسال طلب '+esc(s)+' إلى واتساب</button></div>';
   });
@@ -1348,9 +1350,9 @@ function send(s){
     var code=o.code;sub=o.total;
     var m="🛒 *طلب جديد عبر "+brandE(s)+"*\n"+
       (code?"🔒 *رقم الطلب المرجعي:* #"+code+"\n":"")+
-      "🏪 *البقالة:* "+s+"\n👤 *الاسم:* "+cust.n+"\n📞 *الهاتف:* "+cust.p+"\n"+(rv==="delivery"?"🚚 *الاستلام:* توصيل (الإسراء والمعراج للتوصيل)\n"+(zoneSel?"🗺️ *الحي:* "+zoneSel+" — رسم التوصيل: "+(zoneFee(zoneSel)||0).toLocaleString()+" جنيه (يُدفع للسائق)\n":"")+"📍 *العنوان:* "+cust.a:rv==="own"?"🛵 *الاستلام:* توصيل من المتجر\n📍 *العنوان:* "+cust.a:"🏪 *الاستلام:* من المتجر"+(cust.a?"\n📝 *ملاحظة:* "+cust.a:""))+"\n💳 *طريقة الدفع:* "+(acS?("تحويل — "+acS.provider+" ("+acS.number+")"):"دفع عند الاستلام")+"\n\n📦 *المنتجات المطلوبة:*\n";
+      "🏪 *المحل:* "+s+"\n👤 *الاسم:* "+cust.n+"\n📞 *الهاتف:* "+cust.p+"\n"+(rv==="delivery"?"🚚 *الاستلام:* توصيل (الإسراء والمعراج للتوصيل)\n"+(zoneSel?"🗺️ *الحي:* "+zoneSel+" — رسم التوصيل: "+(zoneFee(zoneSel)||0).toLocaleString()+" جنيه (يُدفع للسائق)\n":"")+"📍 *العنوان:* "+cust.a:rv==="own"?"🛵 *الاستلام:* توصيل من المتجر\n📍 *العنوان:* "+cust.a:"🏪 *الاستلام:* من المتجر"+(cust.a?"\n📝 *ملاحظة:* "+cust.a:""))+"\n💳 *طريقة الدفع:* "+(acS?("تحويل — "+acS.provider+" ("+acS.number+")"):"دفع عند الاستلام")+"\n\n📦 *المنتجات المطلوبة:*\n";
     items.forEach(function(c,i){m+=(i+1)+". "+c.name+" ("+c.unit+") × "+c.qty+" - "+(c.price*c.qty).toLocaleString()+" جنيه\n"});
-    m+="\n💰 *إجمالي هذه البقالة:* "+sub.toLocaleString()+" جنيه";
+    m+="\n💰 *إجمالي هذا المحل:* "+sub.toLocaleString()+" جنيه";
     if(acS)m+="\n\n📎 *ملاحظة:* تم التحويل عبر "+acS.provider+" وسيُرفق إيصال الدفع.";
     if(!o.sb)logOrder(s,items,cust,pl);
     saveHist(s,items,code);
