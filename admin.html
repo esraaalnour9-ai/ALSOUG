@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>إدارة المتجر - أسواق شمال كردفان</title>
+<title>إدارة المتجر - أسواق السودان</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#0b3536">
 <meta name="referrer" content="no-referrer">
@@ -119,7 +119,7 @@ main#app{flex:1 0 auto;width:100%;box-sizing:border-box}
 </header>
 <div id="updBar" hidden><span>✨ يوجد تحديث جديد للوحة</span><button data-act="reload">تحديث الآن</button></div>
 <main id="app"><div class="empty">⏳ جاري التحميل...</div></main>
-<footer class="afoot"><div class="afrow"><div class="afbrand"><span class="afmark">🏪</span><div><b>أسواق شمال كردفان</b><small>شمال كردفان، السودان</small></div></div><div class="afbtns"><a class="afb wa" href="https://wa.me/249115819197?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%A3%D8%AD%D8%AA%D8%A7%D8%AC%20%D9%85%D8%B3%D8%A7%D8%B9%D8%AF%D8%A9%20%D9%81%D9%8A%20%D9%84%D9%88%D8%AD%D8%A9%20%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9%20%D8%B3%D9%88%D9%82%20%D8%A7%D9%84%D8%B1%D9%87%D8%AF" target="_blank" rel="noopener">💬 تواصل معنا</a><a class="afb" href="https://mail.google.com/mail/?view=cm&fs=1&to=Vsob99@gmail.com" target="_blank" rel="noopener">✉️ بريد</a></div></div><div class="afcopy">© 2026 أسواق شمال كردفان — جميع الحقوق محفوظة لدى <b style="white-space:nowrap">إسراء النور</b> <span class="ver">· الإصدار 1</span></div></footer>
+<footer class="afoot"><div class="afrow"><div class="afbrand"><span class="afmark">🏪</span><div><b>أسواق السودان</b><small>السودان</small></div></div><div class="afbtns"><a class="afb wa" href="https://wa.me/249115819197?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%A3%D8%AD%D8%AA%D8%A7%D8%AC%20%D9%85%D8%B3%D8%A7%D8%B9%D8%AF%D8%A9%20%D9%81%D9%8A%20%D9%84%D9%88%D8%AD%D8%A9%20%D8%A5%D8%AF%D8%A7%D8%B1%D8%A9%20%D8%B3%D9%88%D9%82%20%D8%A7%D9%84%D8%B1%D9%87%D8%AF" target="_blank" rel="noopener">💬 تواصل معنا</a><a class="afb" href="https://mail.google.com/mail/?view=cm&fs=1&to=Vsob99@gmail.com" target="_blank" rel="noopener">✉️ بريد</a></div></div><div class="afcopy">© 2026 أسواق السودان — جميع الحقوق محفوظة لدى <b style="white-space:nowrap">إسراء النور</b> <span class="ver">· الإصدار 1</span></div></footer>
 <nav id="bottomNav" class="bnav" hidden></nav>
 <div id="toast"></div>
 <script>
@@ -285,7 +285,7 @@ function showLogin(msg){
     '<label>رقم الهاتف أو البريد الإلكتروني</label><input id="lgEmail" class="ltr" autocomplete="username" placeholder="09xxxxxxxx أو name@gmail.com">'+
     '<label>كلمة السر</label><input id="lgPass" type="password" class="ltr" autocomplete="current-password">'+
     '<button class="btn" style="width:100%" data-act="login">دخول</button>'+
-    '<div class="hint" style="margin-top:10px">الحسابات تُنشأ من إدارة أسواق شمال كردفان فقط.</div></div>';
+    '<div class="hint" style="margin-top:10px">الحسابات تُنشأ من إدارة أسواق السودان فقط.</div></div>';
 }
 // الدخول برقم الهاتف: يُحوَّل الرقم إلى بريد داخلي ثابت (لا يُرسَل له شيء)
 function loginId(v){
@@ -325,12 +325,12 @@ function boot(){
     PROVIDERS=r[3]||[];
     if(ME.master)STORES.forEach(function(st){if(!st.booking_enabled&&isClinicSec(st.section)){st.booking_enabled=true;api("PATCH","stores?id=eq."+st.id,{booking_enabled:true},"return=minimal").catch(function(){st.booking_enabled=false})}});
     if(!STORES.length&&!ME.master){
-      $("app").innerHTML='<div class="card"><div class="err">حسابك غير مرتبط بأي متجر بعد. تواصل مع إدارة أسواق شمال كردفان.</div><button class="btn btn-line" data-act="logout">تسجيل الخروج</button></div>';
+      $("app").innerHTML='<div class="card"><div class="err">حسابك غير مرتبط بأي متجر بعد. تواصل مع إدارة أسواق السودان.</div><button class="btn btn-line" data-act="logout">تسجيل الخروج</button></div>';
       $("outBtn").hidden=false;return;
     }
     var saved="";try{saved=localStorage.getItem("sr_adm_store")||""}catch(e){}
     CUR=storeById(saved)||STORES[0]||null;
-    $("hTitle").textContent=ME.master?"إدارة أسواق شمال كردفان":"إدارة المتجر";
+    $("hTitle").textContent=ME.master?"إدارة أسواق السودان":"إدارة المتجر";
     $("muteBtn").hidden=false;$("outBtn").hidden=false;$("bottomNav").hidden=false;
     if(ME.master){TAB="admin";ALLV=true;loadPushCount()}
     fixTab();buildNav();loadStoreData().then(function(){startPolling()});
@@ -510,7 +510,7 @@ function render(){
 // ===== الرئيسية =====
 function homeHtml(){
   var hr=new Date().getHours(),g=hr>=5&&hr<12?"صباح الخير":"مساء الخير";
-  var who=ME.master?"مدير أسواق شمال كردفان":(CUR?CUR.name:"");
+  var who=ME.master?"مدير أسواق السودان":(CUR?CUR.name:"");
   var all=ME.master&&ALLV;
   var data=STATS.filter(function(o){return all||!CUR||o.store_id===CUR.id});
   var now=new Date(),d0=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();

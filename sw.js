@@ -49,7 +49,7 @@ self.addEventListener("push", function (e) {
   try { d = e.data ? e.data.json() : {}; } catch (x) { d = { body: e.data ? e.data.text() : "" }; }
   // العنوان = اسم سوق المدينة (مثل «سوق الأبيض»)، ثم عنوان الرسالة ونصها في المتن
   var head = d.brand || "";
-  e.waitUntil(self.registration.showNotification(head || d.title || "أسواق شمال كردفان", {
+  e.waitUntil(self.registration.showNotification(head || d.title || "أسواق السودان", {
     body: head ? ((d.title ? d.title + "\n" : "") + (d.body || "")) : (d.body || ""),
     icon: "./icon-192.png",
     badge: "./icon-192.png",
