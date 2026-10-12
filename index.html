@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>أسواق شمال كردفان</title>
+<title>أسواق السودان</title>
 <meta name="google-site-verification" content="7tRSgt6m0xkuMJP6mzbMMhB-5RctV3W7QDETb1LHpeQ" />
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-63SK91X3E1"></script>
 <script>
@@ -16,7 +16,7 @@
 <meta name="theme-color" content="#f59e0b">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="أسواق شمال كردفان">
+<meta name="apple-mobile-web-app-title" content="أسواق السودان">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -321,7 +321,7 @@ html:has(#lb.show){overflow:hidden}
 </head>
 <body>
 <div id="install" hidden>
-  <span id="installTxt">حمّل تطبيق أسواق شمال كردفان على هاتفك الآن 🏪</span>
+  <span id="installTxt">حمّل تطبيق أسواق السودان على هاتفك الآن 🏪</span>
   <span class="grp"><button id="installBtn">تثبيت الآن</button><button id="installX" aria-label="إغلاق">&times;</button></span>
 </div>
 <div id="dataError" hidden>
@@ -330,7 +330,7 @@ html:has(#lb.show){overflow:hidden}
 </div>
 <header>
   <div class="htop">
-    <div class="logo"><span class="ic">🏪</span><div><span id="brandName">أسواق شمال كردفان</span><button type="button" class="cbtn" id="cityBtn" data-city="open">📍 الرهد أبو دكنة</button></div></div>
+    <div class="logo"><span class="ic">🏪</span><div><span id="brandName">أسواق السودان</span><button type="button" class="cbtn" id="cityBtn" data-city="open">📍 الرهد أبو دكنة</button></div></div>
     <div class="swrap"><input id="q" placeholder="ابحث عن السلع أو اسم المحل..."><button id="qx" aria-label="مسح البحث">&times;</button><div id="storeSuggest"></div></div>
     <button class="iconbtn" id="refresh" title="تحديث البيانات">↻</button>
     <button class="cartbtn" id="openCart">🛒 السلة<b id="cnt" hidden>0</b></button>
@@ -340,7 +340,7 @@ html:has(#lb.show){overflow:hidden}
 <div id="promoBar" class="promo-bar" hidden></div>
 <section class="hero"><div class="in">
   <span class="badge">🛍️ سوق إلكتروني محلي</span>
-  <h2>مرحباً بكم في أسواق شمال كردفان الإلكترونية</h2>
+  <h2>مرحباً بكم في أسواق السودان الإلكترونية</h2>
   <p>اختر بقالتك المفضلة، تصفح المنتجات بوحداتها المختلفة، وأرسل طلبك عبر الواتساب أو ادفع إلكترونيًا بكل سهولة وأمان.</p>
   <button type="button" class="cityhero" id="cityBtn2" data-city="open" hidden>📍 <span id="cityBtn2t">اختر مدينتك</span> <small>· تغيير المدينة ▾</small></button>
 </div></section>
@@ -379,7 +379,7 @@ html:has(#lb.show){overflow:hidden}
   <div class="frow">
     <div class="fbrand">
       <div class="fmark">🏪</div>
-      <div><div class="ftitle">أسواق شمال كردفان الإلكترونية</div><div class="fsub">شمال كردفان، السودان</div></div>
+      <div><div class="ftitle">أسواق السودان الإلكترونية</div><div class="fsub">السودان</div></div>
     </div>
     <div class="ficons">
       <a class="fic invite" id="inviteFriend" target="_blank" rel="noopener" title="ادعُ صديقاً للتسوق من التطبيق">
@@ -397,7 +397,7 @@ html:has(#lb.show){overflow:hidden}
     <span>🏪 لإضافة متجرك تواصل معنا</span>
     <a href="#" id="ctaWa">تواصل معنا</a>
   </div>
-  <div class="fbottom"><p>© 2026 أسواق شمال كردفان — جميع الحقوق محفوظة لدى <b>إسراء النور</b></p></div>
+  <div class="fbottom"><p>© 2026 أسواق السودان — جميع الحقوق محفوظة لدى <b>إسراء النور</b></p></div>
 </div></footer>
 <script>
 var PLATFORM="249115819197";
@@ -636,7 +636,7 @@ function writeCache(d){
   try{localStorage.setItem("sr_data_cache",JSON.stringify({data:d,ts:Date.now()}))}catch(e){}
 }
 function load(){
-  var wa="مرحباً، أرغب في إضافة متجري إلى أسواق شمال كردفان";
+  var wa="مرحباً، أرغب في إضافة متجري إلى أسواق السودان";
   $("joinWa").href="https://wa.me/"+PLATFORM+"?text="+encodeURIComponent(wa);
   $("ctaWa").href="https://wa.me/"+PLATFORM+"?text="+encodeURIComponent(wa);
   var inviteMsg="🛍️ جرّب "+brandE("")+"! تسوّق من محلات منطقتك بسهولة عبر واتساب:\n"+location.origin+location.pathname;
@@ -816,7 +816,7 @@ function normP(p){
 }
 // ===== المدن والأسواق =====
 try{var g0=JSON.parse(localStorage.getItem("sr_geo")||"null");if(g0&&Array.isArray(g0.cities)&&Array.isArray(g0.markets))GEO=g0}catch(e){}
-function brandOf(n){var st=null;stores.forEach(function(x){if(x.name===n)st=x});if(!st&&RAWD&&RAWD[n])st=RAWD[n];var c=cityById(st?cityOfStoreMeta(st):CITY);return c?"سوق "+c.name:"أسواق شمال كردفان"}
+function brandOf(n){var st=null;stores.forEach(function(x){if(x.name===n)st=x});if(!st&&RAWD&&RAWD[n])st=RAWD[n];var c=cityById(st?cityOfStoreMeta(st):CITY);return c?"سوق "+c.name:"أسواق السودان"}
 function brandE(n){var b=brandOf(n);return b.indexOf("سوق ")===0?b+" الإلكتروني":b+" الإلكترونية"}
 function marketOf(id){return GEO.markets.filter(function(m){return m.id===id})[0]}
 function cityById(id){return GEO.cities.filter(function(c){return c.id===id})[0]}
@@ -850,7 +850,7 @@ function paintGeo(){
   if(!cs.length)return;
   if(cb){cb.textContent=c?("📍 "+c.name+(cs.length>1?" ▾":"")):"📍 اختر مدينتك ▾";cb.disabled=cs.length<2}
   var cb2=$("cityBtn2");if(cb2){cb2.hidden=cs.length<2;var t2=$("cityBtn2t");if(t2)t2.textContent=c?c.name:"اختر مدينتك"}
-  var hh=document.querySelector(".hero h2");if(hh)hh.textContent=c?("مرحباً بكم في سوق "+c.name+" الإلكتروني"):"مرحباً بكم في أسواق شمال كردفان الإلكترونية";
+  var hh=document.querySelector(".hero h2");if(hh)hh.textContent=c?("مرحباً بكم في سوق "+c.name+" الإلكتروني"):"مرحباً بكم في أسواق السودان الإلكترونية";
   var ms=c?GEO.markets.filter(function(m){return m.city_id===CITY}):[],bar=$("mkBar");
   if(bar){
     if(ms.length>1){bar.hidden=false;chips($("mkts"),[["all","🏬 كل الأسواق"]].concat(ms.map(function(m){return[m.id,m.name]})),MKT,"mkt","")}
