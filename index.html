@@ -72,6 +72,9 @@ header{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px
 .hero::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 85% -10%,rgba(255,255,255,.25),transparent 55%),radial-gradient(rgba(255,255,255,.12) 1px,transparent 1px);background-size:100% 100%,16px 16px}
 .hero .in{position:relative;max-width:640px;margin:0 auto;text-align:center}
 .badge{display:inline-block;background:rgba(255,255,255,.22);backdrop-filter:blur(2px);border:1px solid rgba(255,255,255,.35);padding:5px 14px;border-radius:99px;font-size:12px;font-weight:800;margin-bottom:12px}
+.hero .cityhero{display:inline-flex;align-items:center;gap:8px;margin:14px auto 0;background:#fff;color:#9a3412;border:0;border-radius:99px;padding:11px 20px;font:inherit;font-weight:900;font-size:15px;box-shadow:0 8px 22px -8px rgba(0,0,0,.45);cursor:pointer}
+.hero .cityhero small{font-weight:700;color:#c2410c;font-size:12px}
+.hero .cityhero[hidden]{display:none}
 .hero h2{margin:0 0 8px;font-size:23px;font-weight:900;line-height:1.35}
 .hero p{margin:0;opacity:.95;font-size:13.5px;line-height:1.7}
 .perks{display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap}
@@ -295,7 +298,7 @@ html:has(#lb.show){overflow:hidden}
 .logo>div{min-width:0}#brandName{white-space:nowrap;display:block}
 @media (max-width:440px){.htop{gap:6px}.logo{font-size:15px;gap:6px}.logo .ic{width:32px;height:32px;font-size:16px}.swrap{min-width:44px}#q{padding:8px 30px 8px 10px;font-size:13px}.cartbtn{padding:8px 10px;font-size:12.5px}.iconbtn{width:36px;height:36px}}
 /* ===== المدن والأسواق ===== */
-.logo .cbtn{background:var(--amberbg);color:var(--amberd);font-size:11px;padding:3px 9px;border-radius:99px;font-weight:800;display:block;margin-top:1px;border:0;font-family:inherit;cursor:pointer;text-align:right}
+.logo .cbtn{background:#fde68a;color:#7c2d12;box-shadow:0 0 0 2px rgba(253,230,138,.45);font-size:12px;padding:4px 11px;border-radius:99px;font-weight:800;display:block;margin-top:1px;border:0;font-family:inherit;cursor:pointer;text-align:right}
 .mkbar{margin-bottom:12px}.mkbar[hidden]{display:none}
 #cityPick{position:fixed;inset:0;z-index:95;background:rgba(15,23,42,.62);backdrop-filter:blur(4px);display:none;align-items:flex-end;justify-content:center}
 #cityPick.show{display:flex}
@@ -339,6 +342,7 @@ html:has(#lb.show){overflow:hidden}
   <span class="badge">🛍️ سوق إلكتروني محلي</span>
   <h2>مرحباً بكم في أسواق شمال كردفان الإلكترونية</h2>
   <p>اختر بقالتك المفضلة، تصفح المنتجات بوحداتها المختلفة، وأرسل طلبك عبر الواتساب أو ادفع إلكترونيًا بكل سهولة وأمان.</p>
+  <button type="button" class="cityhero" id="cityBtn2" data-city="open" hidden>📍 <span id="cityBtn2t">اختر مدينتك</span> <small>· تغيير المدينة ▾</small></button>
 </div></section>
 <section class="storepick"><div class="in">
   <div class="mkbar" id="mkBar" hidden><h3>🏬 اختر السوق</h3><div class="chips" id="mkts"></div></div>
@@ -720,7 +724,7 @@ function reorder(i){
   showToast("أُضيفت "+added+" أصناف بأسعار اليوم"+(skipped?" · تعذّر "+skipped:""));
 }
 // ===== الإشعارات: اشتراك الزبون =====
-var VAPID_PUB="BBK45OzhDA17mnlC8lqv0RfmXMwViX731y3jaM94yk21CBdrOtyMTmjnqOB5YsgI_P93MaLlw7Y9M2SdNnnuvHk";
+var VAPID_PUB="BB77mxbE8FUDPiQgdCIO4oWVwxhxS6cJ7xSzF8ewU4lY-lMOjAr3Rm7NiE5NzO3uMgfnmCfXSQ61cJcmIonqKgI";
 function pushSupported(){return "serviceWorker" in navigator&&"PushManager" in window&&"Notification" in window&&!!VAPID_PUB}
 function u8(b64){var p="=".repeat((4-b64.length%4)%4),r=atob((b64+p).replace(/-/g,"+").replace(/_/g,"/")),o=new Uint8Array(r.length);for(var i=0;i<r.length;i++)o[i]=r.charCodeAt(i);return o}
 var PUSH_DBG={save:""};
@@ -746,11 +750,23 @@ function paintPush(){
   b.hidden=!show;
   b.innerHTML=show?'<span>🔔 فعّل الإشعارات لتصلك العروض الجديدة من محلات السوق</span><span class="nacts"><button data-pushon="1">تفعيل</button><button data-pushx="1" class="nx">✕</button></span>':"";
 }
+function pushGetSub(reg){
+  var want=u8(VAPID_PUB);
+  function mk(){return reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:want})}
+  return reg.pushManager.getSubscription().then(function(s){
+    if(!s)return mk();
+    try{
+      var k=s.options&&s.options.applicationServerKey;
+      if(k){var a=new Uint8Array(k),same=a.length===want.length;for(var i=0;same&&i<a.length;i++)if(a[i]!==want[i])same=false;if(!same)return s.unsubscribe().then(mk)}
+    }catch(e){}
+    return s;
+  });
+}
 function pushOn(){
   Notification.requestPermission().then(function(p){
     if(p!=="granted"){paintPush();return}
     return navigator.serviceWorker.ready.then(function(reg){
-      return reg.pushManager.getSubscription().then(function(s){return s||reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID_PUB)})});
+      return pushGetSub(reg);
     }).then(pushSave).then(function(ok){
       paintPush();
       if(ok)showToast("تم تفعيل الإشعارات <b>✓</b>");
@@ -759,16 +775,16 @@ function pushOn(){
     });
   }).catch(function(){paintPush();showToast("تعذّر تفعيل الإشعارات")});
 }
-// تجديد حفظ الاشتراك مرة في اليوم لمن فعّل الإشعارات سابقًا (يتغيّر أحيانًا من المتصفح)
+// تجديد حفظ الاشتراك عند كل فتح للموقع (مرة لكل جلسة) لمن فعّل الإشعارات سابقًا لمن فعّل الإشعارات سابقًا (يتغيّر أحيانًا من المتصفح)
 function pushSync(){
   if(!pushSupported()||Notification.permission!=="granted")return;
-  try{if(Date.now()-(+localStorage.getItem("sr_push_sync")||0)<864e5)return}catch(e){}
+  try{if(sessionStorage.getItem("sr_push_sync_s")==="1"&&!pushSync.force)return}catch(e){}
   navigator.serviceWorker.ready.then(function(reg){
     // الإذن ممنوح: إن لم يوجد اشتراك (مثلًا بعد مسح بيانات الموقع) نُنشئه بلا سؤال
-    return reg.pushManager.getSubscription().then(function(s){return s||reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:u8(VAPID_PUB)})});
+    return pushGetSub(reg);
   }).then(function(s){
     if(!s)return;
-    return pushSave(s).then(function(ok){if(ok){try{localStorage.setItem("sr_push_sync",String(Date.now()))}catch(e){}}});
+    return pushSave(s).then(function(ok){if(ok){try{sessionStorage.setItem("sr_push_sync_s","1")}catch(e){}}});
   }).catch(function(){});
 }
 function pushDebug(){
@@ -833,6 +849,7 @@ function paintGeo(){
   var cs=GEO.cities,c=cityById(CITY),cb=$("cityBtn");
   if(!cs.length)return;
   if(cb){cb.textContent=c?("📍 "+c.name+(cs.length>1?" ▾":"")):"📍 اختر مدينتك ▾";cb.disabled=cs.length<2}
+  var cb2=$("cityBtn2");if(cb2){cb2.hidden=cs.length<2;var t2=$("cityBtn2t");if(t2)t2.textContent=c?c.name:"اختر مدينتك"}
   var hh=document.querySelector(".hero h2");if(hh)hh.textContent=c?("مرحباً بكم في سوق "+c.name+" الإلكتروني"):"مرحباً بكم في أسواق شمال كردفان الإلكترونية";
   var ms=c?GEO.markets.filter(function(m){return m.city_id===CITY}):[],bar=$("mkBar");
   if(bar){
