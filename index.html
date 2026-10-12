@@ -97,7 +97,9 @@ main{max-width:1150px;margin:0 auto;padding:22px 14px 16px}
 .offer-top{overflow:hidden}
 @keyframes offerIn{from{transform:translateX(105%);opacity:0}to{transform:translateX(0);opacity:1}}
 .store-offer .pmsg,.store-offer>span:first-child{animation:offerIn .8s cubic-bezier(.2,.8,.2,1) both}
-@media (prefers-reduced-motion:reduce){.store-offer .pmsg,.store-offer>span:first-child{animation:none}}
+@keyframes offerOut{from{transform:translateX(0);opacity:1}to{transform:translateX(-105%);opacity:0}}
+.store-offer.leaving .pmsg,.store-offer.leaving>span:first-child{animation:offerOut .45s ease-in both}
+@media (prefers-reduced-motion:reduce){.store-offer .pmsg,.store-offer>span:first-child,.store-offer.leaving .pmsg{animation:none}}
 .offer-top .store-offer{margin:0;border-radius:0;box-shadow:none;padding:12px 16px;font-size:13.5px}
 .store-offer[hidden]{display:none}.store-offer .pmsg{flex:1;min-width:0}
 .store-offer .pcode{background:rgba(255,255,255,.18);border:1px dashed rgba(255,255,255,.8);border-radius:8px;padding:2px 9px;margin-inline-start:6px;cursor:pointer;font:inherit;color:inherit;font-weight:900;white-space:nowrap}
@@ -1529,7 +1531,11 @@ function paintStoreOffer(){
   }
   box.hidden=false;drawStoreOffer();
   // يدخل العرض من اليمين إلى اليسار ويستقر 8 ثوانٍ ليقرر الزبون، ثم يأتي التالي (الزمن ثابت من المنصة لا من التجار)
-  if(list.length>1)soTimer=setInterval(function(){soIdx=(soIdx+1)%soList.length;drawStoreOffer()},8000);
+  // دورة مستمرة: 1 ثم 2 ثم 3 ... ثم يعود للأول، حتى لو كان عرضًا واحدًا يُعاد دخوله (يخرج يسارًا ثم يدخل من اليمين)
+  soTimer=setInterval(function(){
+    box.classList.add("leaving");
+    setTimeout(function(){soIdx=(soIdx+1)%soList.length;box.classList.remove("leaving");drawStoreOffer()},450);
+  },8000);
 }
 function drawStoreOffer(){
   var o=soList[soIdx];if(!o)return;
