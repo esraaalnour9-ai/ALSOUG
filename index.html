@@ -940,7 +940,16 @@ function shareStore(name){
   var msg=isBk?("🩺 احجز موعدك في "+name+" عبر "+brandOf(name)+":\n"+url):("🛍️ تسوّق من "+name+" عبر "+brandOf(name)+":\n"+url);
   window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
 }
-var SRANK={};
+var TROT=Math.floor(Math.random()*1000),SRANK={};
+// تدوير ترتيب الأقسام والمحلات: عند كل فتح، وأيضًا عند عودة الزبون للتطبيق بعد غياب 3 دقائق فأكثر (دون مقاطعته أثناء التصفح)
+var HIDDEN_AT=0;
+document.addEventListener("visibilitychange",function(){
+  if(document.hidden){HIDDEN_AT=Date.now();return}
+  if(HIDDEN_AT&&Date.now()-HIDDEN_AT>3*60*1000){
+    TROT=Math.floor(Math.random()*1000);SRANK={};HIDDEN_AT=0;
+    try{if(typeof render==="function"&&!loading)render()}catch(e){}
+  }
+});
 function srank(n){if(!(n in SRANK))SRANK[n]=Math.random();return SRANK[n]}
 function storeLabel(s){return s.name.length>16?s.name.slice(0,15)+"…":s.name}
 function chips(el,list,cur,key,cls){
@@ -959,6 +968,8 @@ function render(){
   var typesPresent=[];stores.forEach(function(s){if(typesPresent.indexOf(s.type)<0)typesPresent.push(s.type)});
   var SEC_ORDER=(SECLIST.length?SECLIST:["بقالة","إجمالي","دكان","فواكه وخضروات","جزار","دواجن ولحوم","أسماك","فرن ومخبوزات","حلويات","مشتقات ألبان","مشروبات وعصائر","مطاعم وكافتيريا","أواني منزلية","مستحضرات تجميل","عطور","بوتيك","أحذية وحقائب","إلكترونيات وكهربائيات","صيدلية","مكتبة","سيارات","عقارات","أخرى"]).map(normAr);
   typesPresent.sort(function(a,b){var x=SEC_ORDER.indexOf(a),y=SEC_ORDER.indexOf(b);return (x<0?999:x)-(y<0?999:y)});
+  // تدوير بداية الأقسام عشوائيًا مع كل فتح للموقع (ثابت داخل الجلسة) حتى تظهر كل أنواع المحلات في أول الشريط بالتناوب
+  if(typesPresent.length>1){var rot=TROT%typesPresent.length;typesPresent=typesPresent.slice(rot).concat(typesPresent.slice(0,rot))}
   var typeList=[["all","📂 الكل"]].concat(typesPresent.map(function(k){return[k,icon(typeLabels[k])+" "+typeLabels[k]]}));
   chips($("types"),typeList,selType,"t","");
 
