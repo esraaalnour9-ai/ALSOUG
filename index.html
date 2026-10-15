@@ -238,7 +238,7 @@ main{max-width:1150px;margin:0 auto;padding:22px 14px 16px}
 .paybox{display:flex;flex-direction:column;gap:6px;margin-top:6px}
 .paybox label{font-size:12px;font-weight:800;color:var(--muted)}
 .paybox select{padding:10px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--text);font:inherit;font-weight:700;font-size:14px}
-.callrow{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0;font-size:12px;color:#666}.snote{width:100%;margin:6px 0;font-size:13px}.stok{color:#15803d;font-weight:700}.stno{color:#b91c1c;font-weight:700}.callbtns{display:flex;gap:6px}.callshop.wa{background:#dcfce7}.callshop{background:#e8f5e9;color:#1b5e20;border:1px solid #66bb6a;border-radius:99px;padding:7px 14px;font-weight:800;font-size:13px;text-decoration:none}
+.callrow{flex-wrap:wrap;display:flex;align-items:center;justify-content:space-between;gap:8px;margin:8px 0;font-size:12px;color:#666}.snote{width:100%;margin:6px 0;font-size:13px}.stok{color:#15803d;font-weight:700}.stno{color:#b91c1c;font-weight:700}.callbtns{display:flex;gap:6px;flex-wrap:wrap}.callshop.wa{background:#dcfce7}.callshop{background:#e8f5e9;color:#1b5e20;border:1px solid #66bb6a;border-radius:99px;padding:7px 14px;font-weight:800;font-size:13px;text-decoration:none}
 .copynum{background:var(--amberbg);color:var(--amberd);border:1px solid var(--amber);border-radius:99px;padding:3px 10px;font-weight:800;font-size:12px;margin-inline-start:6px}
 .pay button.on{border-color:var(--amber);background:var(--amberbg);color:var(--amberd)}
 .grp{border:1px solid var(--line);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:8px}
@@ -1144,7 +1144,7 @@ function callBlock(st){
   if(!st||!st.phone)return "";
   var n=phone(st.phone);
   var ss=storeState(st),stx=ss?(ss.open?'<small class="stok">🟢 مفتوح الآن</small>':'<small class="stno">🔴 '+esc(ss.txt)+'</small>'):'';
-  return '<div class="callrow"><span>هل لديك استفسار؟ '+stx+'</span><a class="callshop" href="tel:+'+n+'">📞 اتصل بصاحب المحل</a></div>';
+  return '<div class="callrow"><span>هل لديك استفسار؟ '+stx+'</span><span class="callbtns"><a class="callshop" href="tel:+'+n+'">📞 اتصل بـ'+esc(st.name||'المحل')+'</a><a class="callshop wa" target="_blank" rel="noopener" href="https://wa.me/'+n+'?text='+encodeURIComponent('السلام عليكم، عندي استفسار قبل إتمام الطلب')+'">💬 واتساب</a></span></div>';
 }
 function payBlock(s,st,ac){
   if(!ac)return '<div class="info">💵 الدفع عند الاستلام</div>';
