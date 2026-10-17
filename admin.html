@@ -381,7 +381,7 @@ function fixTab(){if(!ALLV&&isBkStore(CUR)&&(TAB==="products"||TAB==="offers"||T
 function hasBk(){return STORES.some(function(s){return s.booking_enabled})}
 function loadBookings(){
   if(!hasBk()){BKL=[];return Promise.resolve()}
-  return api("GET","bookings?select=id,code,store_id,service_name,patient_name,phone,age,gender,reason,booking_date,queue_no,status,created_at&order=booking_date.asc,queue_no.asc&limit=500").then(function(x){BKL=x||[];var b=$("navBadge_bk"),n=BKL.filter(function(f){return f.status==="pending"}).length;if(b){b.hidden=!n;b.textContent=n>99?"99+":n}}).catch(function(){});
+  return api("GET","bookings?select=id,code,store_id,service_name,patient_name,phone,age,gender,reason,booking_date,booking_time,queue_no,status,created_at&order=booking_date.asc,booking_time.asc,queue_no.asc&limit=500").catch(function(){return api("GET","bookings?select=id,code,store_id,service_name,patient_name,phone,age,gender,reason,booking_date,queue_no,status,created_at&order=booking_date.asc,queue_no.asc&limit=500")}).then(function(x){BKL=x||[];var b=$("navBadge_bk"),n=BKL.filter(function(f){return f.status==="pending"}).length;if(b){b.hidden=!n;b.textContent=n>99?"99+":n}}).catch(function(){});
 }
 function loadBsv(){
   if(!CUR||!CUR.booking_enabled){BSV=[];return Promise.resolve()}
@@ -390,6 +390,28 @@ function loadBsv(){
 var WD=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
 function wdBoxes(pre,sel){return '<div class="acts" style="margin:4px 0;flex-wrap:wrap">'+WD.map(function(n,i){return '<label style="display:inline-flex;gap:4px;align-items:center;margin:0 6px 4px 0;font-size:13px"><input type="checkbox" id="'+pre+i+'"'+(sel&&sel.indexOf(i)>-1?' checked':'')+' style="width:auto;margin:0">'+n+'</label>'}).join('')+'</div>'}
 function wdRead(pre){var a=[];for(var i=0;i<7;i++){if($(pre+i)&&$(pre+i).checked)a.push(i)}return(a.length&&a.length<7)?a:null}
+function slotsTxt(sl,i){var w=sl&&sl[String(i)];if(!w||typeof w!=="object")return"";return Object.keys(w).sort().map(function(k){return w[k]==null?k:k+"="+w[k]}).join("، ")}
+function slotsEditor(v){
+  return '<details style="margin:8px 0"><summary style="font-weight:800;cursor:pointer">⏰ الساعات والأعداد لكل يوم (اختياري)</summary>'+
+    '<div class="hint" style="margin:6px 0">اكتب الساعات بصيغة 24 ساعة، افصل بينها بفاصلة، والعدد بعد علامة =. بدون عدد = مفتوح بلا حد. مثال: <b class="ltr">08:00=10, 09:00=8, 10:00</b> (يعني 8 صباحاً 10 حجوزات، 9 صباحاً 8، و10 صباحاً مفتوح). اترك اليوم فارغاً ليعمل بالعدد اليومي العادي.</div>'+
+    WD.map(function(n,i){return '<label>'+n+'</label><input class="ltr" id="bss_'+esc(v.id)+'_'+i+'" placeholder="مثال: 08:00=10, 09:00=8" value="'+esc(slotsTxt(v.slots,i))+'">'}).join("")+
+    '<button type="button" class="btn btn-line btn-sm" data-act="bssCopy" data-id="'+esc(v.id)+'" style="margin-top:6px">نسخ ساعات الأحد إلى كل الأيام</button></details>';
+}
+function slotsRead(id){
+  var out={},bad="";
+  for(var i=0;i<7;i++){
+    var el=$("bss_"+id+"_"+i);if(!el)continue;
+    var txt=lat(el.value||"").replace(/،/g,",").trim();if(!txt)continue;
+    var o={};
+    txt.split(/[,\s]+/).filter(Boolean).forEach(function(tok){
+      var m=/^(\d{1,2}):(\d{2})(?:=(\d+))?$/.exec(tok);
+      if(!m||+m[1]>23||+m[2]>59||(m[3]!==undefined&&+m[3]<1)){bad=WD[i]+": «"+tok+"»";return}
+      o[("0"+m[1]).slice(-2)+":"+m[2]]=m[3]===undefined?null:+m[3];
+    });
+    if(Object.keys(o).length)out[String(i)]=o;
+  }
+  return bad?{err:bad}:{val:Object.keys(out).length?out:null};
+}
 var BK_LBL={pending:"جديدة",confirmed:"مؤكدة",done:"تمّت",cancelled:"ملغاة"};
 function bkHtml(){
   var cnt={pending:0,confirmed:0,done:0,cancelled:0};BKL.forEach(function(b){cnt[b.status]=(cnt[b.status]||0)+1});
@@ -399,9 +421,9 @@ function bkHtml(){
   if(!L.length)h+='<div class="card"><div class="empty">لا توجد حجوزات هنا.</div></div>';
   L.forEach(function(b){
     var st=storeById(b.store_id),ph=waNum(b.phone);
-    var wmsg=encodeURIComponent("السلام عليكم "+b.patient_name+"، بخصوص حجزك رقم "+b.code+" ("+b.service_name+") بتاريخ "+b.booking_date+" ورقمك في الدور "+b.queue_no+".");
+    var wmsg=encodeURIComponent("السلام عليكم "+b.patient_name+"، بخصوص حجزك رقم "+b.code+" ("+b.service_name+") بتاريخ "+b.booking_date+(b.booking_time?" الساعة "+b.booking_time:"")+" ورقمك في الدور "+b.queue_no+".");
     h+='<div class="item"><div class="row"><div class="iname">#'+esc(b.code)+(ME.master&&st?' — '+esc(st.name):'')+'</div><span class="badge '+(b.status==="pending"?'red':(b.status==="cancelled"?'':'green'))+'">'+esc(BK_LBL[b.status]||b.status)+'</span></div>'+
-      '<div class="imeta">📅 '+esc(b.booking_date)+' · رقم الدور: <b>'+b.queue_no+'</b> · '+esc(b.service_name)+'</div>'+
+      '<div class="imeta">📅 '+esc(b.booking_date)+(b.booking_time?' · ⏰ <b>'+esc(b.booking_time)+'</b>':'')+' · رقم الدور: <b>'+b.queue_no+'</b> · '+esc(b.service_name)+'</div>'+
       '<div class="imeta">👤 '+esc(b.patient_name)+' · العمر '+b.age+(b.gender==="male"?' · ذكر':(b.gender==="female"?' · أنثى':''))+'</div>'+
       '<div class="imeta">📞 <a class="lnk ltr" href="tel:'+esc(ph)+'">'+esc(b.phone)+'</a> · <a class="lnk" target="_blank" rel="noopener" href="https://wa.me/'+esc(ph)+'?text='+wmsg+'">واتساب</a></div>'+
       (b.reason?'<div class="imeta">📝 '+esc(b.reason)+'</div>':'')+
@@ -419,7 +441,7 @@ function bkHtml(){
     BSV.forEach(function(v){
       h+='<div class="item"><div class="iname"'+(v.paused?' style="opacity:.5"':'')+'>'+esc(v.name)+(v.grp?' · '+esc(v.grp):'')+(v.paused?' (متوقفة مؤقتًا)':'')+'</div><div class="imeta">'+(v.weekdays&&v.weekdays.length?v.weekdays.map(function(i){return WD[i]}).join('، '):'كل الأيام')+'</div>'+
         '<label>الصورة</label>'+imgPicker('bsi_'+v.id,'bspv_'+v.id,v.image_url,'🩺')+'<input id="bsi_'+esc(v.id)+'" type="hidden" value="'+esc(v.image_url||"")+'"><div class="grid3" style="grid-template-columns:1fr 1fr"><div><label>الاسم (قسم أو طبيب)</label><input id="bsn_'+esc(v.id)+'" maxlength="80" value="'+esc(v.name)+'"></div><div><label>القسم</label>'+deptSelect('bsg_'+v.id,v.grp||"")+'</div>'+
-        '<div><label>العدد في اليوم</label><input id="bsc_'+esc(v.id)+'" inputmode="numeric" placeholder="بلا حد" value="'+(v.capacity_per_day==null?'':v.capacity_per_day)+'"></div><div><label>قيمة الحجز (اختياري)</label><input id="bsp_'+esc(v.id)+'" inputmode="numeric" placeholder="بلا قيمة" value="'+(v.price==null?'':v.price)+'"></div></div><label>أيام العمل (بدون تحديد = كل الأيام)</label>'+wdBoxes('bsw_'+v.id+'_',v.weekdays)+
+        '<div><label>العدد في اليوم</label><input id="bsc_'+esc(v.id)+'" inputmode="numeric" placeholder="بلا حد" value="'+(v.capacity_per_day==null?'':v.capacity_per_day)+'"></div><div><label>قيمة الحجز (اختياري)</label><input id="bsp_'+esc(v.id)+'" inputmode="numeric" placeholder="بلا قيمة" value="'+(v.price==null?'':v.price)+'"></div></div><label>أيام العمل (بدون تحديد = كل الأيام)</label>'+wdBoxes('bsw_'+v.id+'_',v.weekdays)+slotsEditor(v)+
         '<div class="acts"><button class="btn btn-sm" data-act="bsvSave" data-id="'+esc(v.id)+'">حفظ</button><button class="btn btn-line btn-sm" data-act="bsvToggle" data-id="'+esc(v.id)+'">'+(v.paused?'استئناف الخدمة':'إيقاف مؤقت')+'</button><button class="btn btn-red btn-sm" data-act="bsvDel" data-id="'+esc(v.id)+'">حذف</button></div></div>';
     });
     h+='<label>صورة القسم أو الطبيب — اختياري</label>'+imgPicker("bsNewImg","bsNewPv","","🩺")+'<input id="bsNewImg" type="hidden"><label>الاسم (الخدمة أو الطبيب)</label><input id="bsNew" maxlength="80"><label>القسم</label>'+deptSelect('bsNewGrp',"")+'<label>قيمة الحجز — اختياري</label><input id="bsNewPrice" inputmode="numeric" placeholder="بلا قيمة"><label>العدد في اليوم — اختياري</label><input id="bsNewCap" inputmode="numeric" placeholder="بلا حد"><label>أيام العمل (بدون تحديد = كل الأيام)</label>'+wdBoxes('bswn_',null)+'<button class="btn" data-act="bsvAdd">إضافة الخدمة</button></div>';
@@ -535,6 +557,11 @@ function homeHtml(){
     '<div class="qstats"><button class="qcard" data-tab="orders"><div class="qn">'+pend+'</div><div class="ql">طلبات جديدة</div></button>'+
     '<button class="qcard" data-tab="'+(all?'admin':'products')+'"><div class="qn">'+(all?STORES.length:PRODUCTS.length)+'</div><div class="ql">'+(all?'متاجر':'أصناف')+'</div></button>'+
     '<button class="qcard" data-tab="orders"><div class="qn">'+fmt(pd.s)+'</div><div class="ql">مبيعات اليوم</div></button></div></div>';
+  // ملخص اليوم
+  var tdy=data.filter(function(o){return +new Date(o.created_at)>=d0}),tdDone=tdy.filter(function(o){return o.status==="done"}).length,tdAgg={};
+  tdy.forEach(function(o){(o.order_items||[]).forEach(function(i){tdAgg[i.name]=(tdAgg[i.name]||0)+Number(i.qty||0)})});
+  var tdTop=Object.keys(tdAgg).sort(function(a,b){return tdAgg[b]-tdAgg[a]})[0];
+  h+='<div class="card"><h2>📅 ملخص اليوم</h2>'+(tdy.length?'<div class="item"><div class="row"><span>🧾 طلبات اليوم</span><b>'+tdy.length+'</b></div><div class="row"><span>✅ تم تسليمها</span><b>'+tdDone+'</b></div><div class="row"><span>🔴 تنتظر التسليم</span><b>'+(tdy.length-tdDone)+'</b></div><div class="row"><span>💰 مبيعات اليوم</span><b>'+fmt(pd.s)+' جنيه</b></div>'+(tdTop?'<div class="row"><span>🔥 الأكثر طلباً اليوم</span><b>'+esc(tdTop)+' ×'+tdAgg[tdTop]+'</b></div>':'')+'</div>':'<div class="empty">لا توجد طلبات اليوم بعد.</div>')+'</div>';
   // المبيعات حسب الفترة
   function tile(t,p){return '<div style="flex:1;min-width:0;background:var(--bg,#f3f6f5);border-radius:12px;padding:10px;text-align:center"><div class="muted" style="font-size:12px">'+t+'</div><div style="font-weight:800;font-size:17px;margin:4px 0">'+fmt(p.s)+'</div><div class="muted" style="font-size:12px">'+p.n+' طلب</div></div>'}
   h+='<div class="card"><h2>📊 المبيعات</h2><div style="display:flex;gap:8px">'+tile("اليوم",pd)+tile("آخر 7 أيام",pw)+tile("هذا الشهر",pm)+'</div></div>';
@@ -567,6 +594,18 @@ function homeHtml(){
 }
 
 // ===== الطلبات =====
+var RTPL=[["✅ تأكيد","confirm"],["🛵 في الطريق","way"],["🏪 جاهز للاستلام","ready"],["⏳ تأخير بسيط","late"],["🙏 شكراً","thanks"]];
+function replyUrl(o,k){
+  var st=storeById(o.store_id),sn=st?st.name:"المحل",nm=o.customer_name||"",c=o.code?" رقم #"+o.code:"";
+  var m={
+    confirm:"السلام عليكم "+nm+"، هنا "+sn+". استلمنا طلبك"+c+" وجارٍ تجهيزه بإذن الله. الإجمالي: "+fmt(o.total)+" جنيه.",
+    way:"السلام عليكم "+nm+"، طلبك"+c+" من "+sn+" في الطريق إليك الآن. نرجو تجهيز رقم هاتفك للرد.",
+    ready:"السلام عليكم "+nm+"، طلبك"+c+" جاهز للاستلام من "+sn+". في انتظارك.",
+    late:"السلام عليكم "+nm+"، نعتذر عن تأخر بسيط في تجهيز طلبك"+c+" من "+sn+". سنوافيك فور جاهزيته. شكراً لصبرك.",
+    thanks:"شكراً لتسوقك من "+sn+" يا "+nm+" 🌹 يسعدنا خدمتك دائماً. رأيك يهمنا."
+  }[k];
+  return "https://wa.me/"+waNum(o.customer_phone)+"?text="+encodeURIComponent(m);
+}
 var DELIV_LBL={none:"لم يُطلب التوصيل بعد",requested:"بانتظار تعيين سائق",assigned:"عُيّن له سائق",picked:"السائق استلمه وهو في الطريق",delivered:"تم التوصيل",cancelled:"أُلغي التوصيل"};
 function delivHtml(o){
   if(o.delivery_type==="own")return '🛵 توصيل من المتجر نفسه';
@@ -582,7 +621,7 @@ function ordersHtml(){
     h+='<div class="item"><div class="row"><div class="iname">#'+esc(o.code)+(ME.master&&st?' — '+esc(st.name):'')+'</div><span class="badge '+(done?'green':'red')+'">'+(done?'تم التسليم':'جديد')+'</span></div>'+
       '<div class="imeta">👤 '+esc(o.customer_name)+' · 📞 <a class="lnk ltr" href="tel:'+esc(ph)+'">'+esc(o.customer_phone)+'</a> · <a class="lnk" target="_blank" rel="noopener" href="https://wa.me/'+esc(ph)+'">واتساب</a></div>'+
       '<div class="imeta">'+delivHtml(o)+'</div>'+
-      '<div class="imeta">📍 '+esc(o.customer_address)+'</div><div class="imeta">💳 '+esc(o.pay_method||"-")+' · 🕒 '+esc(new Date(o.created_at).toLocaleString("ar-EG"))+'</div>'+
+      '<div class="acts" style="margin:6px 0 2px;flex-wrap:wrap">'+RTPL.map(function(x){return '<a class="btn btn-line btn-sm" target="_blank" rel="noopener" href="'+replyUrl(o,x[1])+'">'+x[0]+'</a>'}).join("")+'</div><div class="imeta">📍 '+esc(o.customer_address)+'</div><div class="imeta">💳 '+esc(o.pay_method||"-")+' · 🕒 '+esc(new Date(o.created_at).toLocaleString("ar-EG"))+'</div>'+
       (o.order_items||[]).map(function(i){return '<div class="oitem">• '+esc(i.name)+' ('+esc(i.unit)+') × '+i.qty+' = '+fmt(i.price*i.qty)+'</div>'}).join("")+
       '<div class="row" style="margin-top:6px"><b>الإجمالي: '+fmt(o.total)+' جنيه</b>'+
       (!done&&o.delivery_status==='none'&&o.delivery_type!=='own'&&(st&&st.delivery_mode)!=='own'?'<button class="btn btn-sm btn-line" data-act="orderDeliv" data-id="'+esc(o.id)+'" data-v="requested">🚚 اطلب توصيلًا</button>':'')+
@@ -832,8 +871,10 @@ var ACT={
   bkEnable:function(){var v=!CUR.booking_enabled;api("PATCH","stores?id=eq."+CUR.id,{booking_enabled:v},"return=minimal").then(function(){CUR.booking_enabled=v;buildNav();return Promise.all([loadBookings(),loadBsv()])}).then(function(){toast(v?"تم تفعيل الحجز ✓ أضيفي الخدمات من تبويب الحجوزات":"تم إيقاف الحجز");render()}).catch(fail)},
   bsvAdd:function(){var n=($("bsNew").value||"").trim(),c=parseInt(lat($("bsNewCap").value),10);if(!n){toast("اكتب اسم الخدمة",true);return}
     api("POST","booking_services",{store_id:CUR.id,name:n,image_url:($("bsNewImg").value||"").trim()||null,price:prc($("bsNewPrice").value),capacity_per_day:c>0?c:null,grp:($("bsNewGrp").value||"").trim(),weekdays:wdRead("bswn_")},"return=minimal").then(function(){return loadBsv()}).then(function(){toast("تمت الإضافة ✓");render()}).catch(fail)},
+  bssCopy:function(d){var v=$("bss_"+d.id+"_0").value;for(var i=1;i<7;i++){var e=$("bss_"+d.id+"_"+i);if(e)e.value=v}toast("تم النسخ — اضغط حفظ")},
   bsvSave:function(d){var n=($("bsn_"+d.id).value||"").trim(),c=parseInt(lat($("bsc_"+d.id).value),10);if(!n){toast("اكتب اسم الخدمة",true);return}
-    api("PATCH","booking_services?id=eq."+d.id,{name:n,image_url:($("bsi_"+d.id).value||"").trim()||null,price:prc($("bsp_"+d.id).value),capacity_per_day:c>0?c:null,grp:($("bsg_"+d.id).value||"").trim(),weekdays:wdRead("bsw_"+d.id+"_")},"return=minimal").then(function(){return loadBsv()}).then(function(){toast("تم الحفظ ✓");render()}).catch(fail)},
+    var sr=slotsRead(d.id);if(sr.err){toast("صيغة الساعات غير صحيحة في "+sr.err,true);return}
+    api("PATCH","booking_services?id=eq."+d.id,{name:n,image_url:($("bsi_"+d.id).value||"").trim()||null,price:prc($("bsp_"+d.id).value),capacity_per_day:c>0?c:null,grp:($("bsg_"+d.id).value||"").trim(),weekdays:wdRead("bsw_"+d.id+"_"),slots:sr.val},"return=minimal").then(function(){return loadBsv()}).then(function(){toast("تم الحفظ ✓");render()}).catch(fail)},
   bsvToggle:function(d){var v=BSV.filter(function(x){return x.id===d.id})[0];api("PATCH","booking_services?id=eq."+d.id,{paused:!v.paused},"return=minimal").then(function(){return loadBsv()}).then(function(){render()}).catch(fail)},
   bsvDel:function(d){if(!confirm("حذف الخدمة؟ الحجوزات السابقة تبقى محفوظة."))return;api("DELETE","booking_services?id=eq."+d.id,null,"return=minimal").then(function(){return loadBsv()}).then(function(){toast("تم الحذف");render()}).catch(fail)},
   backup:function(){

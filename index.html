@@ -84,6 +84,15 @@ header{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px
 .hero::after{content:"";pointer-events:none;position:absolute;inset:0;background:radial-gradient(circle at 85% -10%,rgba(255,255,255,.25),transparent 55%),radial-gradient(rgba(255,255,255,.12) 1px,transparent 1px);background-size:100% 100%,16px 16px}
 .hero .in{position:relative;max-width:640px;margin:0 auto;text-align:center}
 .badge{display:inline-block;background:rgba(255,255,255,.22);backdrop-filter:blur(2px);border:1px solid rgba(255,255,255,.35);padding:5px 14px;border-radius:99px;font-size:12px;font-weight:800;margin-bottom:12px}
+.vline{margin:10px 0 0;font-size:12px;font-weight:700;opacity:.9}
+.guidelink{position:relative;z-index:2;display:inline-block;margin-top:6px;color:#fff;opacity:.85;font-size:11.5px;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.guides{padding:26px 16px 6px}.guides .gin{max-width:640px;margin:0 auto;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px 16px;text-align:center;box-shadow:0 6px 22px rgba(15,23,42,.06)}
+.gbadge{background:var(--amberbg);color:var(--amberd);font-weight:800;font-size:12px;padding:3px 12px;border-radius:99px}
+.guides h2{font-size:18px;margin:12px 0 6px;line-height:1.6}.guides p{color:var(--muted);font-size:13px;line-height:1.9;margin:0 0 14px}
+.gcards{display:grid;gap:10px}.gcard{display:flex;flex-direction:column;align-items:center;gap:2px;background:var(--soft);border:1px solid var(--line);border-radius:16px;padding:14px 10px;color:var(--text);text-decoration:none}
+.gcard .gi{font-size:30px}.gcard b{font-size:14.5px}.gcard small{color:var(--muted);font-size:12px}.gcard em{font-style:normal;margin-top:6px;background:linear-gradient(135deg,var(--amber2),var(--amber));color:#111;font-weight:800;font-size:12.5px;padding:6px 16px;border-radius:99px}
+@media(min-width:560px){.gcards{grid-template-columns:repeat(3,1fr)}}
+html{scroll-behavior:smooth}
 .hero .cityhero{position:relative;z-index:2;display:inline-flex;align-items:center;gap:8px;margin:14px auto 0;background:#fff;color:#9a3412;border:0;border-radius:99px;padding:11px 20px;font:inherit;font-weight:900;font-size:15px;box-shadow:0 8px 22px -8px rgba(0,0,0,.45);cursor:pointer}
 .hero .cityhero small{font-weight:700;color:#c2410c;font-size:12px}
 .hero .cityhero[hidden]{display:none}
@@ -104,6 +113,7 @@ main{max-width:1150px;margin:0 auto;padding:22px 14px 16px}
 .count{font-size:11.5px;background:var(--soft);color:var(--muted);padding:3px 10px;border-radius:99px;font-weight:800}
 .store-banner{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
 .store-banner[hidden]{display:none}
+.store-banner .sbbtns{display:flex;gap:6px;flex-wrap:wrap}
 .store-banner .sbinfo{display:flex;flex-direction:column;gap:3px;min-width:0}
 .store-offer{display:flex;align-items:center;gap:10px;margin:8px 0;padding:11px 14px;border-radius:16px;background:linear-gradient(120deg,#0b3536,#0e8a86);color:#fff;font-weight:800;font-size:13px;box-shadow:0 8px 20px -10px rgba(11,53,54,.6)}
 .offer-top{overflow:hidden}
@@ -156,6 +166,7 @@ main{max-width:1150px;margin:0 auto;padding:22px 14px 16px}
 #bkm .sh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
 #bkm .sh b{font-size:15px}
 #bkm .x{width:36px;height:36px;border-radius:50%;background:var(--soft);font-size:22px;line-height:1}
+#bkm .days button.off{opacity:.45;text-decoration:line-through}#bkm .days button small{font-size:10.5px;font-weight:700}
 #bkm .kinds{display:flex;gap:6px;margin:10px 0 6px}
 #bkm .kinds button{flex:1;padding:8px;border-radius:12px;background:var(--soft);border:1px solid var(--line);font-weight:800;font-size:13px}
 #bkm .kinds button.on{background:var(--amberbg);border-color:var(--amber);color:var(--amberd)}
@@ -361,7 +372,9 @@ html:has(#lb.show){overflow:hidden}
   <span class="badge">🛍️ سوق إلكتروني محلي</span>
   <h2>مرحباً بكم في أسواق السودان الإلكترونية</h2>
   <p>اختر محلك المفضل، تصفح المنتجات بوحداتها المختلفة، وأرسل طلبك عبر الواتساب أو ادفع إلكترونيًا بكل سهولة وأمان.</p>
-  <button type="button" class="cityhero" id="cityBtn2" data-city="open" hidden>📍 <span id="cityBtn2t">اختر مدينتك</span> <small>· تغيير المدينة ▾</small></button>
+  <button type="button" class="cityhero" id="cityBtn2" data-city="open">📍 <span id="cityBtn2t">اختر مدينتك</span> <small id="cityBtn2s">· المدن ▾</small></button>
+  <div class="vline">بدون حساب · اطلب عبر واتساب · احجز موعدك في المستشفى</div>
+  <a class="guidelink" href="#guides">📘 دليل الاستخدام</a>
 </div></section>
 <section class="storepick"><div class="in">
   <div class="mkbar" id="mkBar" hidden><h3>🏬 اختر السوق</h3><div class="chips" id="mkts"></div></div>
@@ -394,6 +407,16 @@ html:has(#lb.show){overflow:hidden}
   <div class="pb" id="cartBody"></div>
   <div class="pfoot"><button id="closeCart2">← متابعة التسوق</button></div>
 </div></div>
+<section class="guides" id="guides"><div class="gin">
+  <span class="gbadge">📘 مركز المساعدة</span>
+  <h2>أسواق السودان… كل ما تحتاجه من مدينتك في مكان واحد</h2>
+  <p>منصة محلية جديدة تقرّب المحلات منك: تتسوق من هاتفك وترسل طلبك على واتساب، وتحجز موعدك في المستشفى بدون زحمة. حمّل الدليل المناسب لك، وهو قصير وبسيط وبالعربية.</p>
+  <div class="gcards">
+    <a class="gcard" href="https://drive.google.com/file/d/1txqpmQZ55hQhcHYbuACMekUrkL7oHyfK/view?usp=drivesdk" target="_blank" rel="noopener"><span class="gi">🛒</span><b>دليل المستخدم</b><small>كيف تتسوق وتحجز موعداً خطوة بخطوة</small><em>عرض الدليل 📖</em></a>
+    <a class="gcard" href="https://drive.google.com/file/d/1f9Q3itPc6W1W2c825qGB1Ds-uqvaG05r/view?usp=drivesdk" target="_blank" rel="noopener"><span class="gi">🏪</span><b>دليل التاجر</b><small>أضف متجرك وأصنافك واستقبل الطلبات</small><em>عرض الدليل 📖</em></a>
+    <a class="gcard" href="https://drive.google.com/file/d/1XzocSHP36m1PwNXTKXYIvkXsJxDe1pab/view?usp=drivesdk" target="_blank" rel="noopener"><span class="gi">🏥</span><b>دليل المستشفيات</b><small>إدارة الحجوزات والتعامل مع الإدارة</small><em>عرض الدليل 📖</em></a>
+  </div>
+</div></section>
 <footer><div class="fwrap">
   <div class="frow">
     <div class="fbrand">
@@ -442,7 +465,7 @@ function loadSupabase(){
     sbGet("delivery_zones?select=name,fee,city_id&order=sort_order,name&limit=300").catch(function(){return sbGet("delivery_zones?select=name,fee&order=sort_order,name&limit=100")}).catch(function(){return []}),
     sbGet("app_settings?select=key,value&limit=20").catch(function(){return []}),
     sbGet("product_feedback?select=product_id,kind,rating&limit=5000").catch(function(){return []}),
-    sbGet("booking_services?select=id,store_id,name,grp,weekdays,paused,price,image_url&order=sort_order,name&limit=200").catch(function(){return sbGet("booking_services?select=id,store_id,name,grp,weekdays,paused,price&order=sort_order,name&limit=200")}).catch(function(){return sbGet("booking_services?select=id,store_id,name,grp,weekdays,paused&order=sort_order,name&limit=200")}).catch(function(){return sbGet("booking_services?select=id,store_id,name,grp,weekdays&order=sort_order,name&limit=200")}).catch(function(){return sbGet("booking_services?select=id,store_id,name&order=sort_order,name&limit=200")}).catch(function(){return []}),
+    sbGet("booking_services?select=id,store_id,name,grp,weekdays,paused,price,image_url,slots&order=sort_order,name&limit=200").catch(function(){return sbGet("booking_services?select=id,store_id,name,grp,weekdays,paused,price,image_url&order=sort_order,name&limit=200")}).catch(function(){return sbGet("booking_services?select=id,store_id,name,grp,weekdays,paused,price&order=sort_order,name&limit=200")}).catch(function(){return sbGet("booking_services?select=id,store_id,name,grp,weekdays,paused&order=sort_order,name&limit=200")}).catch(function(){return sbGet("booking_services?select=id,store_id,name,grp,weekdays&order=sort_order,name&limit=200")}).catch(function(){return sbGet("booking_services?select=id,store_id,name&order=sort_order,name&limit=200")}).catch(function(){return []}),
     sbGet("cities?select=id,name,slug,sort_order,active&order=sort_order,name&limit=100").catch(function(){return []}),
     sbGet("markets?select=id,city_id,name,sort_order,active&order=sort_order,name&limit=500").catch(function(){return []})
   ]).then(function(r){
@@ -508,7 +531,7 @@ var DEMO={
   {id:1,name:"أدوات منزلية متنوعة",category:"محل",unit:"قطعة",price_full:1800,status:"موجود"}]}
 };
 var GEO={cities:[],markets:[]},CITY="",MKT="all",RAWD=null,ALLZ=[];
-var stores=[],products=[],cart=[],qty={},selStore="all",selType="all",selCat="all",term="",pay="whatsapp",cust={n:"",p:"",a:""},recvBy={},zoneSel="",ZONES=[],DPAUSE=false,DPMSG="",FB={},BKS=[],BKP=null,BKSV="",BKD="",BKG="",BKDONE=null,FBP=null,FBL=[],FBK="review",FBR=0,FBDONE="",loading=true,liveData=true,pop={};
+var stores=[],products=[],cart=[],qty={},selStore="all",selType="all",selCat="all",term="",pay="whatsapp",cust={n:"",p:"",a:""},recvBy={},zoneSel="",ZONES=[],DPAUSE=false,DPMSG="",FB={},BKS=[],BKP=null,BKSV="",BKD="",BKG="",BKT="",BKAV={},BKDONE=null,FBP=null,FBL=[],FBK="review",FBR=0,FBDONE="",loading=true,liveData=true,pop={};
 function popMap(){try{return JSON.parse(localStorage.getItem("sr_pop")||"{}")}catch(e){return{}}}
 function bumpPop(id){try{var m=popMap();m[id]=(m[id]||0)+1;localStorage.setItem("sr_pop",JSON.stringify(m))}catch(e){}}
 var $=function(i){return document.getElementById(i)};
@@ -863,7 +886,7 @@ function paintGeo(){
   var cs=GEO.cities,c=cityById(CITY),cb=$("cityBtn");
   if(!cs.length)return;
   if(cb){cb.textContent=c?("📍 "+c.name+(cs.length>1?" ▾":"")):"📍 اختر مدينتك ▾";cb.disabled=cs.length<2}
-  var cb2=$("cityBtn2");if(cb2){cb2.hidden=cs.length<2;var t2=$("cityBtn2t");if(t2)t2.textContent=c?c.name:"اختر مدينتك"}
+  var cb2=$("cityBtn2");if(cb2){cb2.hidden=false;var t2=$("cityBtn2t");if(t2)t2.textContent=c?c.name:"اختر مدينتك";var s2=$("cityBtn2s");if(s2)s2.textContent=cs.length>1?"· تغيير المدينة ▾":"· مدن جديدة قريباً ▾"}
   var hh=document.querySelector(".hero h2");if(hh)hh.textContent=c?("مرحباً بكم في سوق "+c.name+" الإلكتروني"):"مرحباً بكم في أسواق السودان الإلكترونية";
   var ms=c?GEO.markets.filter(function(m){return m.city_id===CITY}):[],bar=$("mkBar");
   if(bar){
@@ -872,7 +895,12 @@ function paintGeo(){
   }
 }
 function openCityPick(force){
-  var cs=GEO.cities;if(cs.length<2)return;
+  var cs=GEO.cities;
+  if(cs.length<2){
+    var one=cs[0]?'<button type="button" class="cardcity on" data-city="close"><span>'+esc(cs[0].name)+'<small>المدينة المتاحة حالياً</small></span><span>✓</span></button>':'';
+    $("cityBody").innerHTML='<h3>📍 اختر مدينتك</h3><p>أسواق السودان تتوسع! نضيف مدناً جديدة قريباً، وستظهر لك هنا لتختار منها وتتسوق من محلاتها.</p>'+one+'<div class="cardcity" style="opacity:.75;cursor:default"><span>🚧 مدن أخرى قريباً<small>ترقّبوا الإضافات الجديدة</small></span></div><button type="button" class="chip" data-city="close" style="width:100%;margin-top:4px">إغلاق</button>';
+    $("cityPick").classList.add("show");return;
+  }
   var h='<h3>📍 اختر مدينتك</h3><p>تظهر لك محلات وأسواق المدينة التي تختارها، ورسوم التوصيل تتبع أحياءها.</p>';
   cs.forEach(function(c){
     var n=GEO.markets.filter(function(m){return m.city_id===c.id}).length;
@@ -966,7 +994,10 @@ document.addEventListener("visibilitychange",function(){
   }
 });
 function srank(n){if(!(n in SRANK))SRANK[n]=Math.random();return SRANK[n]}
-function storeLabel(s){return s.name.length>16?s.name.slice(0,15)+"…":s.name}
+var FAV=[];try{FAV=JSON.parse(localStorage.getItem("sr_fav")||"[]");if(!Array.isArray(FAV))FAV=[]}catch(e){FAV=[]}
+function isFav(n){return FAV.indexOf(n)>-1}
+function toggleFav(n){var i=FAV.indexOf(n);if(i>-1)FAV.splice(i,1);else FAV.push(n);try{localStorage.setItem("sr_fav",JSON.stringify(FAV))}catch(e){}render()}
+function storeLabel(s){return (isFav(s.name)?"⭐ ":"")+(s.name.length>16?s.name.slice(0,15)+"…":s.name)}
 function chips(el,list,cur,key,cls){
   el.innerHTML=list.map(function(x){return '<button class="chip '+cls+(cur===x[0]?' on':'')+'" data-'+key+'="'+esc(x[0])+'">'+esc(x[1])+'</button>'}).join("");
 }
@@ -989,10 +1020,10 @@ function render(){
   chips($("types"),typeList,selType,"t","");
 
   var storesInType=stores.filter(function(s){return selType==="all"||s.type===selType});
-  var storeList=[["all","🛒 كل المتاجر"]].concat(storesInType.slice().sort(function(a,b){return srank(a.name)-srank(b.name)}).map(function(s){return[s.name,storeLabel(s)]}));
+  var storeList=[["all","🛒 كل المتاجر"]].concat(storesInType.slice().sort(function(a,b){return (isFav(b.name)?1:0)-(isFav(a.name)?1:0)||srank(a.name)-srank(b.name)}).map(function(s){return[s.name,storeLabel(s)]}));
   chips($("stores"),storeList,selStore,"s","");
   $("storeSel").innerHTML='<option value="all"'+(selStore==="all"?' selected':'')+'>🛒 كل المتاجر</option>'+
-    storesInType.map(function(s){return '<option value="'+esc(s.name)+'"'+(selStore===s.name?' selected':'')+'>'+esc(s.name)+'</option>'}).join("");
+    storesInType.slice().sort(function(a,b){return (isFav(b.name)?1:0)-(isFav(a.name)?1:0)}).map(function(s){return '<option value="'+esc(s.name)+'"'+(selStore===s.name?' selected':'')+'>'+(isFav(s.name)?'⭐ ':'')+esc(s.name)+'</option>'}).join("");
 
   var curStore=stores.filter(function(s){return s.name===selStore})[0];
   if(curStore){
@@ -1003,7 +1034,7 @@ function render(){
     var stt=storeState(curStore);
     $("storeBanner").innerHTML='<div class="sbinfo"><span class="sbname">'+storeMark(curStore.name)+esc(curStore.name)+'</span>'+(stt?'<span class="sbstate '+(stt.open?'on':'off')+'">🕒 '+esc(stt.txt)+'</span>':'')+
       (noteBits.length?'<span class="sbnote">'+esc(noteBits.join(" · "))+'</span>':'')+'</div>'+
-      '<button class="sbshare" data-share="'+esc(curStore.name)+'">🔗 مشاركة المحل</button>';
+      '<span class="sbbtns"><button class="sbshare" data-fav="'+esc(curStore.name)+'">'+(isFav(curStore.name)?'⭐ في المفضلة':'☆ أضف للمفضلة')+'</button><button class="sbshare" data-share="'+esc(curStore.name)+'">🔗 مشاركة المحل</button></span>';
   }else{
     $("storeBanner").hidden=true;$("storeBanner").innerHTML="";
   }
@@ -1244,7 +1275,15 @@ function bkOk(v,d){return !v||!Array.isArray(v.weekdays)||!v.weekdays.length||v.
 function openBk(sid,svc){
   var st=stores.filter(function(s){return s.sid===sid})[0];if(!st)return;
   var sv=BKS.filter(function(v){return v.store_id===sid});if(!sv.length)return;
-  BKP=st;BKSV=(svc&&sv.some(function(x){return x.id===svc&&!x.paused}))?svc:((sv.length===1&&!sv[0].paused)?sv[0].id:"");BKD=khDay(0);bkFix();BKG="";BKDONE=null;bkDraw();$("bkm").classList.add("show");
+  BKP=st;BKSV=(svc&&sv.some(function(x){return x.id===svc&&!x.paused}))?svc:((sv.length===1&&!sv[0].paused)?sv[0].id:"");BKD=khDay(0);bkFix();BKG="";BKT="";BKDONE=null;bkDraw();$("bkm").classList.add("show");
+}
+function bkT(x){var p=String(x).split(":"),h=+p[0];return (h%12||12)+":"+p[1]+" "+(h<12?"ص":"م")}
+function bkSlots(v,d){if(!v||!v.slots||typeof v.slots!=="object")return null;var w=v.slots[String(bkDow(d))];return(w&&typeof w==="object"&&Object.keys(w).length)?w:null}
+function bkLoadAv(svc,d){
+  var k=svc+"|"+d;if(BKAV[k]!==undefined)return;BKAV[k]=null;
+  fetch(SB_URL+"/rest/v1/rpc/slot_availability",{method:"POST",headers:{apikey:SB_KEY,"Content-Type":"application/json"},body:JSON.stringify({p_service:svc,p_date:d})})
+    .then(function(r){return r.json()}).then(function(j){BKAV[k]=(j&&typeof j==="object"&&!Array.isArray(j))?j:{};bkDraw()})
+    .catch(function(){BKAV[k]={};bkDraw()});
 }
 function bkFix(){var v=BKS.filter(function(x){return x.id===BKSV})[0];if(!v||bkOk(v,BKD))return;for(var o=0;o<7;o++){if(bkOk(v,khDay(o))){BKD=khDay(o);return}}}
 function bkDraw(){
@@ -1254,14 +1293,26 @@ function bkDraw(){
   var sv=BKS.filter(function(v){return v.store_id===BKP.sid});
   var h='<div class="sh"><b>🩺 حجز موعد — '+esc(BKP.name)+'</b><button type="button" class="x" data-bkclose="1" aria-label="إغلاق">×</button></div>';
   if(BKDONE){
-    var msg="السلام عليكم، حجزت موعدًا عبر "+brandOf(BKP.name)+".\nالرمز: "+BKDONE.code+"\nالاسم: "+BKDONE.name+"\nالخدمة: "+BKDONE.service+"\nاليوم: "+BKDONE.date+"\nرقمي في الدور: "+BKDONE.queue;
-    h+='<div class="okmsg">تم حجزك ✓<br>رقمك في الدور: <b>'+BKDONE.queue+'</b><br>الرمز: <b>'+esc(BKDONE.code)+'</b><br>اليوم: '+esc(BKDONE.date)+'<br>سيتواصل معك المستوصف للتأكيد.</div>'+
+    var msg="السلام عليكم، حجزت موعدًا عبر "+brandOf(BKP.name)+".\nالرمز: "+BKDONE.code+"\nالاسم: "+BKDONE.name+"\nالخدمة: "+BKDONE.service+"\nاليوم: "+BKDONE.date+(BKDONE.time?"\nالساعة: "+bkT(BKDONE.time):"")+"\nرقمي في الدور: "+BKDONE.queue;
+    h+='<div class="okmsg">تم حجزك ✓<br>رقمك في الدور: <b>'+BKDONE.queue+'</b><br>الرمز: <b>'+esc(BKDONE.code)+'</b><br>اليوم: '+esc(BKDONE.date)+(BKDONE.time?'<br>الساعة: <b>'+esc(bkT(BKDONE.time))+'</b>':'')+'<br>سيتواصل معك المستوصف للتأكيد.</div>'+
       (BKP.phone?'<a class="wa" target="_blank" rel="noopener" href="https://wa.me/'+esc(BKP.phone)+'?text='+encodeURIComponent(msg)+'">أرسل تفاصيل الحجز للمستوصف على واتساب</a>':'');
   }else{
     var grps=[];sv.forEach(function(v){var g=v.grp||"";if(grps.indexOf(g)<0)grps.push(g)});
     h+='<h4>القسم / الطبيب</h4>'+grps.map(function(g){return (g?'<div class="note" style="margin:6px 0 0"><b>'+esc(g)+'</b></div>':'')+'<div class="svcs">'+sv.filter(function(v){return (v.grp||"")===g}).map(function(v){return v.paused?'<button type="button" disabled class="off">'+esc(v.name)+' — متوقفة مؤقتًا</button>':'<button type="button" data-bksvc="'+esc(v.id)+'" class="'+(BKSV===v.id?'on':'')+'">'+esc(v.name)+(v.price>0?' — '+Number(v.price).toLocaleString()+' ج.س':'')+'</button>'}).join("")+'</div>'}).join("");
     var cur=sv.filter(function(v){return v.id===BKSV})[0];
     h+='<h4>اليوم'+(cur&&cur.weekdays&&cur.weekdays.length?' <span class="note">(أيام عمل هذا القسم فقط)</span>':'')+'</h4><div class="days">'+[0,1,2,3,4,5,6].filter(function(o){return bkOk(cur,khDay(o))}).map(function(o){var d=khDay(o);return '<button type="button" data-bkday="'+d+'" class="'+(BKD===d?'on':'')+'">'+esc(khLabel(o))+'</button>'}).join("")+'</div>';
+    var bsl=bkSlots(cur,BKD);
+    if(bsl){
+      var avk=cur.id+"|"+BKD;bkLoadAv(cur.id,BKD);var av=BKAV[avk];
+      h+='<h4>الساعة</h4>';
+      if(av===null||av===undefined)h+='<div class="note">⏳ جارٍ تحميل الساعات المتاحة...</div>';
+      else{
+        var nowKh=new Intl.DateTimeFormat("en-GB",{timeZone:"Africa/Khartoum",hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date());
+        h+='<div class="days">'+Object.keys(bsl).sort().map(function(tm){
+          var left=av.hasOwnProperty(tm)?av[tm]:undefined,full=(left===0),past=(BKD===khDay(0)&&tm<=nowKh);
+          return '<button type="button" data-bktime="'+tm+'"'+((full||past)?' disabled':'')+' class="'+(BKT===tm?'on':'')+((full||past)?' off':'')+'">'+esc(bkT(tm))+(full?'<br><small>اكتمل</small>':(past?'<br><small>انتهى</small>':(typeof left==="number"?'<br><small>متبقي '+left+'</small>':'')))+'</button>'}).join("")+'</div>';
+      }
+    }
     h+='<input id="bkName" maxlength="60" placeholder="اسم المريض" value="'+esc(nm)+'">'+
       '<input id="bkAge" inputmode="numeric" maxlength="3" placeholder="العمر (بالسنوات)" value="'+esc(ag)+'">'+
       '<input id="bkPh" dir="ltr" inputmode="tel" maxlength="20" placeholder="رقم الهاتف" value="'+esc(ph)+'">'+
@@ -1276,18 +1327,21 @@ function bkDraw(){
 function bkSend(){
   var name=($("bkName").value||"").trim(),age=parseInt(lat($("bkAge").value),10),ph=lat($("bkPh").value).trim();
   if(!BKSV){alert("اختر الخدمة.");return}
+  var _cur=BKS.filter(function(v){return v.id===BKSV})[0];if(bkSlots(_cur,BKD)&&!BKT){alert("اختر الساعة.");return}
   if(name.length<2){alert("اكتب اسم المريض.");return}
   if(!(age>=0&&age<=120)){alert("اكتب العمر بالأرقام (مثل 25).");return}
   if(ph.replace(/\D/g,"").length<9){alert("اكتب رقم هاتف صحيحًا.");return}
   var btn=$("bkSend");btn.disabled=true;btn.textContent="⏳ جارٍ الحجز...";
   cust.n=cust.n||name;cust.p=cust.p||ph;
   var svcName=(BKS.filter(function(v){return v.id===BKSV})[0]||{}).name||"";
-  fetch(BK_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({service_id:BKSV,date:BKD,name:name,phone:ph,age:age,gender:BKG||null,reason:($("bkReason").value||"").trim(),website:$("bkWeb").value})})
+  fetch(BK_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({service_id:BKSV,date:BKD,name:name,phone:ph,age:age,gender:BKG||null,reason:($("bkReason").value||"").trim(),time:BKT||"",website:$("bkWeb").value})})
   .then(function(r){return r.json().catch(function(){return{}}).then(function(j){return{r:r,j:j}})})
   .then(function(x){
-    if(x.r.ok&&x.j.ok){var dl=BKD;[0,1,2,3,4,5,6].forEach(function(o){if(khDay(o)===BKD)dl=khLabel(o)+" ("+BKD+")"});BKDONE={code:x.j.code,queue:x.j.queue_no,date:dl,service:svcName,name:name};bkDraw();return}
+    if(x.r.ok&&x.j.ok){var dl=BKD;[0,1,2,3,4,5,6].forEach(function(o){if(khDay(o)===BKD)dl=khLabel(o)+" ("+BKD+")"});BKDONE={code:x.j.code,queue:x.j.queue_no,date:dl,time:x.j.time||"",service:svcName,name:name};bkDraw();return}
     btn.disabled=false;btn.textContent="تأكيد الحجز";
     var e=x.j&&x.j.error;
+    if(e==="full"&&BKT){delete BKAV[BKSV+"|"+BKD];var _old=BKT;BKT="";bkDraw();alert("اكتمل العدد في الساعة "+bkT(_old)+"."+(x.j.alt?" أقرب ساعة متاحة: "+bkT(x.j.alt)+". اخترها أو اختر وقتاً آخر.":" اختر يوماً أو ساعة أخرى."));return}
+    if(e==="past"){delete BKAV[BKSV+"|"+BKD];BKT="";bkDraw();alert("انتهى وقت هذه الساعة. اختر ساعة أخرى.");return}
     alert(e==="full"?"اكتمل الحجز لهذا اليوم. اختر يومًا آخر.":e==="duplicate"?"لديك حجز لنفس الخدمة في هذا اليوم.":e==="rate_limited"?"أرسلتَ طلبات كثيرة. حاول بعد قليل.":e==="phone"?"رقم الهاتف غير صحيح.":e==="age"?"العمر غير صحيح.":e==="links"?"لا تضع روابط في النص.":e==="date"?"اليوم المختار غير متاح.":e==="day"?"هذا القسم لا يعمل في هذا اليوم. اختر يومًا آخر.":e==="paused"?"هذه الخدمة متوقفة مؤقتًا.":"تعذّر الحجز الآن، حاول مرة أخرى.");
   }).catch(function(){btn.disabled=false;btn.textContent="تأكيد الحجز";alert("تعذّر الاتصال. تأكد من الإنترنت وحاول مرة أخرى.")});
 }
@@ -1385,14 +1439,16 @@ document.addEventListener("click",function(e){
   if(d.fbsend){fbSend();return}
   if(d.bk!==undefined){openBk(d.bk,d.bks);return}
   if(d.bkclose){$("bkm").classList.remove("show");BKP=null;return}
-  if(d.bksvc){BKSV=d.bksvc;bkFix();bkDraw();return}
-  if(d.bkday){BKD=d.bkday;bkDraw();return}
+  if(d.bksvc){BKSV=d.bksvc;BKT="";bkFix();bkDraw();return}
+  if(d.bkday){BKD=d.bkday;BKT="";bkDraw();return}
+  if(d.bktime){if(!t.disabled){BKT=d.bktime;bkDraw()}return}
   if(d.bkgender){BKG=BKG===d.bkgender?"":d.bkgender;bkDraw();return}
   if(d.bksend){bkSend();return}
   if(d.recvs!==undefined){recvBy[d.recvs]=d.recvm;saveState();drawCart();return}
   if(d.t!==undefined){selType=d.t;selStore="all";render()}
   else if(d.gostore!==undefined){clearTimeout(qTimer);selStore=d.gostore;term="";$("q").value="";$("qx").classList.remove("show");$("storeSuggest").classList.remove("show");render()}
   else if(d.share!==undefined){shareStore(d.share)}
+  else if(d.fav!==undefined){toggleFav(d.fav)}
   else if(d.copycode){
     var code=d.copycode;
     if(navigator.clipboard&&navigator.clipboard.writeText){
